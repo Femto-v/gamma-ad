@@ -3,8 +3,6 @@ import { createMemoryHistory, createRouter } from "vue-router";
 import { ref, computed } from "vue";
 </script>
 
-<template>
-    <router-view />
-</template>
+<template></template>
 
 <style scoped></style>

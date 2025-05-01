@@ -4,7 +4,7 @@ import { ref, computed } from "vue";
 </script>
 
 <template>
-    <router-view />
+    <component :is="currentView" />
 </template>
 
 <style scoped></style>
