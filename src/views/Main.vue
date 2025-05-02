@@ -61,7 +61,7 @@
         <main>
             <div
                 class="bg-cover bg-center h-60 text-white flex flex-col justify-center items-center"
-                style="background-image: url('/images/backdropMain.jpg')"
+                style="background-image: url('/backdropMain.jpg')"
             >
                 <img src="/UTM-LOGO.png" class="w-16 mb-2" alt="UTM Logo" />
                 <h2 class="text-2xl font-bold drop-shadow-md">Welcome</h2>
