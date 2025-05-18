@@ -1,19 +1,40 @@
-<html lang="en">
-    <head>
-        <meta charset="UTF-8" />
-        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-        <title>Login - TTMS-FK</title>
-        <script src="https://cdn.tailwindcss.com"></script>
-    </head>
+<script setup>
+console.log("Login Loaded . . . ");
+import { ref } from "vue";
 
-    <body
+const login = ref("A16CS4016");
+const password = ref("201608M10112");
+
+// HANDLE LOGIN
+const handleLogin = async () => {
+    const url = `http://web.fc.utm.my/ttms/web_man_webservice_json.cgi?entity=authentication&login=${login.value}&password=${password.value}`;
+
+    try {
+        const response = await fetch(url);
+        const data = await response.json();
+
+        alert("Success login to the system!");
+        localStorage.setItem(
+            "web.fc.utm.my_usersession",
+            JSON.stringify(data[0])
+        );
+        window.location.replace("/main");
+    } catch (error) {
+        alert("Invalid credential!");
+        console.error(error);
+    }
+};
+</script>
+
+<template>
+    <div
         class="bg-[url('https://www.transparenttextures.com/patterns/beige-paper.png')] bg-repeat min-h-screen flex items-center justify-center px-4"
     >
         <div
             class="w-full max-w-xs bg-[#e0c28b] p-6 rounded-2xl shadow-lg text-center"
         >
             <img
-                src="./UTM-LOGO-FULL.png"
+                src="/UTM-LOGO-FULL.png"
                 alt="UTM Logo"
                 class="mx-auto w-20 mb-2"
             />
@@ -31,55 +52,30 @@
                 Staff/Pelajar
             </button>
 
-            <div class="mb-3 text-left">
+            <div class="mb-3 text-left text-black">
                 <label class="text-sm font-bold text-gray-700">Login</label>
                 <input
                     type="text"
-                    id="login"
-                    value="A16CS4016"
+                    v-model="login"
                     class="w-full px-3 py-2 border rounded-lg mt-1 focus:outline-none focus:ring-2 focus:ring-[#730000]"
                 />
             </div>
-            <div class="mb-4 text-left">
+
+            <div class="mb-4 text-left text-black">
                 <label class="text-sm font-bold text-gray-700">Password</label>
                 <input
                     type="password"
-                    id="password"
-                    value="201608M10112"
+                    v-model="password"
                     class="w-full px-3 py-2 border rounded-lg mt-1 focus:outline-none focus:ring-2 focus:ring-[#730000]"
                 />
             </div>
+
             <button
-                id="btnLogin"
+                @click="handleLogin"
                 class="bg-blue-700 hover:bg-blue-800 text-white font-bold py-2 px-4 rounded w-full"
             >
                 Submit
             </button>
         </div>
-
-        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
-        <script>
-            $("#btnLogin").click(function () {
-                var url =
-                    "http://web.fc.utm.my/ttms/web_man_webservice_json.cgi?entity=authentication&login=" +
-                    $("#login").val() +
-                    "&password=" +
-                    $("#password").val();
-                fetch(url)
-                    .then((res) => res.json())
-                    .then((jsonInst) => {
-                        alert("Success login to the system!");
-                        localStorage.setItem(
-                            "web.fc.utm.my_usersession",
-                            JSON.stringify(jsonInst[0])
-                        );
-                        window.location.replace("ttms-main.html");
-                    })
-                    .catch((err) => {
-                        alert("Invalid credential!");
-                        console.error(err);
-                    });
-            });
-        </script>
-    </body>
-</html>
+    </div>
+</template>

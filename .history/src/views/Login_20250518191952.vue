@@ -5,7 +5,6 @@ import { ref } from "vue";
 const login = ref("A16CS4016");
 const password = ref("201608M10112");
 
-// HANDLE LOGIN
 const handleLogin = async () => {
     const url = `http://web.fc.utm.my/ttms/web_man_webservice_json.cgi?entity=authentication&login=${login.value}&password=${password.value}`;
 

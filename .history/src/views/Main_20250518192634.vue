@@ -115,11 +115,11 @@ onMounted(() => {
                 <div class="bg-blue-100 rounded-xl shadow p-4">
                     <div class="grid grid-cols-2 text-sm">
                         <div class="font-bold">Sesi</div>
-                        <div>{{ sesi }}</div>
+                        <div>2024/2025</div>
                         <div class="font-bold">Semester</div>
-                        <div>{{ semester }}</div>
+                        <div>2</div>
                         <div class="font-bold">Tarikh Mula/Tamat</div>
-                        <div>{{ tarikhMula }} / {{ tarikhTamat }}</div>
+                        <div>2025-03-16 / 2025-06-28</div>
                     </div>
                 </div>
 

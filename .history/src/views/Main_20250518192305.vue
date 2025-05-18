@@ -2,13 +2,9 @@
 import { ref, onMounted } from "vue";
 
 const sidebarOpen = ref(false);
-const userInfo = ref("User Name - Matric No");
 
-// Reactive values for session display
-const sesi = ref("Sesi Tidak Diketahui");
-const semester = ref("-");
-const tarikhMula = ref("-");
-const tarikhTamat = ref("-");
+const userInfo = ref("User Name - Matric No");
+const userSesi = ref("none of sessi");
 
 const toggleSidebar = () => {
     sidebarOpen.value = !sidebarOpen.value;
@@ -16,7 +12,7 @@ const toggleSidebar = () => {
 
 const loadTimetable = () => {
     toggleSidebar();
-    window.location.href = "ttms-timetable.html";
+    window.location.href = "ttms-timetable.html"; // Replace with router navigation if using Vue Router
 };
 
 const logout = () => {
@@ -25,18 +21,9 @@ const logout = () => {
 };
 
 onMounted(() => {
-    const userSession = JSON.parse(
-        localStorage.getItem("web.fc.utm.my_usersession")
-    );
-
-    if (userSession) {
-        userInfo.value = `${userSession.full_name} - ${userSession.login_name}`;
-
-        // Assuming the session info is inside this object
-        sesi.value = userSession?.sesi || "Tidak Diketahui";
-        semester.value = userSession?.semester || "-";
-        tarikhMula.value = userSession?.tarikh_mula || "-";
-        tarikhTamat.value = userSession?.tarikh_tamat || "-";
+    const user = JSON.parse(localStorage.getItem("web.fc.utm.my_usersession"));
+    if (user) {
+        userInfo.value = `${user.full_name} - ${user.login_name}`;
     }
 });
 </script>
@@ -115,11 +102,11 @@ onMounted(() => {
                 <div class="bg-blue-100 rounded-xl shadow p-4">
                     <div class="grid grid-cols-2 text-sm">
                         <div class="font-bold">Sesi</div>
-                        <div>{{ sesi }}</div>
+                        <div>2024/2025</div>
                         <div class="font-bold">Semester</div>
-                        <div>{{ semester }}</div>
+                        <div>2</div>
                         <div class="font-bold">Tarikh Mula/Tamat</div>
-                        <div>{{ tarikhMula }} / {{ tarikhTamat }}</div>
+                        <div>2025-03-16 / 2025-06-28</div>
                     </div>
                 </div>
 
