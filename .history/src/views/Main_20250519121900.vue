@@ -6,11 +6,10 @@ const sidebarOpen = ref(false);
 const userInfo = ref("User Name - Matric No");
 
 // Reactive values for session display
-const semesterApi = new SemesterApi();
-const currentSession = ref("-");
-const currentSemester = ref("-");
-const startDate = ref("-");
-const endDate = ref("-");
+const sesi = ref("Sesi Tidak Diketahui");
+const semester = ref("-");
+const tarikhMula = ref("-");
+const tarikhTamat = ref("-");
 
 const toggleSidebar = () => {
     sidebarOpen.value = !sidebarOpen.value;
@@ -114,11 +113,11 @@ onMounted(async () => {
                 <div class="bg-blue-100 rounded-xl shadow p-4">
                     <div class="grid grid-cols-2 text-sm">
                         <div class="font-bold">Sesi</div>
-                        <div>{{ currentSession }}</div>
+                        <div>{{ sesi }}</div>
                         <div class="font-bold">Semester</div>
-                        <div>{{ currentSemester }}</div>
+                        <div>{{ semester }}</div>
                         <div class="font-bold">Tarikh Mula/Tamat</div>
-                        <div>{{ startDate }} / {{ endDate }}</div>
+                        <div>{{ tarikhMula }} / {{ tarikhTamat }}</div>
                     </div>
                 </div>
 

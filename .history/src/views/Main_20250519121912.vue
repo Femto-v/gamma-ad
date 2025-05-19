@@ -114,11 +114,11 @@ onMounted(async () => {
                 <div class="bg-blue-100 rounded-xl shadow p-4">
                     <div class="grid grid-cols-2 text-sm">
                         <div class="font-bold">Sesi</div>
-                        <div>{{ currentSession }}</div>
+                        <div>{{ sesi }}</div>
                         <div class="font-bold">Semester</div>
-                        <div>{{ currentSemester }}</div>
+                        <div>{{ semester }}</div>
                         <div class="font-bold">Tarikh Mula/Tamat</div>
-                        <div>{{ startDate }} / {{ endDate }}</div>
+                        <div>{{ tarikhMula }} / {{ tarikhTamat }}</div>
                     </div>
                 </div>
 

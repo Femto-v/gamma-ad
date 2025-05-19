@@ -1,37 +1,35 @@
 <script setup>
 console.log("Login Loaded . . . ");
 import { ref } from "vue";
-import AuthApi from "@/api/AuthApi";
+import "../api/AuthApi";
 
 const login = ref("A16CS4016");
 const password = ref("201608M10112");
-const sessionId = ref("");
 
-// Instantiate the AuthApi class
-const authApi = new AuthApi();
+// // Instantiate the AuthApi class
+// const authApi = new AuthApi();
 
-// HANDLE LOGIN
-const handleLogin = async () => {
-    try {
-        const data = await authApi.login(login.value, password.value);
+// // HANDLE LOGIN
+// const handleLogin = async () => {
+//     try {
+//         const data = await authApi.login(login.value, password.value);
 
-        if (data?.[0]?.session_id) {
-            alert("Success login to the system!");
-            localStorage.setItem(
-                "web.fc.utm.my_usersession",
-                JSON.stringify(data[0])
-            );
-            sessionId.value = data[0].session_id;
-            window.location.replace("/main");
-        } else {
-            alert("Invalid login response!");
-            console.log("Response:", data);
-        }
-    } catch (error) {
-        alert("Invalid credentials or failed to fetch!");
-        console.error(error);
-    }
-};
+//         if (data?.[0]?.session_id) {
+//             alert("Success login to the system!");
+//             localStorage.setItem(
+//                 "web.fc.utm.my_usersession",
+//                 JSON.stringify(data[0])
+//             );
+//             window.location.replace("/main");
+//         } else {
+//             alert("Invalid login response!");
+//             console.log("Response:", data);
+//         }
+//     } catch (error) {
+//         alert("Invalid credentials or failed to fetch!");
+//         console.error(error);
+//     }
+// };
 </script>
 
 <template>

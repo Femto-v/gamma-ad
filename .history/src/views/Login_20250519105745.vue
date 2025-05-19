@@ -21,7 +21,6 @@ const handleLogin = async () => {
                 "web.fc.utm.my_usersession",
                 JSON.stringify(data[0])
             );
-            sessionId.value = data[0].session_id;
             window.location.replace("/main");
         } else {
             alert("Invalid login response!");
