@@ -5,6 +5,12 @@ import JadualApi from "@/api/JadualApi";
 const sidebarOpen = ref(false);
 const userInfo = ref("User Name - Matric No");
 
+const subjectCodeAndSection = ref("/-/");
+const subjectCode = ref("/");
+const subjectSection = ref("/");
+const bilPelajar = ref("-");
+const subjectVenue = ref("-");
+
 const toggleSidebar = () => {
     sidebarOpen.value = !sidebarOpen.value;
 };
