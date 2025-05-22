@@ -83,8 +83,7 @@ onMounted(async () => {
         if (data && data.length > 0) {
             for (i = 0; i < data.length; i++) {
                 const curr = data[i];
-                //semester and sesi adjustment
-
+                if(curr = )
                 subjectCode.value = curr.kod_subjek;
                 subjectSection.value = curr.seksyen;
             }

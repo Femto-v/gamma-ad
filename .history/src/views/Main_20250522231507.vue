@@ -15,14 +15,14 @@ const endDate = ref("-");
 //name and matric values
 const userName = ref("");
 const noMatric = ref("");
+
 const lsData = JSON.parse(localStorage.getItem("web.fc.utm.my_usersession"));
 if (lsData) {
     userName.value = lsData.full_name;
     noMatric.value = lsData.login_name;
-    userInfo.value = `${userName.value} - ${noMatric.value}`;
+    userInfo = `${userName} - ${noMatric}`;
 }
 
-//button function
 const toggleSidebar = () => {
     sidebarOpen.value = !sidebarOpen.value;
 };
@@ -67,7 +67,6 @@ const logout = () => {
     window.location.replace("/login");
 };
 
-//on mounted
 onMounted(async () => {
     const data = await semesterApi.getCurrentSemesterInfo();
 

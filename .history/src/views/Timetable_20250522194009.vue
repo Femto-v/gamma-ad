@@ -5,13 +5,11 @@ import TimetableApi from "@/api/TimetableApi";
 const sidebarOpen = ref(false);
 const userInfo = ref("User Name - Matric No");
 
+const subjectCodeAndSection = ref("/-/");
 const subjectCode = ref("/");
 const subjectSection = ref("/");
 const bilPelajar = ref("-");
 const subjectVenue = ref("-");
-const subjectCodeAndSection = `${subjectCode} - ${subjectSection}`;
-
-//retrieve data semester and sesi
 
 //handle function
 const toggleSidebar = () => {
@@ -75,21 +73,7 @@ if (_lsData && _lsData.login_name) {
 //get all data
 onMounted(async () => {
     try {
-        console.log("Fetching with matric number:", noMatric.value);
-        const data = await timetableApi.getTimetableInfo({
-            no_matrik: noMatric.value,
-        });
-
-        if (data && data.length > 0) {
-            for (i = 0; i < data.length; i++) {
-                const curr = data[i];
-                //semester and sesi adjustment
-
-                subjectCode.value = curr.kod_subjek;
-                subjectSection.value = curr.seksyen;
-            }
-            console.log(data[0]);
-        }
+        const data = await timetableApi.getTimetableInfo({ noMatric });
     } catch (error) {
         console.log("timetable error api : " + error);
     }

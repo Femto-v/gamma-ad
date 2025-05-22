@@ -11,8 +11,6 @@ const bilPelajar = ref("-");
 const subjectVenue = ref("-");
 const subjectCodeAndSection = `${subjectCode} - ${subjectSection}`;
 
-//retrieve data semester and sesi
-
 //handle function
 const toggleSidebar = () => {
     sidebarOpen.value = !sidebarOpen.value;
@@ -83,8 +81,6 @@ onMounted(async () => {
         if (data && data.length > 0) {
             for (i = 0; i < data.length; i++) {
                 const curr = data[i];
-                //semester and sesi adjustment
-
                 subjectCode.value = curr.kod_subjek;
                 subjectSection.value = curr.seksyen;
             }
