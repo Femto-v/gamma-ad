@@ -16,7 +16,7 @@ const handleLogin = async () => {
         const data = await authApi.login(login.value, password.value);
 
         if (data?.[0]?.session_id) {
-            alert("Success login to the system!");
+            console.log("Login successful!");
             localStorage.setItem(
                 "web.fc.utm.my_usersession",
                 JSON.stringify(data[0])
