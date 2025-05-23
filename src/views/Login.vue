@@ -61,7 +61,7 @@ const handleLogin = async () => {
             </button>
 
             <div class="mb-3 text-left text-black">
-                <label class="text-sm font-bold text-gray-700">Login</label>
+                <label class="text-sm font-bold text-gray-700">Username</label>
                 <input
                     type="text"
                     v-model="login"

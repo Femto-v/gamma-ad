@@ -218,7 +218,6 @@ const subjects = ref([
               <td class="border border-black px-2 py-1">{{ subject.subjekDanSubseksyen }}</td>
               <td class="border border-black px-2 py-1">
                 <button class="mr-2 text-blue-600 hover:text-blue-900">📄</button>
-                <button class="text-green-600 hover:text-green-900">✏️</button>
               </td>
             </tr>
           </tbody>

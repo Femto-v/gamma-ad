@@ -200,9 +200,6 @@ const selectedFaculty = ref("FSKSM")
               <button class="mr-2 text-blue-600 hover:text-blue-900">
                 📄
               </button>
-              <button class="text-green-600 hover:text-green-900">
-                ✏️
-              </button>
             </td>
           </tr>
         </tbody>
