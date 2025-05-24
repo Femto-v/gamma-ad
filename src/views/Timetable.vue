@@ -54,7 +54,7 @@ const timetable = ref([
     },
     {
         time: "10:00 AM – 10:50 AM",
-        slots: ["", "", "SECJ3104-1 [25] MPK9", "", "", "", ""],
+        slots: ["", "", "", "SECJ3104-1 [30] MPK9", "", "", ""],
     },
     // ... Add all time slots here
 ]);
