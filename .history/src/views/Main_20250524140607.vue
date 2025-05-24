@@ -5,17 +5,15 @@ import { ref, onMounted } from "vue";
 import Toggle from "@/components/Toggle.vue";
 import SemesterApi from "@/api/SemesterApi";
 import ProfileBanner from "@/components/ProfileBanner.vue";
-import {
-    currentSession,
-    currentSemester,
-    startDate,
-    endDate,
-} from "@/constants/ApiConstants";
 
 //__DATA
 
 // Reactive values for session display
 const semesterApi = new SemesterApi();
+const currentSession = ref("-");
+const currentSemester = ref("-");
+const startDate = ref("-");
+const endDate = ref("-");
 
 //__FUNCTIONS
 
@@ -40,7 +38,6 @@ onMounted(async () => {
         <!-- Main content -->
         <main>
             <ProfileBanner />
-
             <div class="p-4">
                 <div class="bg-blue-100 rounded-xl shadow p-4">
                     <div class="grid grid-cols-2 text-sm">
@@ -52,7 +49,6 @@ onMounted(async () => {
                         <div>{{ startDate }} / {{ endDate }}</div>
                     </div>
                 </div>
-
                 <p class="text-xs text-center mt-6">
                     Jika anda mempunyai sebarang komen atau pertanyaan mengenai
                     halaman web ini sila hubungi webmaster di

@@ -19,7 +19,7 @@ const pelajarSubjekApi = new PelajarSubjekApi();
 //get all data
 onMounted(async () => {
     try {
-        const data = await pelajarSubjekApi.getTimetableInfo({
+        const data = await timetableApi.getTimetableInfo({
             no_matrik: userMatric.value,
         });
 

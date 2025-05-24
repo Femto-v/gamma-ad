@@ -5,17 +5,15 @@ import { ref, onMounted } from "vue";
 import Toggle from "@/components/Toggle.vue";
 import SemesterApi from "@/api/SemesterApi";
 import ProfileBanner from "@/components/ProfileBanner.vue";
-import {
-    currentSession,
-    currentSemester,
-    startDate,
-    endDate,
-} from "@/constants/ApiConstants";
 
 //__DATA
 
 // Reactive values for session display
 const semesterApi = new SemesterApi();
+const currentSession = ref("-");
+const currentSemester = ref("-");
+const startDate = ref("-");
+const endDate = ref("-");
 
 //__FUNCTIONS
 
@@ -39,7 +37,14 @@ onMounted(async () => {
         <Toggle />
         <!-- Main content -->
         <main>
-            <ProfileBanner />
+            <!-- <div
+                class="bg-cover bg-center h-60 text-white flex flex-col justify-center items-center"
+                style="background-image: url('/backdropMain.jpg')"
+            >
+                <img src="/UTM-LOGO.png" class="w-16 mb-2" alt="UTM Logo" />
+                <h2 class="text-2xl font-bold drop-shadow-md">Welcome</h2>
+                <p class="drop-shadow-md">{{ userInfo }}</p>
+            </div> -->
 
             <div class="p-4">
                 <div class="bg-blue-100 rounded-xl shadow p-4">

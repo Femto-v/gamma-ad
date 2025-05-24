@@ -1,23 +1,27 @@
 <script setup>
-//__IMPORTS
-
 import { ref, onMounted } from "vue";
 import Toggle from "@/components/Toggle.vue";
 import SemesterApi from "@/api/SemesterApi";
-import ProfileBanner from "@/components/ProfileBanner.vue";
-import {
-    currentSession,
-    currentSemester,
-    startDate,
-    endDate,
-} from "@/constants/ApiConstants";
 
-//__DATA
+const sidebarOpen = ref(false);
+const userInfo = ref("User Name - Matric No");
 
 // Reactive values for session display
 const semesterApi = new SemesterApi();
+const currentSession = ref("-");
+const currentSemester = ref("-");
+const startDate = ref("-");
+const endDate = ref("-");
 
-//__FUNCTIONS
+//name and matric values
+const userName = ref("");
+const noMatric = ref("");
+const lsData = JSON.parse(localStorage.getItem("web.fc.utm.my_usersession"));
+if (lsData) {
+    userName.value = lsData.full_name;
+    noMatric.value = lsData.login_name;
+    userInfo.value = `${userName.value} - ${noMatric.value}`;
+}
 
 //on mounted
 onMounted(async () => {
@@ -36,10 +40,19 @@ onMounted(async () => {
 
 <template>
     <div class="bg-gray-100 min-h-screen">
+        Toggle
         <Toggle />
+
         <!-- Main content -->
         <main>
-            <ProfileBanner />
+            <div
+                class="bg-cover bg-center h-60 text-white flex flex-col justify-center items-center"
+                style="background-image: url('/backdropMain.jpg')"
+            >
+                <img src="/UTM-LOGO.png" class="w-16 mb-2" alt="UTM Logo" />
+                <h2 class="text-2xl font-bold drop-shadow-md">Welcome</h2>
+                <p class="drop-shadow-md">{{ userInfo }}</p>
+            </div>
 
             <div class="p-4">
                 <div class="bg-blue-100 rounded-xl shadow p-4">

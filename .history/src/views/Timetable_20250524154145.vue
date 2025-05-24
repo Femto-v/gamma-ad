@@ -1,9 +1,13 @@
 <script setup>
 import { ref, onMounted } from "vue";
-import PelajarSubjekApi from "@/api/PelajarSubjekApi";
+import TimetableApi from "@/api/TimetableApi";
 import Toggle from "@/components/Toggle.vue";
 import ProfileBanner from "@/components/ProfileBanner.vue";
-import { userMatric } from "@/constants/ApiConstants";
+
+const userName = ref("");
+const userMatric = ref("");
+
+const userInfo = ref("User Name - Matric No");
 
 const subjectCode = ref("/");
 const subjectSection = ref("/");
@@ -14,13 +18,16 @@ const subjectCodeAndSection = `${subjectCode} - ${subjectSection}`;
 //retrieve data semester and sesi
 
 // create object from timetableAPI class
-const pelajarSubjekApi = new PelajarSubjekApi();
+const timetableApi = new TimetableApi();
+const noMatric = ref("-");
 
+userInfo.value = `${userName.value} - ${noMatric.value}`;
 //get all data
 onMounted(async () => {
     try {
-        const data = await pelajarSubjekApi.getTimetableInfo({
-            no_matrik: userMatric.value,
+        console.log("Fetching with matric number:", noMatric.value);
+        const data = await timetableApi.getTimetableInfo({
+            no_matrik: noMatric.value,
         });
 
         if (data && data.length > 0) {
@@ -65,7 +72,6 @@ const timetable = ref([
         <Toggle />
         <!-- Main Content -->
         <main>
-            <ProfileBanner />
             <!-- Timetable Table -->
             <div class="overflow-x-auto p-4">
                 <table

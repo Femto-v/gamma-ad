@@ -5,17 +5,15 @@ import { ref, onMounted } from "vue";
 import Toggle from "@/components/Toggle.vue";
 import SemesterApi from "@/api/SemesterApi";
 import ProfileBanner from "@/components/ProfileBanner.vue";
-import {
-    currentSession,
-    currentSemester,
-    startDate,
-    endDate,
-} from "@/constants/ApiConstants";
 
 //__DATA
 
 // Reactive values for session display
 const semesterApi = new SemesterApi();
+const currentSession = ref("-");
+const currentSemester = ref("-");
+const startDate = ref("-");
+const endDate = ref("-");
 
 //__FUNCTIONS
 

@@ -1,6 +1,6 @@
 <script setup>
 import { ref, onMounted } from "vue";
-import PelajarSubjekApi from "@/api/PelajarSubjekApi";
+import TimetableApi from "@/api/TimetableApi";
 import Toggle from "@/components/Toggle.vue";
 import ProfileBanner from "@/components/ProfileBanner.vue";
 import { userMatric } from "@/constants/ApiConstants";
@@ -14,12 +14,12 @@ const subjectCodeAndSection = `${subjectCode} - ${subjectSection}`;
 //retrieve data semester and sesi
 
 // create object from timetableAPI class
-const pelajarSubjekApi = new PelajarSubjekApi();
+const timetableApi = new TimetableApi();
 
 //get all data
 onMounted(async () => {
     try {
-        const data = await pelajarSubjekApi.getTimetableInfo({
+        const data = await timetableApi.getTimetableInfo({
             no_matrik: userMatric.value,
         });
 
