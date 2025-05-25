@@ -1,53 +1,14 @@
 <script setup>
 import { ref, onMounted } from "vue";
 import SemesterApi from "@/api/SemesterApi";
+import Toggle from "@/components/Toggle.vue";
+import { userInfo, userName, userMatric } from "@/constants/ApiConstants.js";
 
-const sidebarOpen = ref(false);
-const userInfo = ref("User Name - Matric No");
-
-const toggleSidebar = () => {
-    sidebarOpen.value = !sidebarOpen.value;
-};
-
-const loadMain = () => {
-    toggleSidebar();
-    window.location.href = "/main";
-};
-
-const loadTimetable = () => {
-    toggleSidebar();
-    window.location.href = "/timetable";
-};
-
-const loadRuang = () => {
-    toggleSidebar();
-    window.location.href = "/ruang";
-};
-
-const loadSubjek = () => {
-    toggleSidebar();
-    window.location.href = "/subjek";
-};
-
-const loadPensyarah = () => {
-    toggleSidebar();
-    window.location.href = "/pensyarah";
-};
-
-const loadPelajar = () => {
-    toggleSidebar();
-    window.location.href = "/pelajar";
-};
-
-const loadKurikulum = () => {
-    toggleSidebar();
-    window.location.href = "/kurikulum";
-};
-
-const logout = () => {
-    localStorage.removeItem("web.fc.utm.my_usersession");
-    window.location.replace("/login");
-};
+const lsData = JSON.parse(localStorage.getItem("web.fc.utm.my_usersession"));
+if (lsData) {
+    userName.value = lsData.full_name;
+    userMatric.value = lsData.login_name;
+}
 
 // Filters
 const nama = ref("");
@@ -72,81 +33,7 @@ const searchStudents = () => {
 
 <template>
   <div class="bg-gray-100 min-h-screen">
-    <!-- Header -->
-    <header class="bg-blue-600 text-white p-4 flex justify-between items-center">
-      <button @click="toggleSidebar" class="text-3xl">&#9776;</button>
-      <h1 class="text-xl font-bold">Pelajar</h1>
-    </header>
-
-    <!-- Sidebar -->
-        <div
-            :class="[
-                'fixed top-0 left-0 h-full w-64 bg-white shadow-lg transform transition-transform z-50',
-                { '-translate-x-full': !sidebarOpen },
-            ]"
-        >
-            <div class="p-4 border-b flex justify-between items-center">
-                <h2 class="text-sm font-semibold">&#x2190; Kembali</h2>
-                <button @click="toggleSidebar" class="text-2xl">&times;</button>
-            </div>
-            <nav class="flex flex-col p-4 text-sm">
-                <a
-                    href="#"
-                    @click.prevent="loadMain"
-                    class="py-2 text-gray-800 hover:bg-blue-100 rounded"
-                    >Home</a
-                >
-                <a
-                    href="#"
-                    @click.prevent="loadTimetable"
-                    class="py-2 text-gray-800 hover:bg-blue-100 rounded"
-                    >Jadual Waktu</a
-                >
-                <div class="group relative">
-                    <button
-                        class="py-2 text-left w-full text-gray-800 hover:bg-blue-100 rounded"
-                    >
-                        Analysis ▼
-                    </button>
-                </div>
-                <a  
-                    href="#" 
-                    @click.prevent="loadRuang"
-                    class="py-2 text-gray-800 hover:bg-blue-100 rounded"
-                    >Ruang</a
-                >
-                <a  
-                    href="#" 
-                    @click.prevent="loadSubjek"
-                    class="py-2 text-gray-800 hover:bg-blue-100 rounded"
-                    >Subjek</a
-                >
-                <a 
-                    href="#" 
-                    @click.prevent="loadPensyarah"
-                    class="py-2 text-gray-800 hover:bg-blue-100 rounded"
-                    >Pensyarah</a
-                >
-                <a 
-                    href="#" 
-                    @click.prevent="loadPelajar"
-                    class="py-2 text-gray-800 hover:bg-blue-100 rounded"
-                    >Pelajar</a
-                >
-                <a 
-                    href="#" 
-                    @click.prevent="loadKurikulum"
-                    class="py-2 text-gray-800 hover:bg-blue-100 rounded"
-                    >Kurikulum</a
-                >
-                <a
-                    href="#"
-                    @click="logout"
-                    class="py-2 text-red-600 hover:bg-red-100 rounded"
-                    >Logout</a
-                >
-            </nav>
-        </div>
+    <Toggle />
 
     <!-- Banner -->
     <div

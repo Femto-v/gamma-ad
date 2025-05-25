@@ -8,6 +8,12 @@ import Subjek from "@/views/Subjek.vue";
 import Pensyarah from "@/views/Pensyarah.vue";
 import Pelajar from "@/views/Pelajar.vue";
 import Kurikulum from "@/views/Kurikulum.vue";
+import Masaruang from "@/views/Masaruang.vue";
+import AnalysisSubjek from "@/views/AnalysisSubjek.vue";
+import AnalysisPelajar from "@/views/AnalysisPelajar.vue";
+import ClashRuang from "@/views/ClashRuang.vue";
+import ClashPelajar from "@/views/ClashPelajar.vue";
+import ClashPensyarah from "@/views/ClashPensyarah.vue";
 
 const routes = [
     { path: "/", redirect: "/login" },
@@ -19,6 +25,12 @@ const routes = [
     { path: "/pensyarah", name: "Pensyarah", component: Pensyarah},
     { path: "/pelajar", name: "Pelajar", component: Pelajar},
     { path: "/kurikulum", name: "Kurikulum", component: Kurikulum},
+    { path: "/masaruang", name: "Masaruang", component: Masaruang},
+    { path: "/analysissubjek", name: "AnalysiSubjek", component: AnalysisSubjek},
+    { path: "/analysispelajar", name: "AnalysiPelajar", component: AnalysisPelajar},
+    { path: "/clashruang", name: "ClashRuang", component: ClashRuang},
+    { path: "/clashpelajar", name: "ClashPelajar", component: ClashPelajar},
+    { path: "/clashpensyarah", name: "ClashPensyarah", component: ClashPensyarah},
 ];
 
 const router = createRouter({
