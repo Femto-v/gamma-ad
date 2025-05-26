@@ -6,9 +6,9 @@ import ProfileBanner from "@/components/ProfileBanner.vue";
 
 import { ref } from "vue";
 import { onMounted } from "vue";
-import { userMatric } from "@/constants/ApiConstants";
-import { timetable } from "@/constants/TimetableConstants";
-import { days } from "@/constants/TimetableConstants";
+import { userMatric } from "@/models/ApiConstants";
+import { timetable } from "@/models/TimetableConstants";
+import { days } from "@/models/TimetableConstants";
 
 //retrieve data semester and sesi
 const timetableData = ref(JSON.parse(JSON.stringify(timetable))); // Deep copy for display
@@ -19,7 +19,7 @@ const jadualSubjekApi = new JadualSubjekApi();
 
 // Settings—change as needed:
 const activeSemester = 2;
-const activeSesi = "2024/2025";
+const activeSesi = "2020/2021";
 
 //get all data
 onMounted(async () => {
@@ -93,7 +93,14 @@ onMounted(async () => {
         <Toggle />
         <!-- Main Content -->
         <main>
-            <ProfileBanner />
+            <div
+                class="bg-cover bg-center h-60 text-white flex flex-col justify-center items-center"
+                style="background-image: url('/backdropMain.jpg')"
+            >
+                <img src="/UTM-LOGO.png" class="w-16 mb-2" alt="UTM Logo" />
+                <h2 class="text-2xl font-bold drop-shadow-md">Jadual Waktu</h2>
+                <p class="drop-shadow-md">{{ userInfo }}</p>
+            </div>
             <!-- Timetable Table -->
             <div class="overflow-x-auto p-4">
                 <table

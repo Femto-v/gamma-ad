@@ -2,7 +2,7 @@
 import { ref, onMounted } from "vue";
 import SemesterApi from "@/api/SemesterApi";
 import Toggle from "@/components/Toggle.vue";
-import { userInfo, userName, userMatric } from "@/constants/ApiConstants.js";
+import { userInfo, userName, userMatric } from "@/models/ApiConstants.js";
 
 // Load user info from session
 const lsData = JSON.parse(localStorage.getItem("web.fc.utm.my_usersession"));

@@ -19,7 +19,7 @@ const jadualSubjekApi = new JadualSubjekApi();
 
 // Settings—change as needed:
 const activeSemester = 2;
-const activeSesi = "2024/2025";
+const activeSesi = "2020/2021";
 
 //get all data
 onMounted(async () => {
