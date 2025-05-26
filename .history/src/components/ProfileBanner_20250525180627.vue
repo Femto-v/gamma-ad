@@ -20,5 +20,3 @@ if (lsData) {
         <p class="drop-shadow-md">{{ userInfo }}</p>
     </div>
 </template>
-
-<!-- ini juga jadi problem karna semua page bakal bertuliskan Welcome -->

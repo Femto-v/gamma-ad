@@ -1,10 +1,8 @@
 <script setup>
 import PelajarSubjekApi from "@/api/PelajarSubjekApi";
-import JadualSubjekApi from "@/api/JadualSubjekApi";
 import Toggle from "@/components/Toggle.vue";
 import ProfileBanner from "@/components/ProfileBanner.vue";
 
-import { ref } from "vue";
 import { onMounted } from "vue";
 import { userMatric } from "@/models/ApiConstants";
 import { timetable } from "@/models/TimetableConstants";
@@ -18,72 +16,27 @@ const pelajarSubjekApi = new PelajarSubjekApi();
 
 // Settings—change as needed:
 const activeSemester = 2;
-const activeSesi = "2020/2021";
-const jadualSubjekApi = new JadualSubjekApi();
+const activeSesi = "2024/2025";
 
 //get all data
 onMounted(async () => {
     try {
-        // 1. Fetch subject list
-        const subjectList = await pelajarSubjekApi.getTimetableInfo(
-            userMatric.value
-        );
-        console.log("Fetched subject list:", subjectList);
-        if (!subjectList?.length) {
-            console.warn("No subjects found!");
-            return;
-        }
-        console.log(
-            "Semesters:",
-            subjectList.map((s) => s.semester)
-        );
-        console.log(
-            "Sesis:",
-            subjectList.map((s) => s.sesi)
-        );
-        // 2. Filter for this semester/sesi
-        const filteredSubjects = subjectList.filter(
-            (s) => s.semester === activeSemester && s.sesi === activeSesi
-        );
-        console.log(
-            "Filtered subjects for current semester/sesi:",
-            filteredSubjects
-        );
-        if (!filteredSubjects.length) {
-            console.warn("No subjects for current semester/sesi!");
-            return;
-        }
-
-        // 3. Prepare parallel schedule fetches for each subject-section
-        const schedulePromises = filteredSubjects.map((s) =>
-            jadualSubjekApi.getSubjectSchedule({
-                kod_subjek: s.kod_subjek,
-                seksyen: s.seksyen,
-                sesi: s.sesi,
-                semester: s.semester,
-            })
-        );
-        const allSchedules = (await Promise.all(schedulePromises)).flat();
-
-        // 4. Map each schedule to the timetable grid
-        allSchedules.forEach((item) => {
-            const rowIdx = (item.masa ?? 1) - 1;
-            const colIdx = (item.hari ?? 1) - 1;
-            if (
-                timetableData.value[rowIdx] &&
-                timetableData.value[rowIdx].slots[colIdx] !== undefined
-            ) {
-                timetableData.value[rowIdx].slots[colIdx] =
-                    `${item.kod_subjek} - ${item.seksyen}` +
-                    (item.ruang?.nama_ruang_singkatan
-                        ? ` @ ${item.ruang.nama_ruang_singkatan}`
-                        : "");
-            }
+        const data = await pelajarSubjekApi.getTimetableInfo({
+            no_matrik: userMatric.value,
         });
 
-        console.log("Final mapped timetable:", timetableData.value);
+        if (data && data.length > 0) {
+            for (i = 0; i < data.length; i++) {
+                const curr = data[i];
+                //semester and sesi adjustment
+
+                subjectCode.value = curr.kod_subjek;
+                subjectSection.value = curr.seksyen;
+            }
+            console.log(data);
+        }
     } catch (error) {
-        console.log("timetable error api: " + error);
+        console.log("timetable error api : " + error);
     }
 });
 </script>
@@ -93,14 +46,7 @@ onMounted(async () => {
         <Toggle />
         <!-- Main Content -->
         <main>
-            <div
-                class="bg-cover bg-center h-60 text-white flex flex-col justify-center items-center"
-                style="background-image: url('/backdropMain.jpg')"
-            >
-                <img src="/UTM-LOGO.png" class="w-16 mb-2" alt="UTM Logo" />
-                <h2 class="text-2xl font-bold drop-shadow-md">Jadual Waktu</h2>
-                <p class="drop-shadow-md">{{ userInfo }}</p>
-            </div>
+            <ProfileBanner />
             <!-- Timetable Table -->
             <div class="overflow-x-auto p-4">
                 <table
@@ -120,7 +66,7 @@ onMounted(async () => {
                         </tr>
                     </thead>
                     <tbody>
-                        <tr v-for="(row, index) in timetableData" :key="index">
+                        <tr v-for="(row, index) in timetable" :key="index">
                             <td class="border border-black px-1 py-1">
                                 {{ row.masa }}
                             </td>

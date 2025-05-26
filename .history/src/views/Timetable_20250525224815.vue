@@ -18,7 +18,7 @@ const pelajarSubjekApi = new PelajarSubjekApi();
 
 // Settings—change as needed:
 const activeSemester = 2;
-const activeSesi = "2020/2021";
+const activeSesi = "2024/2025";
 const jadualSubjekApi = new JadualSubjekApi();
 
 //get all data
@@ -28,27 +28,17 @@ onMounted(async () => {
         const subjectList = await pelajarSubjekApi.getTimetableInfo(
             userMatric.value
         );
-        console.log("Fetched subject list:", subjectList);
+
         if (!subjectList?.length) {
             console.warn("No subjects found!");
             return;
         }
-        console.log(
-            "Semesters:",
-            subjectList.map((s) => s.semester)
-        );
-        console.log(
-            "Sesis:",
-            subjectList.map((s) => s.sesi)
-        );
+
         // 2. Filter for this semester/sesi
         const filteredSubjects = subjectList.filter(
             (s) => s.semester === activeSemester && s.sesi === activeSesi
         );
-        console.log(
-            "Filtered subjects for current semester/sesi:",
-            filteredSubjects
-        );
+
         if (!filteredSubjects.length) {
             console.warn("No subjects for current semester/sesi!");
             return;
@@ -74,7 +64,7 @@ onMounted(async () => {
                 timetableData.value[rowIdx].slots[colIdx] !== undefined
             ) {
                 timetableData.value[rowIdx].slots[colIdx] =
-                    `${item.kod_subjek} - ${item.seksyen}` +
+                    item.kod_subjek +
                     (item.ruang?.nama_ruang_singkatan
                         ? ` @ ${item.ruang.nama_ruang_singkatan}`
                         : "");
@@ -93,14 +83,7 @@ onMounted(async () => {
         <Toggle />
         <!-- Main Content -->
         <main>
-            <div
-                class="bg-cover bg-center h-60 text-white flex flex-col justify-center items-center"
-                style="background-image: url('/backdropMain.jpg')"
-            >
-                <img src="/UTM-LOGO.png" class="w-16 mb-2" alt="UTM Logo" />
-                <h2 class="text-2xl font-bold drop-shadow-md">Jadual Waktu</h2>
-                <p class="drop-shadow-md">{{ userInfo }}</p>
-            </div>
+            <ProfileBanner />
             <!-- Timetable Table -->
             <div class="overflow-x-auto p-4">
                 <table
@@ -120,7 +103,7 @@ onMounted(async () => {
                         </tr>
                     </thead>
                     <tbody>
-                        <tr v-for="(row, index) in timetableData" :key="index">
+                        <tr v-for="(row, index) in timetable" :key="index">
                             <td class="border border-black px-1 py-1">
                                 {{ row.masa }}
                             </td>

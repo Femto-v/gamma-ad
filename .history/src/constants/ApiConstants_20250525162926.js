@@ -12,5 +12,6 @@ export const startDate = ref("-");
 export const endDate = ref("-");
 // user jadual
 export const subjectCode = ref("-");
+export const subjectSection = ref("-");
 export const subjectVenue = ref("-");
 export const totalStudents = ref(0);
