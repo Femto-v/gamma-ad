@@ -50,7 +50,7 @@ const selectedFaculty = ref("FSKSM");
 
         <!-- Main Content -->
         <main>
-            <ProfileBanner titleBanner="Ruang" />
+            <ProfileBanner titleBanner="senarai ruang" />
             <!-- Table Section -->
             <div class="overflow-x-auto px-4 py-4">
                 <table
