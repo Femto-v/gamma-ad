@@ -69,11 +69,11 @@ watch(
                 timetableData.value[rowIdx] &&
                 timetableData.value[rowIdx].slots[colIdx] !== undefined
             ) {
-                timetableData.value[rowIdx].slots[colIdx] = `${
-                    item.kod_subjek
-                }\nsection : ${item.seksyen}\n   ${
-                    item.ruang?.nama_ruang_singkatan ?? ""
-                }`;
+                timetableData.value[rowIdx].slots[colIdx] =
+                    `${item.kod_subjek}\nsection : ${item.seksyen}` +
+                    (item.ruang?.nama_ruang_singkatan
+                        ? `\nvenue : ${item.ruang.nama_ruang_singkatan}`
+                        : "");
             }
         });
         console.log("Final mapped timetable:", timetableData.value);
@@ -132,7 +132,7 @@ console.log("activeSemester: ", activeSemester.value);
                             <td
                                 v-for="(slot, idx) in row.slots"
                                 :key="idx"
-                                class="border border-black px-1 py-1 text-xs"
+                                class="border border-black px-1 py-1"
                             >
                                 {{ slot }}
                             </td>

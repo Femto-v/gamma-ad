@@ -3,55 +3,63 @@ import PelajarSubjekApi from "@/api/PelajarSubjekApi";
 import JadualSubjekApi from "@/api/JadualSubjekApi";
 import Toggle from "@/components/Toggle.vue";
 import ProfileBanner from "@/components/ProfileBanner.vue";
-import { ref, computed, onMounted, watch } from "vue";
+
+import { ref, computed, onMounted } from "vue";
 import { userMatric } from "@/constants/ApiConstants";
 import { timetable } from "@/constants/TimetableConstants";
 import { days } from "@/constants/TimetableConstants";
 
-// Settings
-const activeSemester = ref(1); // Default semester
-const activeSesi = ref("2024/2025");
+//retrieve data semester and sesi
+const timetableData = ref(JSON.parse(JSON.stringify(timetable))); // Deep copy for display
 
-// Main reactive state
-const subjectList = ref([]); // fetched from API
-const timetableData = ref(JSON.parse(JSON.stringify(timetable))); // deep copy
-
-// API class instances
+// create object from timetableAPI class
 const pelajarSubjekApi = new PelajarSubjekApi();
 const jadualSubjekApi = new JadualSubjekApi();
 
-// Get all subjects for this student
+// Settings—change as needed:
+const activeSemester = ref(1); // Default semester
+const activeSesi = ref("2024/2025");
+const subjectList = ref([]); // Store fetched subjects
+
+//get all data
 onMounted(async () => {
     try {
+        // 1. Fetch subject list
         subjectList.value = await pelajarSubjekApi.getTimetableInfo(
             userMatric.value
         );
-        // Optionally set default semester/sesi based on data here
-    } catch (error) {
-        console.log("timetable error api: " + error);
-    }
-});
-
-// Compute the filtered subjects based on the current semester/sesi
-const filteredSubjects = computed(() =>
-    subjectList.value.filter(
-        (s) =>
-            s.semester === activeSemester.value && s.sesi === activeSesi.value
-    )
-);
-
-// Watch for changes to semester/sesi and update the timetable
-watch(
-    [filteredSubjects, activeSemester, activeSesi],
-    async ([newFilteredSubjects]) => {
-        // Reset timetable grid first
-        timetableData.value = JSON.parse(JSON.stringify(timetable));
-        if (!newFilteredSubjects.length) {
+        console.log("Fetched subject list:", subjectList);
+        if (!subjectList?.length) {
+            console.warn("No subjects found!");
+            return;
+        }
+        console.log(
+            "Semesters:",
+            subjectList.map((s) => s.semester)
+        );
+        console.log(
+            "Sesis:",
+            subjectList.map((s) => s.sesi)
+        );
+        // 2. Filter for this semester/sesi
+        const filteredSubjects = computed(() =>
+            subjectList.value.filter(
+                (s) =>
+                    s.semester === activeSemester.value &&
+                    s.sesi === activeSesi.value
+            )
+        );
+        console.log(
+            "Filtered subjects for current semester/sesi:",
+            filteredSubjects
+        );
+        if (!filteredSubjects.length) {
             console.warn("No subjects for current semester/sesi!");
             return;
         }
-        // Fetch schedules for each subject
-        const schedulePromises = newFilteredSubjects.map((s) =>
+
+        // 3. Prepare parallel schedule fetches for each subject-section
+        const schedulePromises = filteredSubjects.map((s) =>
             jadualSubjekApi.getSubjectSchedule({
                 kod_subjek: s.kod_subjek,
                 seksyen: s.seksyen,
@@ -61,7 +69,7 @@ watch(
         );
         const allSchedules = (await Promise.all(schedulePromises)).flat();
 
-        // Map each schedule to the timetable grid
+        // 4. Map each schedule to the timetable grid
         allSchedules.forEach((item) => {
             const rowIdx = (item.masa ?? 1) - 1;
             const colIdx = (item.hari ?? 1) - 1;
@@ -69,18 +77,19 @@ watch(
                 timetableData.value[rowIdx] &&
                 timetableData.value[rowIdx].slots[colIdx] !== undefined
             ) {
-                timetableData.value[rowIdx].slots[colIdx] = `${
-                    item.kod_subjek
-                }\nsection : ${item.seksyen}\n   ${
-                    item.ruang?.nama_ruang_singkatan ?? ""
-                }`;
+                timetableData.value[rowIdx].slots[colIdx] =
+                    `${item.kod_subjek} - ${item.seksyen}` +
+                    (item.ruang?.nama_ruang_singkatan
+                        ? ` @ ${item.ruang.nama_ruang_singkatan}`
+                        : "");
             }
         });
-        console.log("Final mapped timetable:", timetableData.value);
-    },
-    { immediate: true }
-);
 
+        console.log("Final mapped timetable:", timetableData.value);
+    } catch (error) {
+        console.log("timetable error api: " + error);
+    }
+});
 console.log("activeSemester: ", activeSemester.value);
 </script>
 
@@ -132,7 +141,7 @@ console.log("activeSemester: ", activeSemester.value);
                             <td
                                 v-for="(slot, idx) in row.slots"
                                 :key="idx"
-                                class="border border-black px-1 py-1 text-xs"
+                                class="border border-black px-1 py-1"
                             >
                                 {{ slot }}
                             </td>
