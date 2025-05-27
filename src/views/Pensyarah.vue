@@ -1,6 +1,5 @@
 <script setup>
-import { ref, onMounted } from "vue";
-import SemesterApi from "@/api/SemesterApi";
+import { ref } from "vue";
 import Toggle from "@/components/Toggle.vue";
 import { userInfo, userName, userMatric } from "@/constants/ApiConstants.js";
 
@@ -44,7 +43,6 @@ const lecturers = ref([
   <div class="bg-gray-100 min-h-screen">
     <Toggle />
 
-    <!-- Main Content -->
     <main>
       <!-- Banner -->
       <div
@@ -56,34 +54,32 @@ const lecturers = ref([
         <p class="drop-shadow-md">{{ userInfo }}</p>
       </div>
 
-      <!-- Lecturer Table -->
-      <div class="overflow-x-auto p-4">
-        <table class="w-full border border-black text-sm text-center bg-[#d0e7f7]">
-          <thead class="bg-[#b8d4ea]">
-            <tr>
-              <th class="border border-black px-2 py-1">Bil</th>
-              <th class="border border-black px-2 py-1">Nama</th>
-              <th class="border border-black px-2 py-1">Bil. Subjek</th>
-              <th class="border border-black px-2 py-1">Bil. Seksyen</th>
-              <th class="border border-black px-2 py-1">Bil. Pelajar</th>
-              <th class="border border-black px-2 py-1">Subjek & Seksyen</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr v-for="(lecturer, index) in lecturers" :key="index">
-              <td class="border border-black px-2 py-1">{{ index + 1 }}</td>
-              <td class="border border-black px-2 py-1">{{ lecturer.name }}</td>
-              <td class="border border-black px-2 py-1">{{ lecturer.subjectCount }}</td>
-              <td class="border border-black px-2 py-1">{{ lecturer.sectionCount }}</td>
-              <td class="border border-black px-2 py-1">{{ lecturer.studentCount }}</td>
-              <td class="border border-black px-2 py-1">
-                <button class="mr-2 text-blue-600 hover:text-blue-900">📄</button>
-              </td>
-            </tr>
-          </tbody>
-        </table>
+      <!-- Card UI Section -->
+      <div class="flex flex-col gap-4 px-4 py-4">
+        <div
+          v-for="(lecturer, index) in lecturers"
+          :key="index"
+          class="bg-blue-100 rounded-xl shadow p-4 relative"
+        >
+          <!-- Top right button -->
+          <button
+            class="absolute top-3 right-3 rounded bg-gray-200 hover:bg-gray-300 p-2"
+            title="Maklumat Jadual"
+          >
+            <!-- Document Icon SVG -->
+            <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <rect x="6" y="3" width="12" height="18" rx="2" stroke-width="2"/>
+              <path d="M9 7h6M9 11h6M9 15h3" stroke-width="2" stroke-linecap="round"/>
+            </svg>
+          </button>
+          <div class="font-semibold text-lg mt-2 mb-3">{{ lecturer.name }}</div>
+          <div class="flex gap-8 text-gray-700 text-[15px]">
+            <div>Bil. Seksyen: {{ lecturer.sectionCount }}</div>
+            <div>Bil. Pensyarah: {{ lecturer.subjectCount }}</div>
+            <div>Bil. Pelajar: {{ lecturer.studentCount }}</div>
+          </div>
+        </div>
       </div>
-
       <!-- Pagination -->
       <div class="text-sm flex justify-center py-4 space-x-2">
         <button>&lt;&lt;</button>

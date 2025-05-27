@@ -38,29 +38,32 @@ onMounted(async () => {
     <div class="bg-gray-100 min-h-screen">
         <Toggle />
         <!-- Main content -->
-        <main>
+       <!-- Main card content, vertically centered -->
+        <main class="flex-1 flex flex-col items-center justify-center">
             <ProfileBanner />
+            <!-- Profile Icon -->
+            <div class="w-32 h-32 rounded-full bg-white flex items-center justify-center shadow-lg mb-6 mt-4">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-20 w-20 text-gray-700" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <circle cx="12" cy="8" r="4" stroke-width="2"/>
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M4 20c0-4 4-7 8-7s8 3 8 7" />
+                </svg>
+            </div>
 
-            <div class="p-4">
-                <div class="bg-blue-100 rounded-xl shadow p-4">
-                    <div class="grid grid-cols-2 text-sm">
-                        <div class="font-bold">Sesi</div>
-                        <div>{{ currentSession }}</div>
-                        <div class="font-bold">Semester</div>
-                        <div>{{ currentSemester }}</div>
-                        <div class="font-bold">Tarikh Mula/Tamat</div>
-                        <div>{{ startDate }} / {{ endDate }}</div>
-                    </div>
+            <!-- Info cards (each with drop-shadow and rounded corners) -->
+            <div class="w-full max-w-xs flex flex-col gap-4">
+                <div class="bg-blue-100 rounded-xl shadow p-4 flex justify-between items-center text-lg">
+                    <span class="font-semibold">Sesi</span>
+                    <span>{{ currentSession }}</span>
                 </div>
-
-                <p class="text-xs text-center mt-6">
-                    Jika anda mempunyai sebarang komen atau pertanyaan mengenai
-                    halaman web ini sila hubungi webmaster di
-                    <a href="mailto:ttms@fc.utm.my" class="text-blue-600"
-                        >ttms@fc.utm.my</a
-                    ><br />
-                    Hakcipta Terpelihara © 2002-2025, Fakulti Komputeran, UTM
-                </p>
+                <div class="bg-blue-100 rounded-xl shadow p-4 flex justify-between items-center text-lg">
+                    <span class="font-semibold">Semester</span>
+                    <span>{{ currentSemester }}</span>
+                </div>
+                <div class="bg-blue-100 rounded-xl shadow p-4 flex justify-between items-center text-lg">
+                    <span class="font-semibold">Tarikh Mula/tamat</span>
+                    <span>{{ startDate }} / {{ endDate }}</span>
+                </div>
             </div>
         </main>
     </div>

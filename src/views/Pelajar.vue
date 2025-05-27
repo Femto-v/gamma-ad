@@ -1,6 +1,5 @@
 <script setup>
-import { ref, onMounted } from "vue";
-import SemesterApi from "@/api/SemesterApi";
+import { ref } from "vue";
 import Toggle from "@/components/Toggle.vue";
 import { userInfo, userName, userMatric } from "@/constants/ApiConstants.js";
 
@@ -17,16 +16,32 @@ const kursus = ref("");
 
 // Dummy student data
 const students = ref([
-  { name: "ABDUL RASHEED KHAN BIN YUSOF KHAN", yearCourse: "2/SECJH", faculty: "FSKSM", subjectCount: 0, credit: 0 },
-  { name: "ABDUL RASHEED KHAN BIN YUSOF KHAN", yearCourse: "2/SECJH", faculty: "FSKSM", subjectCount: 3, credit: 3 },
-  { name: "ABDUL RASHEED KHAN BIN YUSOF KHAN", yearCourse: "2/SECJH", faculty: "FSKSM", subjectCount: 5, credit: 5 },
-  { name: "ABDUL RASHEED KHAN BIN YUSOF KHAN", yearCourse: "2/SECJH", faculty: "FSKSM", subjectCount: 4, credit: 4 },
-  // ...more rows as needed
+  {
+    name: "'AISYAH BINTI MOHAMAD SHIRAJUDDIN",
+    yearCourse: "2/SECJH",
+    faculty: "FSKSM",
+    subjectCount: 6,
+    credit: 16,
+  },
+  {
+    name: "ATHARALIKH BAIHAQI MUBARAK",
+    yearCourse: "2/SECJH",
+    faculty: "FSKSM",
+    subjectCount: 6,
+    credit: 16,
+  },
+  {
+    name: "ABDUL RASHEED KHAN BIN YUSOF KHAN",
+    yearCourse: "2/SECJH",
+    faculty: "FSKSM",
+    subjectCount: 6,
+    credit: 16,
+  },
+  // Add more as needed...
 ]);
 
 const searchStudents = () => {
-  // placeholder logic, just keeps all data for now
-  // you can implement actual filtering here
+  // Placeholder logic for demo
   alert(`Search for: ${nama.value}, ${tahun.value}, ${kursus.value}`);
 };
 </script>
@@ -46,37 +61,59 @@ const searchStudents = () => {
     </div>
 
     <!-- Search Form -->
-    <div class="p-4 flex flex-col sm:flex-row flex-wrap items-center gap-4 justify-center text-sm">
-      <input v-model="nama" type="text" placeholder="Nama" class="border px-2 py-1 rounded w-60" />
-      <input v-model="tahun" type="text" placeholder="Tahun" class="border px-2 py-1 rounded w-32" />
-      <input v-model="kursus" type="text" placeholder="Kursus" class="border px-2 py-1 rounded w-48" />
-      <button @click="searchStudents" class="bg-white border border-black rounded px-4 py-1 text-lg">🔍</button>
+    <div class="p-4 flex flex-col gap-2 items-center text-sm max-w-md mx-auto">
+      <div class="flex flex-row gap-2 w-full">
+        <div class="flex-1 flex flex-col">
+          <label class="mb-1 ml-1 text-xs">Nama</label>
+          <input v-model="nama" type="text" class="border px-2 py-1 rounded w-full" />
+        </div>
+      </div>
+      <div class="flex flex-row gap-2 w-full">
+        <div class="flex-1 flex flex-col">
+          <label class="mb-1 ml-1 text-xs">Tahun</label>
+          <input v-model="tahun" type="text" class="border px-2 py-1 rounded w-full" />
+        </div>
+        <div class="flex-1 flex flex-col">
+          <label class="mb-1 ml-1 text-xs">Kursus</label>
+          <input v-model="kursus" type="text" class="border px-2 py-1 rounded w-full" />
+        </div>
+      </div>
+      <button @click="searchStudents" class="mt-2 bg-white border border-black rounded px-6 py-1 text-lg flex items-center justify-center">
+        <span class="mr-1">🔍</span>
+      </button>
     </div>
 
-    <!-- Student Table -->
-    <div class="overflow-x-auto px-4">
-      <table class="w-full border border-black text-sm text-center bg-[#d0e7f7]">
-        <thead class="bg-[#b8d4ea]">
-          <tr>
-            <th class="border border-black px-2 py-1">Bil</th>
-            <th class="border border-black px-2 py-1">Nama</th>
-            <th class="border border-black px-2 py-1">Tahun/Kursus</th>
-            <th class="border border-black px-2 py-1">Fakulti</th>
-            <th class="border border-black px-2 py-1">Bil. Subjek</th>
-            <th class="border border-black px-2 py-1">Jumlah Kredit</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr v-for="(student, index) in students" :key="index">
-            <td class="border border-black px-2 py-1">{{ index + 1 }}</td>
-            <td class="border border-black px-2 py-1">{{ student.name }}</td>
-            <td class="border border-black px-2 py-1">{{ student.yearCourse }}</td>
-            <td class="border border-black px-2 py-1">{{ student.faculty }}</td>
-            <td class="border border-black px-2 py-1">{{ student.subjectCount }}</td>
-            <td class="border border-black px-2 py-1">{{ student.credit }}</td>
-          </tr>
-        </tbody>
-      </table>
+    <!-- Card List -->
+    <div class="flex flex-col gap-4 px-4 py-2">
+      <div
+        v-for="(student, index) in students"
+        :key="index"
+        class="bg-blue-100 rounded-xl shadow p-4 relative"
+      >
+        <button
+          class="absolute top-3 right-3 rounded bg-gray-200 hover:bg-gray-300 p-2"
+          title="Maklumat Jadual"
+        >
+          <!-- Document Icon SVG -->
+          <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <rect x="6" y="3" width="12" height="18" rx="2" stroke-width="2"/>
+            <path d="M9 7h6M9 11h6M9 15h3" stroke-width="2" stroke-linecap="round"/>
+          </svg>
+        </button>
+        <div class="font-semibold text-lg mt-2 mb-1">{{ student.name }}</div>
+        <div class="mb-1 text-base">{{ student.yearCourse }}</div>
+        <div class="flex flex-row flex-wrap items-center justify-between text-gray-700 text-sm">
+          <div>
+            {{ student.faculty }}
+          </div>
+          <div>
+            Bil. Subjek: {{ student.subjectCount }}
+          </div>
+          <div>
+            Total kredit: {{ student.credit }}
+          </div>
+        </div>
+      </div>
     </div>
 
     <!-- Pagination -->

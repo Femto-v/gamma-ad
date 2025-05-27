@@ -1,64 +1,95 @@
 <script setup>
-import { ref, onMounted } from "vue";
-import SemesterApi from "@/api/SemesterApi";
+import { ref, onMounted, computed } from "vue";
 import Toggle from "@/components/Toggle.vue";
+import ProfileBanner from "@/components/ProfileBanner.vue";
+import SemesterApi from "@/api/SemesterApi";
+import SubjekApi from "@/api/SubjekApi";
 import { userInfo, userName, userMatric } from "@/constants/ApiConstants.js";
 
+// Set user info
 const lsData = JSON.parse(localStorage.getItem("web.fc.utm.my_usersession"));
 if (lsData) {
-    userName.value = lsData.full_name;
-    userMatric.value = lsData.login_name;
+  userName.value = lsData.full_name;
+  userMatric.value = lsData.login_name;
 }
 
-// Dummy dropdown filter options
 const selectedKurikulum = ref("Semua");
 const selectedSubject = ref("Semua");
 
-// Dummy subject data
-const subjects = ref([
-  {
-    code: "MAST2023",
-    name: "Data Science Fundamentals",
-    shortCode: "FSKSM",
-    kredit: 3,
-    bilSubjek: 2,
-    drPensyarah: 2,
-    bilPelajar: 60,
-    subjekDanSubseksyen: "D",
-  },
-  {
-    code: "MAST2024",
-    name: "Big Data Analytics",
-    shortCode: "FSKSM",
-    kredit: 3,
-    bilSubjek: 4,
-    drPensyarah: 2,
-    bilPelajar: 70,
-    subjekDanSubseksyen: "D",
-  },
-  // ... more rows as needed
-]);
+const subjectRows = ref([]);
+const error = ref(null);
 
+const semesterApi = new SemesterApi();
+const subjekApi = new SubjekApi();
+
+const currentSession = ref("");
+const currentSemester = ref("");
+
+const itemsPerPage = 10;
+const currentPage = ref(1);
+
+// Fetch and process data
+onMounted(async () => {
+  try {
+    const sessionData = await semesterApi.getCurrentSemesterInfo();
+    if (sessionData.length > 0) {
+      currentSession.value = sessionData[0].sesi;
+      currentSemester.value = sessionData[0].semester;
+
+      const subjectData = await subjekApi.getSubjectSections(currentSession.value, currentSemester.value);
+
+      // Expect subjectData to be array of subjects, each with seksyen_list
+      if (Array.isArray(subjectData)) {
+        subjectRows.value = subjectData.flatMap(subj =>
+          (Array.isArray(subj.seksyen_list) ? subj.seksyen_list : []).map(section => ({
+            code: subj.kod_subjek,
+            name: subj.nama_subjek,
+            shortCode: subj.kod_fakulti ?? "-",
+            kredit: subj.kredit ?? 0,
+            seksyen: section.seksyen,
+            drPensyarah: section.pensyarah,
+            bilPelajar: section.bil_pelajar,
+            bilSeksyen: subj.bil_seksyen ?? (subj.seksyen_list?.length ?? 0),
+            bilPensyarah: subj.bil_pensyarah ?? new Set((subj.seksyen_list ?? []).map(s => s.pensyarah)).size,
+          }))
+        );
+      } else {
+        subjectRows.value = [];
+      }
+    }
+  } catch (err) {
+    error.value = "Gagal mendapatkan data subjek.";
+    console.error("[ERROR] Failed to fetch subject data:", err);
+  }
+});
+
+// Pagination
+const paginatedRows = computed(() => {
+  const start = (currentPage.value - 1) * itemsPerPage;
+  return subjectRows.value.slice(start, start + itemsPerPage);
+});
+
+const pageCount = computed(() => {
+  return Math.ceil(subjectRows.value.length / itemsPerPage) || 1;
+});
+
+function gotoPage(page) {
+  if (page < 1) page = 1;
+  if (page > pageCount.value) page = pageCount.value;
+  currentPage.value = page;
+}
 </script>
 
 <template>
   <div class="bg-gray-100 min-h-screen">
     <Toggle />
 
-    <!-- Main Content -->
     <main>
       <!-- Banner -->
-      <div
-        class="bg-cover bg-center h-60 text-white flex flex-col justify-center items-center"
-        style="background-image: url('/backdropMain.jpg')"
-      >
-        <img src="/UTM-LOGO.png" class="w-16 mb-2" alt="UTM Logo" />
-        <h2 class="text-2xl font-bold drop-shadow-md">Subjek</h2>
-        <p class="drop-shadow-md">{{ userInfo }}</p>
-      </div>
+      <ProfileBanner titleBanner="Subjek" />
 
-      <!-- Filters -->
-      <div class="p-4 flex flex-col sm:flex-row gap-4 justify-start items-center text-sm">
+      <!-- Filters (keep simple for now) -->
+      <div class="flex flex-wrap items-center gap-3 px-4 py-2">
         <div>
           Kurikulum:
           <select v-model="selectedKurikulum" class="ml-1 px-2 py-1 border rounded">
@@ -71,54 +102,70 @@ const subjects = ref([
           Kod/Nama Subjek:
           <select v-model="selectedSubject" class="ml-1 px-2 py-1 border rounded">
             <option value="Semua">Semua</option>
-            <option value="MAST2023">MAST2023</option>
-            <option value="MAST2024">MAST2024</option>
+            <!-- You can auto-fill options if you want -->
           </select>
+        </div>
+        <!-- You may add a search box here if needed -->
+      </div>
+
+      <!-- Card Section -->
+      <div class="flex flex-col gap-4 px-4 py-2">
+        <div
+          v-for="(subject, index) in paginatedRows"
+          :key="(currentPage-1)*itemsPerPage+index"
+          class="bg-blue-100 rounded-xl shadow p-4 relative transition"
+        >
+          <!-- Top Right Action Button -->
+          <button
+            class="absolute top-3 right-3 rounded bg-gray-200 hover:bg-gray-300 p-2"
+            title="Maklumat Jadual"
+          >
+            <!-- Simple document icon SVG -->
+            <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <rect x="6" y="3" width="12" height="18" rx="2" stroke-width="2"/>
+              <path d="M9 7h6M9 11h6M9 15h3" stroke-width="2" stroke-linecap="round"/>
+            </svg>
+          </button>
+          <!-- Main Subject Info -->
+          <div class="font-semibold text-lg">{{ subject.code }}</div>
+          <div class="text-xl font-normal mb-1">{{ subject.name }}</div>
+          <div class="flex justify-between text-gray-700 mb-2 text-sm">
+            <div>{{ subject.shortCode }}</div>
+            <div>kredit: {{ subject.kredit }}</div>
+          </div>
+          <div class="flex gap-4 text-gray-700 text-[15px]">
+            <div>Bil. Seksyen: {{ subject.seksyen ?? '-' }}</div>
+            <div>Bil. Pensyarah: {{ subject.drPensyarah ?? '-' }}</div>
+            <div>Bil. Pelajar: {{ subject.bilPelajar ?? '-' }}</div>
+          </div>
+        </div>
+        <div v-if="!paginatedRows.length && !error" class="text-center text-gray-500 py-8">
+          Tiada data subjek untuk dipaparkan.
+        </div>
+        <div v-if="error" class="text-red-600 text-center py-2">
+          {{ error }}
         </div>
       </div>
 
-      <!-- Subject Table -->
-      <div class="overflow-x-auto px-4">
-        <table class="w-full border border-black text-sm text-center bg-[#d0e7f7]">
-          <thead class="bg-[#b8d4ea]">
-            <tr>
-              <th class="border border-black px-2 py-1">Kod Subjek</th>
-              <th class="border border-black px-2 py-1">Nama Subjek</th>
-              <th class="border border-black px-2 py-1">Kod Fakulti</th>
-              <th class="border border-black px-2 py-1">Kredit</th>
-              <th class="border border-black px-2 py-1">Bil. Subjek</th>
-              <th class="border border-black px-2 py-1">Dr. Pensyarah</th>
-              <th class="border border-black px-2 py-1">Bil. Pelajar</th>
-              <th class="border border-black px-2 py-1">Subjek & Subseksyen</th>
-              <th class="border border-black px-2 py-1">Aksi</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr v-for="(subject, index) in subjects" :key="index">
-              <td class="border border-black px-2 py-1">{{ subject.code }}</td>
-              <td class="border border-black px-2 py-1">{{ subject.name }}</td>
-              <td class="border border-black px-2 py-1">{{ subject.shortCode }}</td>
-              <td class="border border-black px-2 py-1">{{ subject.kredit }}</td>
-              <td class="border border-black px-2 py-1">{{ subject.bilSubjek }}</td>
-              <td class="border border-black px-2 py-1">{{ subject.drPensyarah }}</td>
-              <td class="border border-black px-2 py-1">{{ subject.bilPelajar }}</td>
-              <td class="border border-black px-2 py-1">{{ subject.subjekDanSubseksyen }}</td>
-              <td class="border border-black px-2 py-1">
-                <button class="mr-2 text-blue-600 hover:text-blue-900">📄</button>
-              </td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-
-      <!-- Pagination -->
-      <div class="text-sm flex justify-center py-4 space-x-2">
-        <button>&lt;&lt;</button>
-        <button class="font-bold underline">1</button>
-        <button>2</button>
-        <button>3</button>
-        <button>4</button>
-        <button>&gt;&gt;</button>
+      <!-- Pagination Dropdown -->
+      <div class="text-sm flex justify-center py-4 items-center gap-2">
+        <button @click="gotoPage(1)" :disabled="currentPage === 1">&lt;&lt;</button>
+        <button @click="gotoPage(currentPage - 1)" :disabled="currentPage === 1">&lt;</button>
+          <span>
+            Page
+            <select
+              v-model="currentPage"
+              @change="gotoPage(Number(currentPage))"
+              class="mx-1 px-2 py-1 border rounded"
+            >
+              <option v-for="page in pageCount" :key="page" :value="page">
+                {{ page }}
+              </option>
+            </select>
+            of {{ pageCount }}
+          </span>
+        <button @click="gotoPage(currentPage + 1)" :disabled="currentPage === pageCount">&gt;</button>
+        <button @click="gotoPage(pageCount)" :disabled="currentPage === pageCount">&gt;&gt;</button>
       </div>
     </main>
 
