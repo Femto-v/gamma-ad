@@ -113,7 +113,7 @@ const fetchWithErrorHandler = async (apiCall) => {
         ]"
     >
         <div
-            class="p-4 border-b-1 border-r-1 bg-gradient-to-br from-blue-200 via-blue-300 to-blue-400 flex justify-between items-center"
+            class="p-4 border-b-1 border-r-1 bg-gradient-to-br from-blue-100 via-blue-200 to-blue-500 flex justify-between items-center"
         >
             <h2 class="text-xl font-bold">menu</h2>
             <button @click="toggleSidebar" class="text- xl">&times;</button>

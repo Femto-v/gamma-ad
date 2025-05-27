@@ -99,7 +99,7 @@ const fetchWithErrorHandler = async (apiCall) => {
 <template>
     <!-- header -->
     <header
-        class="border-b-1 fixed top-0 left-0 z-2 w-full bg-gradient-to-br from-blue-100 via-blue-200 to-blue-300 text-black p-4 flex justify-between items-center"
+        class="-translate-y-3 fixed z-2 w-full bg-gradient-to-br from-blue-100 via-blue-200 to-blue-300 text-black p-4 flex justify-between items-center"
     >
         <button @click="toggleSidebar" class="text-xl">&#9776;</button>
         <h1 class="text-xl font-bold">FC Timetable</h1>
@@ -113,7 +113,7 @@ const fetchWithErrorHandler = async (apiCall) => {
         ]"
     >
         <div
-            class="p-4 border-b-1 border-r-1 bg-gradient-to-br from-blue-200 via-blue-300 to-blue-400 flex justify-between items-center"
+            class="p-4 bg-gradient-to-br from-blue-100 via-blue-200 to-blue-300 flex justify-between items-center"
         >
             <h2 class="text-xl font-bold">menu</h2>
             <button @click="toggleSidebar" class="text- xl">&times;</button>
