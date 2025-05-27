@@ -190,7 +190,7 @@ watch(
                         class="flex flex-col items-center cursor-pointer p-2 rounded-lg transition-colors"
                         :class="
                             selectedDay === index
-                                ? 'bg-blue-100'
+                                ? 'bg-purple-100'
                                 : 'hover:bg-gray-100'
                         "
                     >
@@ -201,7 +201,7 @@ watch(
                             class="w-8 h-8 flex items-center justify-center rounded-full text-sm font-medium"
                             :class="
                                 selectedDay === index
-                                    ? 'bg-blue-500 text-white'
+                                    ? 'bg-purple-500 text-white'
                                     : 'text-gray-700'
                             "
                         ></div>
