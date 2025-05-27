@@ -3,67 +3,62 @@ import { ref, onMounted } from "vue";
 import SemesterApi from "@/api/SemesterApi";
 import Toggle from "@/components/Toggle.vue";
 import { userInfo, userName, userMatric } from "@/constants/ApiConstants.js";
-import ProfileBanner from "@/components/ProfileBanner.vue";
 
-// Session data
+// Load user info from session
 const lsData = JSON.parse(localStorage.getItem("web.fc.utm.my_usersession"));
 if (lsData) {
     userName.value = lsData.full_name;
     userMatric.value = lsData.login_name;
 }
 
-// Sample subject data
+// Dummy subject data
 const subjectList = ref([
     {
-        code: "SCSE1013",
+        code: "MCSD1013",
         name: "Business Intelligence and Analytics",
         section: "1",
         lecturer: "NOR ERNE NAZIRA BINTI BAZIN",
-        students: 23,
+        course: "FSKSM",
+        students: 42,
+        faculty: "FSKSM / -",
     },
     {
-        code: "SCSE1013",
+        code: "MCSD1043",
         name: "Research Design and Analysis Data Science",
         section: "1",
         lecturer: "MOHD SHAHAIZAN BIN OTHMAN",
-        students: 30,
+        course: "FSKSM",
+        students: 35,
+        faculty: "FSKSM / -",
     },
     {
-        code: "SCSE1203",
+        code: "MCSD1113",
         name: "Statistic for Data Science",
         section: "1",
         lecturer: "MOHAMAD SHUKOR BIN TALIB",
-        students: 0,
+        course: "FSKSM",
+        students: 40,
+        faculty: "FSKSM / -",
     },
-    {
-        code: "SCSE1203",
-        name: "Big Data Management",
-        section: "1",
-        lecturer: "NOR AZIZAH BT. ALI",
-        students: 34,
-    },
-    {
-        code: "SCSE1203",
-        name: "Big Data Management",
-        section: "1",
-        lecturer: "NOORFA HASZLINNA BT. MUSTAFFA",
-        students: 25,
-    },
-    {
-        code: "SCSE1224",
-        name: "Advanced Analytics for Data Science",
-        section: "1",
-        lecturer: "NOR HAIZAN BT. MOHAMED RADZI",
-        students: 0,
-    },
-    // Add more if needed
+    // Add more as needed
 ]);
 
-// Handle click
-const showStudentDetails = (subject) => {
-    alert(
-        `Show details for ${subject.code} - ${subject.name}\nBil. Pelajar: ${subject.students}`
-    );
+// Store selected subject codes
+const selectedSubjects = ref([]);
+
+const toggleSelect = (code) => {
+    if (selectedSubjects.value.includes(code)) {
+        selectedSubjects.value = selectedSubjects.value.filter(
+            (c) => c !== code
+        );
+    } else {
+        selectedSubjects.value.push(code);
+    }
+};
+
+const submitAnalysis = () => {
+    console.log("Selected Subjects:", selectedSubjects.value);
+    alert("Analisis dihantar untuk: " + selectedSubjects.value.join(", "));
 };
 </script>
 
@@ -74,9 +69,9 @@ const showStudentDetails = (subject) => {
         <!-- Main Content -->
         <main>
             <!-- Header -->
-            <ProfileBanner titleBanner="Analysis Pelajar" />
+            <ProfileBanner titleBanner="Analysis Subjek" />
 
-            <!-- Table -->
+            <!-- Table Section -->
             <div class="overflow-x-auto px-4 py-4">
                 <table
                     class="w-full border border-black text-sm text-center bg-[#d0e7f7]"
@@ -97,7 +92,16 @@ const showStudentDetails = (subject) => {
                                 Pensyarah
                             </th>
                             <th class="border border-black px-2 py-1">
+                                Kursus
+                            </th>
+                            <th class="border border-black px-2 py-1">
                                 Bil. Pelajar
+                            </th>
+                            <th class="border border-black px-2 py-1">
+                                Fakulti (Pelajar)
+                            </th>
+                            <th class="border border-black px-2 py-1">
+                                Pilih Item
                             </th>
                         </tr>
                     </thead>
@@ -122,13 +126,23 @@ const showStudentDetails = (subject) => {
                                 {{ subject.lecturer }}
                             </td>
                             <td class="border border-black px-2 py-1">
-                                <a
-                                    href="#"
-                                    @click.prevent="showStudentDetails(subject)"
-                                    class="text-blue-600 underline hover:text-blue-800"
-                                >
-                                    {{ subject.students }}
-                                </a>
+                                {{ subject.course }}
+                            </td>
+                            <td class="border border-black px-2 py-1">
+                                {{ subject.students }}
+                            </td>
+                            <td class="border border-black px-2 py-1">
+                                {{ subject.faculty }}
+                            </td>
+                            <td class="border border-black px-2 py-1">
+                                <input
+                                    type="checkbox"
+                                    :value="subject.code"
+                                    :checked="
+                                        selectedSubjects.includes(subject.code)
+                                    "
+                                    @change="toggleSelect(subject.code)"
+                                />
                             </td>
                         </tr>
                     </tbody>
@@ -143,6 +157,16 @@ const showStudentDetails = (subject) => {
                 <button>3</button>
                 <button>4</button>
                 <button>&gt;&gt;</button>
+            </div>
+
+            <!-- Submit Button -->
+            <div class="text-center mb-8">
+                <button
+                    @click="submitAnalysis"
+                    class="bg-blue-800 text-white text-lg font-bold py-2 px-8 rounded-lg hover:bg-blue-900"
+                >
+                    Hantar
+                </button>
             </div>
         </main>
 

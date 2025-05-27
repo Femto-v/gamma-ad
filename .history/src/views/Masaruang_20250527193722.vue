@@ -3,7 +3,6 @@ import { ref, onMounted } from "vue";
 import SemesterApi from "@/api/SemesterApi";
 import Toggle from "@/components/Toggle.vue";
 import { userInfo, userName, userMatric } from "@/constants/ApiConstants.js";
-import ProfileBanner from "@/components/ProfileBanner.vue";
 
 const lsData = JSON.parse(localStorage.getItem("web.fc.utm.my_usersession"));
 if (lsData) {

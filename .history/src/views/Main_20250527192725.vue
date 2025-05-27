@@ -38,8 +38,7 @@ onMounted(async () => {
     <div class="bg-gray-100 min-h-screen">
         <Toggle />
         <!-- Main content -->
-        <!-- Main card content, vertically centered -->
-        <ProfileBanner />
+        <!-- Main card content, vertically centered --><ProfileBanner />
         <main class="flex-1 flex flex-col items-center justify-center">
             <!-- Profile Icon -->
             <div

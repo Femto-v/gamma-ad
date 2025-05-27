@@ -3,63 +3,65 @@ import { ref, onMounted } from "vue";
 import SemesterApi from "@/api/SemesterApi";
 import Toggle from "@/components/Toggle.vue";
 import { userInfo, userName, userMatric } from "@/constants/ApiConstants.js";
-import ProfileBanner from "@/components/ProfileBanner.vue";
 
-// User info from session
+// Session-based user info
 const lsData = JSON.parse(localStorage.getItem("web.fc.utm.my_usersession"));
 if (lsData) {
     userName.value = lsData.full_name;
     userMatric.value = lsData.login_name;
 }
 
-// Dummy data for student clash
-const clashList = ref([
+// Dummy lecturer clash data
+const lecturerClashes = ref([
     {
-        name: "ABDUL RASYID BIN ABD GANI @ GHANI",
-        yearCourse: "1SECBH",
-        faculty: "FC",
-        subjectCount: 6,
+        name: "AHMAD FARIZ BIN ALI",
+        sections: 5,
         conflicts: [
-            "SECJ1023-1:SECJ1113-1 (Fri 10am-11am)",
-            "SECJ1023-1:SECJ1113-1 (Fri 11am-12pm)",
-        ],
-        suggestions: 3,
-    },
-    {
-        name: "ADAM AZHAR BIN NOR ADHA",
-        yearCourse: "3SECVH",
-        faculty: "FSKSM",
-        subjectCount: 6,
-        conflicts: [
-            "SECV4543-2:SECV3123-1 (Thu 4pm-5pm)",
-            "SECV4543-2:SECV3123-1 (Thu 2pm-3pm)",
-            "SECV4543-2:SECV3123-1 (Thu 2pm-4pm)",
-        ],
-        suggestions: 1,
-    },
-    {
-        name: "AFINA SOLEHA BATRISYA BINTI MOHD HISAFUDIN",
-        yearCourse: "1SECBH",
-        faculty: "FC",
-        subjectCount: 6,
-        conflicts: [
-            "SECJ1113-1:SECJ1023-1 (Fri 10am-11am)",
-            "SECJ1113-1:SECJ1023-1 (Fri 11am-12pm)",
-        ],
-        suggestions: 3,
-    },
-    {
-        name: "ALI MOHAMED FATHY ABDELKADER ELBERMAWY",
-        yearCourse: "3SECJH",
-        faculty: "FSKSM",
-        subjectCount: 7,
-        conflicts: [
-            "SECJ1033-10:SECJ3032-1 (Mon 8am-9am)",
-            "SECJ1033-10:SECJ3032-1 (Mon 9am-10am)",
+            "SECR1013-2:SCSR1013-1 (Wed 2pm-3pm)",
+            "SECR1013-2:SCSR1013-3 (Mon 8am-9am)",
+            "SECR1013-2:SCSR1013-2 (Mon 9am-10am)",
+            "SCSR1033-4:SCSR1033-3 (Tue 12pm-1pm)",
+            "SCSR1033-4:SCSR1033-3 (Wed 9am-10am)",
         ],
         suggestions: 0,
     },
-    // More dummy rows as needed...
+    {
+        name: "CHAN WENG HOWE",
+        sections: 4,
+        conflicts: [
+            "MCST1103-1:MCSD2123-1 (Mon 4pm-5pm)",
+            "MCST1103-1:MCSD2123-1 (Mon 2pm-3pm)",
+        ],
+        suggestions: 0,
+    },
+    {
+        name: "FARKHANA BINTI MUCHTAR",
+        sections: 3,
+        conflicts: [
+            "SECR2043-9:SECR2043-7 (Tue 8am-9am)",
+            "SECR2043-9:SECR2043-8 (Thu 11am-12pm)",
+            "SECR2043-9:SECR2043-8 (Thu 12pm-1pm)",
+        ],
+        suggestions: 7,
+    },
+    {
+        name: "ABDUL RASHEED KHAN BIN YUSOF KHAN",
+        sections: 4,
+        conflicts: [
+            "MCSD1123-1:MCST1033-1 (Wed 10am-11am)",
+            "MCSD1123-1:MCST1033-1 (Wed 12pm-1pm)",
+        ],
+        suggestions: 0,
+    },
+    {
+        name: "ABDUL RASHEED KHAN BIN YUSOF KHAN",
+        sections: 3,
+        conflicts: [
+            "SCST1223-5:SCST1223-4 (Wed 11am-12pm)",
+            "SCST1223-5:SCST1223-4 (Wed 12pm-1pm)",
+        ],
+        suggestions: 1,
+    },
 ]);
 </script>
 
@@ -67,9 +69,9 @@ const clashList = ref([
     <div class="bg-gray-100 min-h-screen">
         <Toggle />
 
-        <!-- Banner -->
+        <!-- Header Banner -->
         <main>
-            <ProfileBanner titleBanner="Clash Pelajar" />
+            <ProfileBanner titleBanner="Clash Pensyarah" />
 
             <!-- Clash Table -->
             <div class="overflow-x-auto px-4 py-4">
@@ -81,13 +83,7 @@ const clashList = ref([
                             <th class="border border-black px-2 py-1">Bil</th>
                             <th class="border border-black px-2 py-1">Nama</th>
                             <th class="border border-black px-2 py-1">
-                                Tahun / Kursus
-                            </th>
-                            <th class="border border-black px-2 py-1">
-                                Fakulti
-                            </th>
-                            <th class="border border-black px-2 py-1">
-                                Bil. Subjek
+                                Bil Seksyen
                             </th>
                             <th class="border border-black px-2 py-1">
                                 Pertindihan Jadual
@@ -98,40 +94,33 @@ const clashList = ref([
                         </tr>
                     </thead>
                     <tbody>
-                        <tr v-for="(student, index) in clashList" :key="index">
+                        <tr
+                            v-for="(lecturer, index) in lecturerClashes"
+                            :key="index"
+                        >
                             <td class="border border-black px-2 py-1">
                                 {{ index + 1 }}
                             </td>
                             <td class="border border-black px-2 py-1">
-                                {{ student.name }}
+                                {{ lecturer.name }}
                             </td>
                             <td class="border border-black px-2 py-1">
-                                {{ student.yearCourse }}
+                                {{ lecturer.sections }}
                             </td>
-                            <td class="border border-black px-2 py-1">
-                                {{ student.faculty }}
-                            </td>
-                            <td class="border border-black px-2 py-1">
-                                {{ student.subjectCount }}
-                            </td>
-                            <td
-                                class="border border-black px-2 py-1 text-left px-2 py-1"
-                            >
-                                <ul class="list-disc list-inside">
+                            <td class="border border-black px-2 py-1 text-left">
+                                <ul class="list-disc list-inside text-sm">
                                     <li
-                                        v-for="(
-                                            conflict, i
-                                        ) in student.conflicts"
+                                        v-for="(clash, i) in lecturer.conflicts"
                                         :key="i"
                                     >
-                                        {{ conflict }}
+                                        {{ clash }}
                                     </li>
                                 </ul>
                             </td>
                             <td
                                 class="border border-black px-2 py-1 font-semibold"
                             >
-                                {{ student.suggestions }}
+                                {{ lecturer.suggestions }}
                             </td>
                         </tr>
                     </tbody>
