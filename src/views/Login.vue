@@ -3,8 +3,8 @@ console.log("Login Loaded . . . ");
 import { ref } from "vue";
 import AuthApi from "@/api/AuthApi";
 
-const login = ref("A16CS4016");
-const password = ref("201608M10112");
+const login = ref("");
+const password = ref("");
 const sessionId = ref("");
 const isLoading = ref(false);
 
@@ -80,6 +80,7 @@ const handleLogin = async () => {
                     <div class="relative group">
                         <input
                             type="text"
+                            v-model="login"
                             class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-utm-red input-glow transition-all duration-300 bg-white/80 backdrop-blur-sm group-focus-within:scale-105"
                             placeholder="Enter your username"
                         />
@@ -98,6 +99,7 @@ const handleLogin = async () => {
                     <div class="relative group">
                         <input
                             type="password"
+                            v-model="password"
                             class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-utm-red input-glow transition-all duration-300 bg-white/80 backdrop-blur-sm group-focus-within:scale-105"
                             placeholder="Enter your password"
                         />
