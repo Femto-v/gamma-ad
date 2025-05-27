@@ -128,22 +128,14 @@ const fetchWithErrorHandler = async (apiCall) => {
                 href="#"
                 @click.prevent="loadTimetable"
                 class="py-2 text-gray-800 hover:bg-blue-100 rounded flex gap-3 items-center"
-                ><AppIcon name="timetable" class="w-5 h-5 text-blue-600" />
-                <p>Timetable</p></a
+                >Jadual Waktu</a
             >
             <div class="relative">
                 <button
                     @click="analysisOpen = !analysisOpen"
                     class="py-2 w-full text-left text-gray-800 hover:bg-blue-100 rounded flex justify-between items-center"
                 >
-                    <span
-                        class="text-gray-800 hover:bg-blue-100 rounded flex gap-3 items-center"
-                        ><AppIcon
-                            name="analysis"
-                            class="w-5 h-5 text-blue-600"
-                        />
-                        <p>Analysis</p></span
-                    >
+                    <span>Analysis</span>
                     <span v-if="!analysisOpen">▼</span>
                     <span v-else>▲</span>
                 </button>
@@ -193,44 +185,38 @@ const fetchWithErrorHandler = async (apiCall) => {
             <a
                 href="#"
                 @click.prevent="loadRuang"
-                class="py-2 text-gray-800 hover:bg-blue-100 rounded flex gap-3 items-center"
-                ><AppIcon name="ruang" class="w-5 h-5 text-blue-600" />
-                <p>Venue</p></a
+                class="py-2 text-gray-800 hover:bg-blue-100 rounded"
+                >Ruang</a
             >
             <a
                 href="#"
                 @click.prevent="loadSubjek"
-                class="py-2 text-gray-800 hover:bg-blue-100 rounded flex gap-3 items-center"
-                ><AppIcon name="subjek" class="w-5 h-5 text-blue-600" />
-                <p>Subject</p></a
+                class="py-2 text-gray-800 hover:bg-blue-100 rounded"
+                >Subjek</a
             >
             <a
                 href="#"
                 @click.prevent="loadPensyarah"
-                class="py-2 text-gray-800 hover:bg-blue-100 rounded flex gap-3 items-center"
-                ><AppIcon name="lecturer" class="w-5 h-5 text-blue-600" />
-                <p>Lecturer</p></a
+                class="py-2 text-gray-800 hover:bg-blue-100 rounded"
+                >Pensyarah</a
             >
             <a
                 href="#"
                 @click.prevent="loadPelajar"
-                class="py-2 text-gray-800 hover:bg-blue-100 rounded flex gap-3 items-center"
-                ><AppIcon name="student" class="w-5 h-5 text-blue-600" />
-                <p>Pelajar</p></a
+                class="py-2 text-gray-800 hover:bg-blue-100 rounded"
+                >Pelajar</a
             >
             <a
                 href="#"
                 @click.prevent="loadKurikulum"
-                class="py-2 text-gray-800 hover:bg-blue-100 rounded flex gap-3 items-center"
-                ><AppIcon name="curriculum" class="w-5 h-5 text-blue-600" />
-                <p>Curriculum</p></a
+                class="py-2 text-gray-800 hover:bg-blue-100 rounded"
+                >Kurikulum</a
             >
             <a
                 href="#"
                 @click="logout"
-                class="py-2 text-gray-800 hover:bg-blue-100 rounded flex gap-3 items-center"
-                ><AppIcon name="logout" class="w-5 h-5 text-blue-600" />
-                <p>Logout</p></a
+                class="py-2 text-red-600 hover:bg-red-100 rounded"
+                >Logout</a
             >
         </nav>
     </div>

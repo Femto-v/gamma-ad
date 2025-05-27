@@ -137,7 +137,6 @@ const fetchWithErrorHandler = async (apiCall) => {
                     class="py-2 w-full text-left text-gray-800 hover:bg-blue-100 rounded flex justify-between items-center"
                 >
                     <span
-                        class="text-gray-800 hover:bg-blue-100 rounded flex gap-3 items-center"
                         ><AppIcon
                             name="analysis"
                             class="w-5 h-5 text-blue-600"
