@@ -62,17 +62,6 @@ const handleLogin = async () => {
                     />
                 </div>
             </div>
-            
-            <!-- University Header -->
-            <div class="mb-6">
-                <h1 class="text-4xl font-bold text-utm-red tracking-wider mb-2 drop-shadow-sm">
-                    UTM
-                </h1>
-                <p class="text-utm-red/80 font-semibold text-sm tracking-wide uppercase">
-                    Universiti Teknologi Malaysia
-                </p>
-                <div class="w-24 h-1 bg-gradient-to-r from-utm-red to-utm-gold mx-auto mt-3 rounded-full"></div>
-            </div>
 
             <!-- System Title -->
             <div class="mb-6">
