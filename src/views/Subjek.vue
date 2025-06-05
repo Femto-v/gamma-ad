@@ -1,5 +1,5 @@
 <script setup>
-import { ref, onMounted, computed } from "vue";
+import { ref, onMounted, computed, nextTick, watch } from "vue";
 import Toggle from "@/components/Toggle.vue";
 import ProfileBanner from "@/components/ProfileBanner.vue";
 import SemesterApi from "@/api/SemesterApi";
@@ -15,7 +15,6 @@ if (lsData) {
 
 const selectedKurikulum = ref("Semua");
 const selectedSubject = ref("Semua");
-
 const subjectRows = ref([]);
 const error = ref(null);
 
@@ -25,10 +24,23 @@ const subjekApi = new SubjekApi();
 const currentSession = ref("");
 const currentSemester = ref("");
 
-const itemsPerPage = 10;
-const currentPage = ref(1);
+// Search and infinite scroll
+const searchTerm = ref("");
+const loadCount = ref(20); // Number of items to load
+const loadingMore = ref(false);
 
-// Fetch and process data
+// Extracted subject codes/names for dropdown filter
+const subjectOptions = computed(() => {
+  const set = new Set();
+  subjectRows.value.forEach((row) => {
+    // Use either code or "code - name" for display
+    if (row.code && row.name) set.add(`${row.code} - ${row.name}`);
+    else if (row.code) set.add(row.code);
+    else if (row.name) set.add(row.name);
+  });
+  return ["Semua", ...Array.from(set)];
+});
+
 onMounted(async () => {
   try {
     const sessionData = await semesterApi.getCurrentSemesterInfo();
@@ -38,7 +50,6 @@ onMounted(async () => {
 
       const subjectData = await subjekApi.getSubjectSections(currentSession.value, currentSemester.value);
 
-      // Expect subjectData to be array of subjects, each with seksyen_list
       if (Array.isArray(subjectData)) {
         subjectRows.value = subjectData.flatMap(subj =>
           (Array.isArray(subj.seksyen_list) ? subj.seksyen_list : []).map(section => ({
@@ -57,27 +68,63 @@ onMounted(async () => {
         subjectRows.value = [];
       }
     }
+    nextTick(() => {
+      const scroller = document.getElementById("subjek-scroll-list");
+      if (scroller) scroller.addEventListener("scroll", handleScroll);
+    });
   } catch (err) {
     error.value = "Gagal mendapatkan data subjek.";
     console.error("[ERROR] Failed to fetch subject data:", err);
   }
 });
 
-// Pagination
-const paginatedRows = computed(() => {
-  const start = (currentPage.value - 1) * itemsPerPage;
-  return subjectRows.value.slice(start, start + itemsPerPage);
+// Filtering logic (Kod/Nama Subjek and search)
+const filteredSubjects = computed(() => {
+  let arr = subjectRows.value;
+  // Kod/Nama Subjek filter
+  if (selectedSubject.value && selectedSubject.value !== "Semua") {
+    // The dropdown entry is in format "CODE - NAME"
+    const [filterCode] = selectedSubject.value.split(" - ");
+    arr = arr.filter(row => row.code === filterCode);
+  }
+  // Search filter
+  const q = searchTerm.value.trim().toLowerCase();
+  if (!q) return arr;
+  return arr.filter(
+    (s) =>
+      (s.code && s.code.toLowerCase().includes(q)) ||
+      (s.name && s.name.toLowerCase().includes(q)) ||
+      (s.shortCode && s.shortCode.toLowerCase().includes(q)) ||
+      (s.seksyen && String(s.seksyen).toLowerCase().includes(q)) ||
+      (s.drPensyarah && s.drPensyarah.toLowerCase().includes(q))
+  );
 });
 
-const pageCount = computed(() => {
-  return Math.ceil(subjectRows.value.length / itemsPerPage) || 1;
-});
+// Only display up to loadCount at a time
+const visibleSubjects = computed(() => filteredSubjects.value.slice(0, loadCount.value));
 
-function gotoPage(page) {
-  if (page < 1) page = 1;
-  if (page > pageCount.value) page = pageCount.value;
-  currentPage.value = page;
+// Infinite scroll handler
+function handleScroll() {
+  const scroller = document.getElementById("subjek-scroll-list");
+  if (!scroller) return;
+  if (
+    scroller.scrollTop + scroller.clientHeight >= scroller.scrollHeight - 50 &&
+    !loadingMore.value
+  ) {
+    if (loadCount.value < filteredSubjects.value.length) {
+      loadingMore.value = true;
+      setTimeout(() => {
+        loadCount.value += 20;
+        loadingMore.value = false;
+      }, 250);
+    }
+  }
 }
+
+// Reset scroll when filter/search changes
+watch([searchTerm, selectedSubject, subjectRows], () => {
+  loadCount.value = 20;
+});
 </script>
 
 <template>
@@ -85,11 +132,28 @@ function gotoPage(page) {
     <Toggle />
 
     <main>
-      <!-- Banner -->
       <ProfileBanner titleBanner="Subjek" />
 
-      <!-- Filters (keep simple for now) -->
-      <div class="flex flex-wrap items-center gap-3 px-4 py-2">
+      <!-- Search Bar -->
+      <div class="flex flex-col items-center">
+        <div class="w-full max-w-lg relative z-10 px-4 -mt-10 mb-4">
+          <div class="flex items-center bg-white rounded-2xl shadow px-4 py-2 border border-gray-300">
+            <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 mr-2 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <circle cx="11" cy="11" r="8" stroke="currentColor" stroke-width="2" fill="none"/>
+              <line x1="21" y1="21" x2="16.65" y2="16.65" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+            </svg>
+            <input
+              v-model="searchTerm"
+              type="text"
+              placeholder="Search"
+              class="w-full outline-none border-0 bg-transparent text-base"
+            />
+          </div>
+        </div>
+      </div>
+
+      <!-- Filters -->
+      <div class="flex flex-wrap items-center gap-3 px-4 pb-2 justify-center">
         <div>
           Kurikulum:
           <select v-model="selectedKurikulum" class="ml-1 px-2 py-1 border rounded">
@@ -101,71 +165,50 @@ function gotoPage(page) {
         <div>
           Kod/Nama Subjek:
           <select v-model="selectedSubject" class="ml-1 px-2 py-1 border rounded">
-            <option value="Semua">Semua</option>
-            <!-- You can auto-fill options if you want -->
+            <option v-for="(option, i) in subjectOptions" :key="i" :value="option">{{ option }}</option>
           </select>
         </div>
-        <!-- You may add a search box here if needed -->
       </div>
 
-      <!-- Card Section -->
-      <div class="flex flex-col gap-4 px-4 py-2">
+      <!-- Card List (Infinite Scroll Area) -->
+      <div class="flex flex-col items-center">
         <div
-          v-for="(subject, index) in paginatedRows"
-          :key="(currentPage-1)*itemsPerPage+index"
-          class="bg-blue-100 rounded-xl shadow p-4 relative transition"
+          id="subjek-scroll-list"
+          class="flex flex-col gap-4 px-4 py-2 max-w-lg w-full mx-auto overflow-y-auto"
+          style="max-height: 65vh;"
+          @scroll="handleScroll"
         >
-          <!-- Top Right Action Button -->
-          <button
-            class="absolute top-3 right-3 rounded bg-gray-200 hover:bg-gray-300 p-2"
-            title="Maklumat Jadual"
+          <div
+            v-for="(subject, index) in visibleSubjects"
+            :key="index"
+            class="bg-blue-100 rounded-xl shadow p-4 relative transition"
           >
-            <!-- Simple document icon SVG -->
-            <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <rect x="6" y="3" width="12" height="18" rx="2" stroke-width="2"/>
-              <path d="M9 7h6M9 11h6M9 15h3" stroke-width="2" stroke-linecap="round"/>
-            </svg>
-          </button>
-          <!-- Main Subject Info -->
-          <div class="font-semibold text-lg">{{ subject.code }}</div>
-          <div class="text-xl font-normal mb-1">{{ subject.name }}</div>
-          <div class="flex justify-between text-gray-700 mb-2 text-sm">
-            <div>{{ subject.shortCode }}</div>
-            <div>kredit: {{ subject.kredit }}</div>
-          </div>
-          <div class="flex gap-4 text-gray-700 text-[15px]">
-            <div>Bil. Seksyen: {{ subject.seksyen ?? '-' }}</div>
-            <div>Bil. Pensyarah: {{ subject.drPensyarah ?? '-' }}</div>
-            <div>Bil. Pelajar: {{ subject.bilPelajar ?? '-' }}</div>
-          </div>
-        </div>
-        <div v-if="!paginatedRows.length && !error" class="text-center text-gray-500 py-8">
-          Tiada data subjek untuk dipaparkan.
-        </div>
-        <div v-if="error" class="text-red-600 text-center py-2">
-          {{ error }}
-        </div>
-      </div>
-
-      <!-- Pagination Dropdown -->
-      <div class="text-sm flex justify-center py-4 items-center gap-2">
-        <button @click="gotoPage(1)" :disabled="currentPage === 1">&lt;&lt;</button>
-        <button @click="gotoPage(currentPage - 1)" :disabled="currentPage === 1">&lt;</button>
-          <span>
-            Page
-            <select
-              v-model="currentPage"
-              @change="gotoPage(Number(currentPage))"
-              class="mx-1 px-2 py-1 border rounded"
+            <!-- Top Right Action Button -->
+            <button
+              class="absolute top-3 right-3 rounded bg-gray-200 hover:bg-gray-300 p-2"
+              title="Maklumat Jadual"
             >
-              <option v-for="page in pageCount" :key="page" :value="page">
-                {{ page }}
-              </option>
-            </select>
-            of {{ pageCount }}
-          </span>
-        <button @click="gotoPage(currentPage + 1)" :disabled="currentPage === pageCount">&gt;</button>
-        <button @click="gotoPage(pageCount)" :disabled="currentPage === pageCount">&gt;&gt;</button>
+              <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <rect x="6" y="3" width="12" height="18" rx="2" stroke-width="2"/>
+                <path d="M9 7h6M9 11h6M9 15h3" stroke-width="2" stroke-linecap="round"/>
+              </svg>
+            </button>
+            <div class="font-semibold text-lg">{{ subject.code }}</div>
+            <div class="text-xl font-normal mb-1">{{ subject.name }}</div>
+            <div class="flex justify-between text-gray-700 mb-2 text-sm">
+              <div>{{ subject.shortCode }}</div>
+              <div>kredit: {{ subject.kredit }}</div>
+            </div>
+            <div class="flex gap-4 text-gray-700 text-[15px]">
+              <div>Bil. Seksyen: {{ subject.seksyen ?? '-' }}</div>
+              <div>Bil. Pensyarah: {{ subject.drPensyarah ?? '-' }}</div>
+              <div>Bil. Pelajar: {{ subject.bilPelajar ?? '-' }}</div>
+            </div>
+          </div>
+          <div v-if="loadingMore" class="py-2 text-center text-gray-400 text-sm">Loading more...</div>
+          <div v-if="!visibleSubjects.length && !error" class="py-10 text-center text-gray-400 text-base">Tiada subjek dijumpai.</div>
+          <div v-if="error" class="py-10 text-center text-red-500 text-base">{{ error }}</div>
+        </div>
       </div>
     </main>
 

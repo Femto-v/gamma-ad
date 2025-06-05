@@ -58,6 +58,24 @@ const curricula = ref([
         <!-- Banner -->
         <ProfileBanner titleBanner="Kurikulum" />
 
+        <!-- Search Bar -->
+        <div class="flex flex-col items-center">
+            <div class="w-full max-w-lg relative z-10 px-4 -mt-10 mb-4">
+                <div class="flex items-center bg-white rounded-2xl shadow px-4 py-2 border border-gray-300">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 mr-2 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <circle cx="11" cy="11" r="8" stroke="currentColor" stroke-width="2" fill="none"/>
+                        <line x1="21" y1="21" x2="16.65" y2="16.65" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                    </svg>
+                    <input
+                    v-model="searchTerm"
+                    type="text"
+                    placeholder="Search"
+                    class="w-full outline-none border-0 bg-transparent text-base"
+                    />
+                </div>
+            </div>
+        </div>
+
         <!-- Card List -->
         <div class="flex flex-col gap-4 px-4 py-2">
             <div
