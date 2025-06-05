@@ -3,6 +3,7 @@ import { ref } from "vue";
 import Toggle from "@/components/Toggle.vue";
 import { userInfo, userName, userMatric } from "@/constants/ApiConstants.js";
 import ProfileBanner from "@/components/ProfileBanner.vue";
+import Footer from "@/components/Footer.vue";
 
 const lsData = JSON.parse(localStorage.getItem("web.fc.utm.my_usersession"));
 if (lsData) {
@@ -116,14 +117,14 @@ const curricula = ref([
                     {{ item.name }}
                 </div>
                 <div class="mb-1 text-base">
-                    <span class="font-light">Maklumat Mula Kemasukan:</span>
+                    <span class="font-light">Admission Start Information:</span>
                 </div>
                 <div
                     class="flex flex-row flex-wrap items-center gap-x-6 text-gray-700 text-sm mb-1"
                 >
-                    <div>Sesi: {{ item.sesi }}</div>
+                    <div>Session: {{ item.sesi }}</div>
                     <div>Semester: {{ item.semester }}</div>
-                    <div>Tahun: {{ item.tahun }}</div>
+                    <div>Year: {{ item.tahun }}</div>
                 </div>
                 <!-- You can add teras/elektif/jumlah below if you want -->
                 <!--
@@ -145,15 +146,6 @@ const curricula = ref([
             <span>4</span>
             <span>&gt;&gt;</span>
         </div>
-
-        <!-- Footer -->
-        <p class="text-xs text-center px-4 pb-6">
-            Jika anda mempunyai sebarang komen atau pertanyaan mengenai halaman
-            web ini sila hubungi webmaster di
-            <a href="mailto:ttms@fc.utm.my" class="text-blue-600"
-                >ttms@fc.utm.my</a
-            ><br />
-            Hakcipta Terpelihara © 2002-2025, Fakulti Komputeran, UTM
-        </p>
+        <Footer />
     </div>
 </template>

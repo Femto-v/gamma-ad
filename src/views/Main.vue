@@ -5,6 +5,7 @@ import Toggle from "@/components/Toggle.vue";
 import SemesterApi from "@/api/SemesterApi";
 import PelajarSubjekApi from "@/api/PelajarSubjekApi";
 import ProfileBanner from "@/components/ProfileBanner.vue";
+import Footer from "@/components/Footer.vue"
 import {
     currentSession,
     currentSemester,
@@ -215,5 +216,6 @@ onMounted(async () => {
                 </div>
             </div>
         </main>
+        <Footer />
     </div>
 </template>

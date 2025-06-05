@@ -4,6 +4,7 @@ import SemesterApi from "@/api/SemesterApi";
 import Toggle from "@/components/Toggle.vue";
 import { userInfo, userName, userMatric } from "@/constants/ApiConstants.js";
 import ProfileBanner from "@/components/ProfileBanner.vue";
+import Footer from "@/components/Footer.vue";
 
 const lsData = JSON.parse(localStorage.getItem("web.fc.utm.my_usersession"));
 if (lsData) {
@@ -12,8 +13,8 @@ if (lsData) {
 }
 
 // Days and time slots
-const days = ["Ahad", "Isnin", "Selasa", "Rabu", "Khamis", "Jumaat", "Sabtu"];
-const selectedDay = ref("Ahad");
+const days = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+const selectedDay = ref("Sunday");
 
 const timeSlots = [
     "07:00 AM - 07:50 AM",
@@ -56,7 +57,7 @@ const handleSubmit = () => {
 
         <main>
             <!-- Banner -->
-            <ProfileBanner titleBanner="Analysis Masa & Ruang" />
+            <ProfileBanner titleBanner="Time & Venue Analysis" />
 
             <!-- Selection Table -->
             <div class="p-4">
@@ -67,16 +68,16 @@ const handleSubmit = () => {
                         <thead>
                             <tr>
                                 <th class="border border-black px-2 py-1">
-                                    Hari
+                                    Day
                                 </th>
                                 <th class="border border-black px-2 py-1">
-                                    Masa
+                                    Num
                                 </th>
                                 <th class="border border-black px-2 py-1">
-                                    Waktu
+                                    Time
                                 </th>
                                 <th class="border border-black px-2 py-1">
-                                    Tarikh
+                                    Date
                                 </th>
                             </tr>
                         </thead>
@@ -182,20 +183,11 @@ const handleSubmit = () => {
                         @click="handleSubmit"
                         class="bg-blue-800 text-white text-lg font-bold py-2 px-8 rounded-lg hover:bg-blue-900"
                     >
-                        Hantar
+                        Send
                     </button>
                 </div>
             </div>
         </main>
-
-        <!-- Footer -->
-        <p class="text-xs text-center px-4 pb-6">
-            Jika anda mempunyai sebarang komen atau pertanyaan mengenai halaman
-            web ini sila hubungi webmaster di
-            <a href="mailto:ttms@fc.utm.my" class="text-blue-600"
-                >ttms@fc.utm.my</a
-            ><br />
-            Hakcipta Terpelihara © 2002-2025, Fakulti Komputeran, UTM
-        </p>
+        <Footer />
     </div>
 </template>

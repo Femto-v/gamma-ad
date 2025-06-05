@@ -4,6 +4,7 @@ import SemesterApi from "@/api/SemesterApi";
 import Toggle from "@/components/Toggle.vue";
 import { userInfo, userName, userMatric } from "@/constants/ApiConstants.js";
 import ProfileBanner from "@/components/ProfileBanner.vue";
+import Footer from "@/components/Footer.vue";
 
 // Session data
 const lsData = JSON.parse(localStorage.getItem("web.fc.utm.my_usersession"));
@@ -74,7 +75,7 @@ const showStudentDetails = (subject) => {
         <!-- Main Content -->
         <main>
             <!-- Header -->
-            <ProfileBanner titleBanner="Analysis Pelajar" />
+            <ProfileBanner titleBanner="Student Analysis" />
 
             <!-- Table -->
             <div class="overflow-x-auto px-4 py-4">
@@ -85,19 +86,19 @@ const showStudentDetails = (subject) => {
                         <tr>
                             <th class="border border-black px-2 py-1">Bil</th>
                             <th class="border border-black px-2 py-1">
-                                Kod Subjek
+                                Subject Code
                             </th>
                             <th class="border border-black px-2 py-1">
-                                Nama Subjek
+                                Subject Name
                             </th>
                             <th class="border border-black px-2 py-1">
-                                Seksyen
+                                Section
                             </th>
                             <th class="border border-black px-2 py-1">
-                                Pensyarah
+                                Lecturer
                             </th>
                             <th class="border border-black px-2 py-1">
-                                Bil. Pelajar
+                                Num. of Student
                             </th>
                         </tr>
                     </thead>
@@ -145,15 +146,6 @@ const showStudentDetails = (subject) => {
                 <button>&gt;&gt;</button>
             </div>
         </main>
-
-        <!-- Footer -->
-        <p class="text-xs text-center px-4 pb-6">
-            Jika anda mempunyai sebarang komen atau pertanyaan mengenai halaman
-            web ini sila hubungi webmaster di
-            <a href="mailto:ttms@fc.utm.my" class="text-blue-600"
-                >ttms@fc.utm.my</a
-            ><br />
-            Hakcipta Terpelihara © 2002-2025, Fakulti Komputeran, UTM
-        </p>
+        <Footer />
     </div>
 </template>

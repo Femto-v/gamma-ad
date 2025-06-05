@@ -4,6 +4,7 @@ import Toggle from "@/components/Toggle.vue";
 import ProfileBanner from "@/components/ProfileBanner.vue";
 import RuangApi from "@/api/RuangApi";
 import { userInfo, userName, userMatric } from "@/constants/ApiConstants.js";
+import Footer from "@/components/Footer.vue";
 
 // User session
 const lsData = JSON.parse(localStorage.getItem("web.fc.utm.my_usersession"));
@@ -179,7 +180,7 @@ onMounted(fetchRooms);
             </div>
           </div>
           <div v-if="loadingMore" class="py-2 text-center text-gray-400 text-sm">Loading more...</div>
-          <div v-if="!visibleRooms.length && !error" class="py-10 text-center text-gray-400 text-base">Tiada ruang dijumpai.</div>
+          <div v-if="!visibleRooms.length && !error" class="py-10 text-center text-gray-400 text-base">No Room Found.</div>
           <div v-if="error" class="py-10 text-center text-red-500 text-base">{{ error }}</div>
         </div>
       </div>
@@ -188,7 +189,7 @@ onMounted(fetchRooms);
     <!-- Fakulti Dropdown -->
     <div class="flex flex-col items-center gap-2 py-4 text-sm">
       <label>
-        Fakulti:
+        Faculty:
         <select v-model="selectedFaculty" class="border px-2 py-1 rounded ml-2">
           <option value="FSKSM">FSKSM</option>
           <option value="FKE">FKE</option>
@@ -196,12 +197,6 @@ onMounted(fetchRooms);
         </select>
       </label>
     </div>
-
-    <!-- Footer -->
-    <p class="text-xs text-center mt-6 px-4">
-      Jika anda mempunyai sebarang komen atau pertanyaan mengenai halaman web ini sila hubungi
-      webmaster di <a href="mailto:ttms@fc.utm.my" class="text-blue-600">ttms@fc.utm.my</a><br />
-      Hakcipta Terpelihara © 2002-2025, Fakulti Komputeran, UTM
-    </p>
+    <Footer />
   </div>
 </template>

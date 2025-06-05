@@ -3,6 +3,7 @@ import { ref } from "vue";
 import Toggle from "@/components/Toggle.vue";
 import { userInfo, userName, userMatric } from "@/constants/ApiConstants.js";
 import ProfileBanner from "@/components/ProfileBanner.vue";
+import Footer from "@/components/Footer.vue";
 
 const lsData = JSON.parse(localStorage.getItem("web.fc.utm.my_usersession"));
 if (lsData) {
@@ -60,7 +61,7 @@ const searchStudents = () => {
         >
             <div class="flex flex-row gap-2 w-full">
                 <div class="flex-1 flex flex-col">
-                    <label class="mb-1 ml-1 text-xs">Nama</label>
+                    <label class="mb-1 ml-1 text-xs">Name</label>
                     <input
                         v-model="nama"
                         type="text"
@@ -70,7 +71,7 @@ const searchStudents = () => {
             </div>
             <div class="flex flex-row gap-2 w-full">
                 <div class="flex-1 flex flex-col">
-                    <label class="mb-1 ml-1 text-xs">Tahun</label>
+                    <label class="mb-1 ml-1 text-xs">Year</label>
                     <input
                         v-model="tahun"
                         type="text"
@@ -78,7 +79,7 @@ const searchStudents = () => {
                     />
                 </div>
                 <div class="flex-1 flex flex-col">
-                    <label class="mb-1 ml-1 text-xs">Kursus</label>
+                    <label class="mb-1 ml-1 text-xs">Course</label>
                     <input
                         v-model="kursus"
                         type="text"
@@ -138,8 +139,8 @@ const searchStudents = () => {
                     <div>
                         {{ student.faculty }}
                     </div>
-                    <div>Bil. Subjek: {{ student.subjectCount }}</div>
-                    <div>Total kredit: {{ student.credit }}</div>
+                    <div>num. Subject: {{ student.subjectCount }}</div>
+                    <div>Total Credit: {{ student.credit }}</div>
                 </div>
             </div>
         </div>
@@ -153,15 +154,6 @@ const searchStudents = () => {
             <button>4</button>
             <button>&gt;&gt;</button>
         </div>
-
-        <!-- Footer -->
-        <p class="text-xs text-center px-4 pb-6">
-            Jika anda mempunyai sebarang komen atau pertanyaan mengenai halaman
-            web ini sila hubungi webmaster di
-            <a href="mailto:ttms@fc.utm.my" class="text-blue-600"
-                >ttms@fc.utm.my</a
-            ><br />
-            Hakcipta Terpelihara © 2002-2025, Fakulti Komputeran, UTM
-        </p>
+        <Footer />
     </div>
 </template>

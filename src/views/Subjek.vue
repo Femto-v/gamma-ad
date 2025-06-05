@@ -5,6 +5,7 @@ import ProfileBanner from "@/components/ProfileBanner.vue";
 import SemesterApi from "@/api/SemesterApi";
 import SubjekApi from "@/api/SubjekApi";
 import { userInfo, userName, userMatric } from "@/constants/ApiConstants.js";
+import Footer from "@/components/Footer.vue";
 
 // Set user info
 const lsData = JSON.parse(localStorage.getItem("web.fc.utm.my_usersession"));
@@ -155,15 +156,15 @@ watch([searchTerm, selectedSubject, subjectRows], () => {
       <!-- Filters -->
       <div class="flex flex-wrap items-center gap-3 px-4 pb-2 justify-center">
         <div>
-          Kurikulum:
+          Curriculum:
           <select v-model="selectedKurikulum" class="ml-1 px-2 py-1 border rounded">
-            <option value="Semua">Semua</option>
+            <option value="Semua">All</option>
             <option value="2024">2024</option>
             <option value="2023">2023</option>
           </select>
         </div>
         <div>
-          Kod/Nama Subjek:
+          Subject Code/Name:
           <select v-model="selectedSubject" class="ml-1 px-2 py-1 border rounded">
             <option v-for="(option, i) in subjectOptions" :key="i" :value="option">{{ option }}</option>
           </select>
@@ -197,26 +198,20 @@ watch([searchTerm, selectedSubject, subjectRows], () => {
             <div class="text-xl font-normal mb-1">{{ subject.name }}</div>
             <div class="flex justify-between text-gray-700 mb-2 text-sm">
               <div>{{ subject.shortCode }}</div>
-              <div>kredit: {{ subject.kredit }}</div>
+              <div>credit: {{ subject.kredit }}</div>
             </div>
             <div class="flex gap-4 text-gray-700 text-[15px]">
-              <div>Bil. Seksyen: {{ subject.seksyen ?? '-' }}</div>
-              <div>Bil. Pensyarah: {{ subject.drPensyarah ?? '-' }}</div>
-              <div>Bil. Pelajar: {{ subject.bilPelajar ?? '-' }}</div>
+              <div>Num. of Section: {{ subject.seksyen ?? '-' }}</div>
+              <div>Num. of Lecturer: {{ subject.drPensyarah ?? '-' }}</div>
+              <div>Num. of Student: {{ subject.bilPelajar ?? '-' }}</div>
             </div>
           </div>
           <div v-if="loadingMore" class="py-2 text-center text-gray-400 text-sm">Loading more...</div>
-          <div v-if="!visibleSubjects.length && !error" class="py-10 text-center text-gray-400 text-base">Tiada subjek dijumpai.</div>
+          <div v-if="!visibleSubjects.length && !error" class="py-10 text-center text-gray-400 text-base">No Subject Found.</div>
           <div v-if="error" class="py-10 text-center text-red-500 text-base">{{ error }}</div>
         </div>
       </div>
     </main>
-
-    <!-- Footer -->
-    <p class="text-xs text-center px-4 pb-6">
-      Jika anda mempunyai sebarang komen atau pertanyaan mengenai halaman web ini sila hubungi
-      webmaster di <a href="mailto:ttms@fc.utm.my" class="text-blue-600">ttms@fc.utm.my</a><br />
-      Hakcipta Terpelihara © 2002-2025, Fakulti Komputeran, UTM
-    </p>
+    <Footer />
   </div>
 </template>

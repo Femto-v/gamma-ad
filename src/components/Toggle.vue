@@ -88,7 +88,7 @@ const fetchWithErrorHandler = async (apiCall) => {
         const result = await apiCall();
         return result;
     } catch (err) {
-        error.value = "Gagal mengambil data: " + (err.message || err);
+        error.value = "Failed to Fetch Data: " + (err.message || err);
         console.error("[Fetch Error]", err);
         // You can also show toast here if you use a toast library
         return null;
@@ -157,37 +157,37 @@ const fetchWithErrorHandler = async (apiCall) => {
                         href="#"
                         @click.prevent="loadMasaruang"
                         class="text-gray-700 hover:bg-blue-50 rounded px-2 py-1"
-                        >Masa & Ruang</a
+                        >Time & Venue</a
                     >
                     <a
                         href="#"
                         @click.prevent="loadAnalysisSubjek"
                         class="text-gray-700 hover:bg-blue-50 rounded px-2 py-1"
-                        >Subjek</a
+                        >Subject</a
                     >
                     <a
                         href="#"
                         @click.prevent="loadAnalysisPelajar"
                         class="text-gray-700 hover:bg-blue-50 rounded px-2 py-1"
-                        >Pelajar</a
+                        >Student</a
                     >
                     <a
                         href="#"
                         @click.prevent="loadClashRuang"
                         class="text-gray-700 hover:bg-blue-50 rounded px-2 py-1"
-                        >Ruang Clash</a
+                        >Venue Clash</a
                     >
                     <a
                         href="#"
                         @click.prevent="loadClashPensyarah"
                         class="text-gray-700 hover:bg-blue-50 rounded px-2 py-1"
-                        >Pensyarah Clash</a
+                        >Lecture Clash</a
                     >
                     <a
                         href="#"
                         @click.prevent="loadClashPelajar"
                         class="text-gray-700 hover:bg-blue-50 rounded px-2 py-1"
-                        >Pelajar Clash</a
+                        >Student Clash</a
                     >
                 </div>
             </div>
@@ -218,7 +218,7 @@ const fetchWithErrorHandler = async (apiCall) => {
                 @click.prevent="loadPelajar"
                 class="py-2 text-gray-800 hover:bg-blue-100 rounded flex gap-3 items-center"
                 ><AppIcon name="student" class="w-5 h-5 text-blue-600" />
-                <p>Pelajar</p></a
+                <p>Student</p></a
             >
             <a
                 href="#"

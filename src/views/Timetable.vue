@@ -7,6 +7,7 @@ import { ref, computed, onMounted, watch } from "vue";
 import { userMatric } from "@/constants/ApiConstants";
 import { timetable } from "@/constants/TimetableConstants";
 import { days } from "@/constants/TimetableConstants";
+import Footer from "@/components/Footer.vue";
 
 // Settings
 const activeSemester = ref(1);
@@ -284,20 +285,7 @@ watch(
                 </div>
             </div>
         </div>
-
-        <!-- Footer -->
-        <div class="px-4 py-6 text-center">
-            <p class="text-xs text-gray-500">
-                Jika anda mempunyai sebarang komen atau pertanyaan mengenai
-                halaman web ini sila hubungi webmaster di
-                <a
-                    href="mailto:ttms@fc.utm.my"
-                    class="text-purple-600 hover:underline"
-                    >ttms@fc.utm.my</a
-                ><br />
-                Hakcipta Terpelihara © 2002-2025, Fakulti Komputeran, UTM
-            </p>
-        </div>
+        <Footer />
     </div>
 </template>
 
