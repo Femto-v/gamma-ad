@@ -178,7 +178,6 @@ watch(
                                 v-for="session in availableSessions"
                                 :key="session"
                                 :value="session"
-                                class="text-sm"
                             >
                                 {{ session }}
                             </option>
@@ -194,29 +193,29 @@ watch(
                 </div>
 
                 <!-- Week View -->
-                <div class="flex justify-between items-center bg-white px-2 py-3 rounded-t-xl border-b border-gray-200">
-                    <div class="flex-1 flex justify-between">
-                        <template v-for="(day, idx) in days">
-                            <div class="flex flex-col items-center flex-1 relative">
-                            <!-- Day text -->
-                            <button
-                            @click="selectedDay = idx"
-                            class="relative z-10 font-medium"
-                            :class="[
-                            selectedDay === idx
-                                ? 'text-black font-semibold'
-                                : 'text-gray-500 hover:text-blue-500'
-                            ]"
-                            >
-                                {{ day.substring(0, 3) }}
-                            </button>
-                            <!-- Active highlight bar -->
-                            <div
-                                v-if="selectedDay === idx"
-                                class="absolute left-1/2 -translate-x-1/2 top-0 w-12 h-7 bg-white rounded-xl shadow-lg border border-blue-200 flex items-center justify-center z-0"
-                            ></div>
-                            </div>
-                        </template>
+                <div class="flex justify-between mb-4">
+                    <div
+                        v-for="(day, index) in days"
+                        :key="index"
+                        @click="selectedDay = index"
+                        class="flex flex-col items-center cursor-pointer p-2 rounded-lg transition-colors"
+                        :class="
+                            selectedDay === index
+                                ? 'bg-blue-100'
+                                : 'hover:bg-gray-100'
+                        "
+                    >
+                        <span class="text-xs text-gray-500 mb-1">{{
+                            day.substring(0, 3)
+                        }}</span>
+                        <div
+                            class="w-8 h-8 flex items-center justify-center rounded-full text-sm font-medium"
+                            :class="
+                                selectedDay === index
+                                    ? 'bg-blue-500 text-white'
+                                    : 'text-gray-700'
+                            "
+                        ></div>
                     </div>
                 </div>
             </div>

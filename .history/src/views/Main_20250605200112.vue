@@ -60,19 +60,6 @@ creditInfo.value = computed(() =>
     )
 );
 
-// Returns yearCourse string "tahun_kursus / kod_kursus" from latest subject
-yearCourse.value = computed(() => {
-    if (!subjects.value.length) return "";
-    // Find subject with largest tahun_kursus
-    const latestSubject = subjects.value.reduce((latest, subj) => {
-        return subj.tahun_kursus > (latest?.tahun_kursus ?? 0) ? subj : latest;
-    }, null);
-    // Return string "tahun_kursus / kod_kursus"
-    return latestSubject
-        ? `${latestSubject.tahun_kursus} / ${latestSubject.kod_kursus}`
-        : "";
-});
-
 //__FUNCTIONS
 onMounted(async () => {
     // get current semester info

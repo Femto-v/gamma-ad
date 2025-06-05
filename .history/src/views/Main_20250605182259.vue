@@ -1,77 +1,23 @@
 <script setup>
 //__IMPORTS
-import { ref, onMounted, computed } from "vue";
+import { ref, onMounted } from "vue";
 import Toggle from "@/components/Toggle.vue";
 import SemesterApi from "@/api/SemesterApi";
-import PelajarSubjekApi from "@/api/PelajarSubjekApi";
 import ProfileBanner from "@/components/ProfileBanner.vue";
 import {
     currentSession,
     currentSemester,
     startDate,
     endDate,
-    userMatric,
 } from "@/constants/ApiConstants";
 
 // Dummy values for credit and year/course (replace with real data later)
 const subjects = ref([]);
-const creditInfo = ref("-");
-const yearCourse = ref("-/-");
+const creditInfo = ref("18/127");
+const yearCourse = ref("3 / SECJH");
 
 //__DATA
 const semesterApi = new SemesterApi();
-const pelajarSubjekApi = new PelajarSubjekApi();
-
-// Extract credit from kod_subjek (last digit)
-function getCredit(kodSubjek) {
-    // Get the last number sequence in kod_subjek (e.g., "SECJ3104" -> 4)
-    const match = kodSubjek.match(/\d+$/);
-    return match ? Number(match[0].slice(-1)) : 0;
-}
-
-// Add credit property to each subject
-const subjectsWithCredit = computed(() => {
-    return subjects.value.map((subj) => ({
-        ...subj,
-        kredit: getCredit(subj.kod_subjek),
-    }));
-});
-
-// Only include subjects before the current sesi/semester
-const subjectsBeforeCurrentSemester = computed(() => {
-    return subjectsWithCredit.value.filter((subj) => {
-        // Sesi comparison (string), semester (number)
-        // If sesi < current, include
-        if (subj.sesi < currentSession.value) return true;
-        // If sesi == current, only semester < current
-        if (
-            subj.sesi === currentSession.value &&
-            subj.semester < currentSemester.value
-        )
-            return true;
-        return false;
-    });
-});
-
-creditInfo.value = computed(() =>
-    subjectsBeforeCurrentSemester.value.reduce(
-        (sum, subj) => sum + subj.kredit,
-        0
-    )
-);
-
-// Returns yearCourse string "tahun_kursus / kod_kursus" from latest subject
-yearCourse.value = computed(() => {
-    if (!subjects.value.length) return "";
-    // Find subject with largest tahun_kursus
-    const latestSubject = subjects.value.reduce((latest, subj) => {
-        return subj.tahun_kursus > (latest?.tahun_kursus ?? 0) ? subj : latest;
-    }, null);
-    // Return string "tahun_kursus / kod_kursus"
-    return latestSubject
-        ? `${latestSubject.tahun_kursus} / ${latestSubject.kod_kursus}`
-        : "";
-});
 
 //__FUNCTIONS
 onMounted(async () => {
@@ -85,12 +31,7 @@ onMounted(async () => {
         endDate.value = latest.tarikh_tamat;
     }
     // get pelajar subjects
-    const dataSubject = await pelajarSubjekApi.getTimetableInfo(
-        userMatric.value
-    );
-    console.log(dataSubject);
-    // Ensure dataSubject is an array
-    subjects.value = Array.isArray(dataSubject) ? dataSubject : [dataSubject];
+    const dataSubject = await semesterApi.getPelajarSubjects();
 });
 </script>
 

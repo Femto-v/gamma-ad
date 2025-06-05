@@ -10,13 +10,13 @@ import {
     currentSemester,
     startDate,
     endDate,
-    userMatric,
 } from "@/constants/ApiConstants";
 
 // Dummy values for credit and year/course (replace with real data later)
 const subjects = ref([]);
-const creditInfo = ref("-");
-const yearCourse = ref("-/-");
+const noMatrik = "A22EC4024";
+const creditInfo = ref("0");
+const yearCourse = ref("3 / SECJH");
 
 //__DATA
 const semesterApi = new SemesterApi();
@@ -60,19 +60,6 @@ creditInfo.value = computed(() =>
     )
 );
 
-// Returns yearCourse string "tahun_kursus / kod_kursus" from latest subject
-yearCourse.value = computed(() => {
-    if (!subjects.value.length) return "";
-    // Find subject with largest tahun_kursus
-    const latestSubject = subjects.value.reduce((latest, subj) => {
-        return subj.tahun_kursus > (latest?.tahun_kursus ?? 0) ? subj : latest;
-    }, null);
-    // Return string "tahun_kursus / kod_kursus"
-    return latestSubject
-        ? `${latestSubject.tahun_kursus} / ${latestSubject.kod_kursus}`
-        : "";
-});
-
 //__FUNCTIONS
 onMounted(async () => {
     // get current semester info
@@ -85,9 +72,7 @@ onMounted(async () => {
         endDate.value = latest.tarikh_tamat;
     }
     // get pelajar subjects
-    const dataSubject = await pelajarSubjekApi.getTimetableInfo(
-        userMatric.value
-    );
+    const dataSubject = await pelajarSubjekApi.getTimetableInfo(noMatrik);
     console.log(dataSubject);
     // Ensure dataSubject is an array
     subjects.value = Array.isArray(dataSubject) ? dataSubject : [dataSubject];
