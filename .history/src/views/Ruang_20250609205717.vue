@@ -1,12 +1,5 @@
 <script setup>
-import {
-    ref,
-    watch,
-    onMounted,
-    onBeforeUnmount,
-    computed,
-    nextTick,
-} from "vue";
+import { ref, watch, onMounted, computed, nextTick } from "vue";
 import Toggle from "@/components/Toggle.vue";
 import ProfileBanner from "@/components/ProfileBanner.vue";
 import RuangApi from "@/api/RuangApi";
@@ -26,7 +19,7 @@ const rooms = ref([]);
 const error = ref(null);
 
 const searchTerm = ref("");
-const loadCount = ref(3);
+const loadCount = ref(20);
 const loadingMore = ref(false);
 
 // Format data
@@ -42,7 +35,7 @@ const formatRoomData = (room) => ({
 const fetchRooms = async () => {
     try {
         error.value = null;
-        loadCount.value = 3;
+        loadCount.value = 20;
         const data = await ruangApi.getRoomsByFaculty(selectedFaculty.value);
         rooms.value = Array.isArray(data)
             ? data.map(formatRoomData)
@@ -103,40 +96,17 @@ function handleScroll() {
     }
 }
 
+// Reset loadCount and scroll when search/filter changes
 watch([searchTerm, rooms], () => {
-    loadCount.value = 3; // Reset to 3
+    loadCount.value = 20;
     nextTick(() => {
-        window.scrollTo({ top: 0, behavior: "auto" });
+        const scroller = document.getElementById("ruang-scroll-list");
+        if (scroller) scroller.scrollTop = 0;
     });
 });
 
 // Initial load
 onMounted(fetchRooms);
-function handleWindowScroll() {
-    const nearBottom = 100;
-    if (
-        window.innerHeight + window.scrollY >=
-            document.body.offsetHeight - nearBottom &&
-        !loadingMore.value
-    ) {
-        if (loadCount.value < filteredRooms.value.length) {
-            loadingMore.value = true;
-            setTimeout(() => {
-                loadCount.value += 3;
-                loadingMore.value = false;
-            }, 250);
-        }
-    }
-}
-
-onMounted(() => {
-    fetchRooms();
-    window.addEventListener("scroll", handleWindowScroll);
-});
-
-onBeforeUnmount(() => {
-    window.removeEventListener("scroll", handleWindowScroll);
-});
 </script>
 
 <template>
@@ -204,6 +174,8 @@ onBeforeUnmount(() => {
                 <div
                     id="ruang-scroll-list"
                     class="flex flex-col gap-4 px-4 py-2 max-w-lg w-full mx-auto overflow-y-auto"
+                    style="max-height: 65vh"
+                    @scroll="handleScroll"
                 >
                     <div
                         v-for="(room, index) in visibleRooms"

@@ -1,6 +1,5 @@
 <script setup>
 import { ref, onMounted, computed, nextTick, watch } from "vue";
-import { onBeforeUnmount } from "vue";
 import Toggle from "@/components/Toggle.vue";
 import ProfileBanner from "@/components/ProfileBanner.vue";
 import SemesterApi from "@/api/SemesterApi";
@@ -44,77 +43,6 @@ const subjectOptions = computed(() => {
     return ["Semua", ...Array.from(set)];
 });
 
-// Filtering logic (Kod/Nama Subjek and search)
-const filteredSubjects = computed(() => {
-    let arr = subjectRows.value;
-    if (selectedSubject.value && selectedSubject.value !== "Semua") {
-        const [filterCode] = selectedSubject.value.split(" - ");
-        arr = arr.filter((row) => row.code === filterCode);
-    }
-    const q = searchTerm.value.trim().toLowerCase();
-    if (!q) return arr;
-    return arr.filter(
-        (s) =>
-            (s.code && s.code.toLowerCase().includes(q)) ||
-            (s.name && s.name.toLowerCase().includes(q)) ||
-            (s.shortCode && s.shortCode.toLowerCase().includes(q)) ||
-            (s.seksyen && String(s.seksyen).toLowerCase().includes(q)) ||
-            (s.drPensyarah && s.drPensyarah.toLowerCase().includes(q))
-    );
-});
-
-const visibleSubjects = computed(() =>
-    filteredSubjects.value.slice(0, loadCount.value)
-);
-
-// Infinite scroll handler (3 at a time)
-function handleScroll() {
-    const scroller = document.getElementById("subjek-scroll-list");
-    if (!scroller) return;
-    if (
-        scroller.scrollTop + scroller.clientHeight >=
-            scroller.scrollHeight - 50 &&
-        !loadingMore.value
-    ) {
-        if (loadCount.value < filteredSubjects.value.length) {
-            loadingMore.value = true;
-            setTimeout(() => {
-                loadCount.value += LOAD_INCREMENT;
-                loadingMore.value = false;
-            }, 250);
-        }
-    }
-}
-
-// Reset scroll when filter/search changes
-watch([searchTerm, selectedSubject, subjectRows], () => {
-    loadCount.value = INITIAL_LOAD;
-});
-
-function handleWindowScroll() {
-    // How far from bottom to trigger load (in px)
-    const nearBottom = 100;
-    if (
-        window.innerHeight + window.scrollY >=
-            document.body.offsetHeight - nearBottom &&
-        !loadingMore.value
-    ) {
-        if (loadCount.value < filteredSubjects.value.length) {
-            loadingMore.value = true;
-            setTimeout(() => {
-                loadCount.value += LOAD_INCREMENT;
-                loadingMore.value = false;
-            }, 250);
-        }
-    }
-}
-
-onMounted(() => {
-    window.addEventListener("scroll", handleWindowScroll);
-});
-onBeforeUnmount(() => {
-    window.removeEventListener("scroll", handleWindowScroll);
-});
 onMounted(async () => {
     try {
         const sessionData = await semesterApi.getCurrentSemesterInfo();
@@ -163,6 +91,53 @@ onMounted(async () => {
         error.value = "Gagal mendapatkan data subjek.";
         console.error("[ERROR] Failed to fetch subject data:", err);
     }
+});
+
+// Filtering logic (Kod/Nama Subjek and search)
+const filteredSubjects = computed(() => {
+    let arr = subjectRows.value;
+    if (selectedSubject.value && selectedSubject.value !== "Semua") {
+        const [filterCode] = selectedSubject.value.split(" - ");
+        arr = arr.filter((row) => row.code === filterCode);
+    }
+    const q = searchTerm.value.trim().toLowerCase();
+    if (!q) return arr;
+    return arr.filter(
+        (s) =>
+            (s.code && s.code.toLowerCase().includes(q)) ||
+            (s.name && s.name.toLowerCase().includes(q)) ||
+            (s.shortCode && s.shortCode.toLowerCase().includes(q)) ||
+            (s.seksyen && String(s.seksyen).toLowerCase().includes(q)) ||
+            (s.drPensyarah && s.drPensyarah.toLowerCase().includes(q))
+    );
+});
+
+const visibleSubjects = computed(() =>
+    filteredSubjects.value.slice(0, loadCount.value)
+);
+
+// Infinite scroll handler (3 at a time)
+function handleScroll() {
+    const scroller = document.getElementById("subjek-scroll-list");
+    if (!scroller) return;
+    if (
+        scroller.scrollTop + scroller.clientHeight >=
+            scroller.scrollHeight - 50 &&
+        !loadingMore.value
+    ) {
+        if (loadCount.value < filteredSubjects.value.length) {
+            loadingMore.value = true;
+            setTimeout(() => {
+                loadCount.value += LOAD_INCREMENT;
+                loadingMore.value = false;
+            }, 250);
+        }
+    }
+}
+
+// Reset scroll when filter/search changes
+watch([searchTerm, selectedSubject, subjectRows], () => {
+    loadCount.value = INITIAL_LOAD;
 });
 </script>
 
@@ -249,6 +224,7 @@ onMounted(async () => {
                 <div
                     id="subjek-scroll-list"
                     class="flex flex-col gap-4 px-4 py-2 max-w-lg w-full mx-auto overflow-y-auto"
+                    @scroll="handleScroll"
                 >
                     <div
                         v-for="(subject, index) in visibleSubjects"

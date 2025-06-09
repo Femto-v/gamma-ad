@@ -122,7 +122,7 @@ function handleWindowScroll() {
         if (loadCount.value < filteredRooms.value.length) {
             loadingMore.value = true;
             setTimeout(() => {
-                loadCount.value += 3;
+                loadCount.value += 20;
                 loadingMore.value = false;
             }, 250);
         }

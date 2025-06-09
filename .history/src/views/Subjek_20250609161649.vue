@@ -1,6 +1,5 @@
 <script setup>
 import { ref, onMounted, computed, nextTick, watch } from "vue";
-import { onBeforeUnmount } from "vue";
 import Toggle from "@/components/Toggle.vue";
 import ProfileBanner from "@/components/ProfileBanner.vue";
 import SemesterApi from "@/api/SemesterApi";
@@ -28,15 +27,14 @@ const currentSemester = ref("");
 
 // Search and infinite scroll
 const searchTerm = ref("");
-const INITIAL_LOAD = 3;
-const LOAD_INCREMENT = 3;
-const loadCount = ref(INITIAL_LOAD); // Show 3 at first
+const loadCount = ref(20); // Number of items to load
 const loadingMore = ref(false);
 
 // Extracted subject codes/names for dropdown filter
 const subjectOptions = computed(() => {
     const set = new Set();
     subjectRows.value.forEach((row) => {
+        // Use either code or "code - name" for display
         if (row.code && row.name) set.add(`${row.code} - ${row.name}`);
         else if (row.code) set.add(row.code);
         else if (row.name) set.add(row.name);
@@ -44,77 +42,6 @@ const subjectOptions = computed(() => {
     return ["Semua", ...Array.from(set)];
 });
 
-// Filtering logic (Kod/Nama Subjek and search)
-const filteredSubjects = computed(() => {
-    let arr = subjectRows.value;
-    if (selectedSubject.value && selectedSubject.value !== "Semua") {
-        const [filterCode] = selectedSubject.value.split(" - ");
-        arr = arr.filter((row) => row.code === filterCode);
-    }
-    const q = searchTerm.value.trim().toLowerCase();
-    if (!q) return arr;
-    return arr.filter(
-        (s) =>
-            (s.code && s.code.toLowerCase().includes(q)) ||
-            (s.name && s.name.toLowerCase().includes(q)) ||
-            (s.shortCode && s.shortCode.toLowerCase().includes(q)) ||
-            (s.seksyen && String(s.seksyen).toLowerCase().includes(q)) ||
-            (s.drPensyarah && s.drPensyarah.toLowerCase().includes(q))
-    );
-});
-
-const visibleSubjects = computed(() =>
-    filteredSubjects.value.slice(0, loadCount.value)
-);
-
-// Infinite scroll handler (3 at a time)
-function handleScroll() {
-    const scroller = document.getElementById("subjek-scroll-list");
-    if (!scroller) return;
-    if (
-        scroller.scrollTop + scroller.clientHeight >=
-            scroller.scrollHeight - 50 &&
-        !loadingMore.value
-    ) {
-        if (loadCount.value < filteredSubjects.value.length) {
-            loadingMore.value = true;
-            setTimeout(() => {
-                loadCount.value += LOAD_INCREMENT;
-                loadingMore.value = false;
-            }, 250);
-        }
-    }
-}
-
-// Reset scroll when filter/search changes
-watch([searchTerm, selectedSubject, subjectRows], () => {
-    loadCount.value = INITIAL_LOAD;
-});
-
-function handleWindowScroll() {
-    // How far from bottom to trigger load (in px)
-    const nearBottom = 100;
-    if (
-        window.innerHeight + window.scrollY >=
-            document.body.offsetHeight - nearBottom &&
-        !loadingMore.value
-    ) {
-        if (loadCount.value < filteredSubjects.value.length) {
-            loadingMore.value = true;
-            setTimeout(() => {
-                loadCount.value += LOAD_INCREMENT;
-                loadingMore.value = false;
-            }, 250);
-        }
-    }
-}
-
-onMounted(() => {
-    window.addEventListener("scroll", handleWindowScroll);
-});
-onBeforeUnmount(() => {
-    window.removeEventListener("scroll", handleWindowScroll);
-});
 onMounted(async () => {
     try {
         const sessionData = await semesterApi.getCurrentSemesterInfo();
@@ -164,6 +91,57 @@ onMounted(async () => {
         console.error("[ERROR] Failed to fetch subject data:", err);
     }
 });
+
+// Filtering logic (Kod/Nama Subjek and search)
+const filteredSubjects = computed(() => {
+    let arr = subjectRows.value;
+    // Kod/Nama Subjek filter
+    if (selectedSubject.value && selectedSubject.value !== "Semua") {
+        // The dropdown entry is in format "CODE - NAME"
+        const [filterCode] = selectedSubject.value.split(" - ");
+        arr = arr.filter((row) => row.code === filterCode);
+    }
+    // Search filter
+    const q = searchTerm.value.trim().toLowerCase();
+    if (!q) return arr;
+    return arr.filter(
+        (s) =>
+            (s.code && s.code.toLowerCase().includes(q)) ||
+            (s.name && s.name.toLowerCase().includes(q)) ||
+            (s.shortCode && s.shortCode.toLowerCase().includes(q)) ||
+            (s.seksyen && String(s.seksyen).toLowerCase().includes(q)) ||
+            (s.drPensyarah && s.drPensyarah.toLowerCase().includes(q))
+    );
+});
+
+// Only display up to loadCount at a time
+const visibleSubjects = computed(() =>
+    filteredSubjects.value.slice(0, loadCount.value)
+);
+
+// Infinite scroll handler
+function handleScroll() {
+    const scroller = document.getElementById("subjek-scroll-list");
+    if (!scroller) return;
+    if (
+        scroller.scrollTop + scroller.clientHeight >=
+            scroller.scrollHeight - 50 &&
+        !loadingMore.value
+    ) {
+        if (loadCount.value < filteredSubjects.value.length) {
+            loadingMore.value = true;
+            setTimeout(() => {
+                loadCount.value += 20;
+                loadingMore.value = false;
+            }, 250);
+        }
+    }
+}
+
+// Reset scroll when filter/search changes
+watch([searchTerm, selectedSubject, subjectRows], () => {
+    loadCount.value = 20;
+});
 </script>
 
 <template>
@@ -175,7 +153,7 @@ onMounted(async () => {
 
             <!-- Search Bar -->
             <div class="flex flex-col items-center">
-                <div class="w-full max-w-lg relative px-4 mb-4">
+                <div class="w-full max-w-lg relative z-10 px-4 -mt-10 mb-4">
                     <div
                         class="flex items-center bg-white rounded-2xl shadow px-4 py-2 border border-gray-300"
                     >
@@ -231,7 +209,7 @@ onMounted(async () => {
                     Subject Code/Name:
                     <select
                         v-model="selectedSubject"
-                        class="ml-1 px-2 py-1 border rounded w-48"
+                        class="ml-1 px-2 py-1 border rounded w-48 truncate"
                     >
                         <option
                             v-for="(option, i) in subjectOptions"
@@ -249,12 +227,15 @@ onMounted(async () => {
                 <div
                     id="subjek-scroll-list"
                     class="flex flex-col gap-4 px-4 py-2 max-w-lg w-full mx-auto overflow-y-auto"
+                    style="max-height: 65vh"
+                    @scroll="handleScroll"
                 >
                     <div
                         v-for="(subject, index) in visibleSubjects"
                         :key="index"
                         class="bg-blue-100 rounded-xl shadow p-4 relative transition"
                     >
+                        <!-- Top Right Action Button -->
                         <button
                             class="absolute top-3 right-3 rounded bg-gray-200 hover:bg-gray-300 p-2"
                             title="Maklumat Jadual"

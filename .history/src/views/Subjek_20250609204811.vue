@@ -1,6 +1,6 @@
 <script setup>
 import { ref, onMounted, computed, nextTick, watch } from "vue";
-import { onBeforeUnmount } from "vue";
+import { onMounted, onBeforeUnmount } from "vue";
 import Toggle from "@/components/Toggle.vue";
 import ProfileBanner from "@/components/ProfileBanner.vue";
 import SemesterApi from "@/api/SemesterApi";
@@ -42,6 +42,59 @@ const subjectOptions = computed(() => {
         else if (row.name) set.add(row.name);
     });
     return ["Semua", ...Array.from(set)];
+});
+
+onMounted(async () => {
+    try {
+        const sessionData = await semesterApi.getCurrentSemesterInfo();
+        if (sessionData.length > 0) {
+            currentSession.value = sessionData[0].sesi;
+            currentSemester.value = sessionData[0].semester;
+
+            const subjectData = await subjekApi.getSubjectSections(
+                currentSession.value,
+                currentSemester.value
+            );
+
+            if (Array.isArray(subjectData)) {
+                subjectRows.value = subjectData.flatMap((subj) =>
+                    (Array.isArray(subj.seksyen_list)
+                        ? subj.seksyen_list
+                        : []
+                    ).map((section) => ({
+                        code: subj.kod_subjek,
+                        name: subj.nama_subjek,
+                        shortCode: subj.kod_fakulti ?? "-",
+                        kredit: subj.kredit ?? 0,
+                        seksyen: section.seksyen,
+                        drPensyarah: section.pensyarah,
+                        bilPelajar: section.bil_pelajar,
+                        bilSeksyen:
+                            subj.bil_seksyen ?? subj.seksyen_list?.length ?? 0,
+                        bilPensyarah:
+                            subj.bil_pensyarah ??
+                            new Set(
+                                (subj.seksyen_list ?? []).map(
+                                    (s) => s.pensyarah
+                                )
+                            ).size,
+                    }))
+                );
+            } else {
+                subjectRows.value = [];
+            }
+        }
+        // ADD WINDOW SCROLL LISTENER HERE
+        window.addEventListener("scroll", handleWindowScroll);
+    } catch (err) {
+        error.value = "Gagal mendapatkan data subjek.";
+        console.error("[ERROR] Failed to fetch subject data:", err);
+    }
+});
+
+// REMOVE LISTENER WHEN COMPONENT UNMOUNTS
+onBeforeUnmount(() => {
+    window.removeEventListener("scroll", handleWindowScroll);
 });
 
 // Filtering logic (Kod/Nama Subjek and search)
@@ -89,80 +142,6 @@ function handleScroll() {
 // Reset scroll when filter/search changes
 watch([searchTerm, selectedSubject, subjectRows], () => {
     loadCount.value = INITIAL_LOAD;
-});
-
-function handleWindowScroll() {
-    // How far from bottom to trigger load (in px)
-    const nearBottom = 100;
-    if (
-        window.innerHeight + window.scrollY >=
-            document.body.offsetHeight - nearBottom &&
-        !loadingMore.value
-    ) {
-        if (loadCount.value < filteredSubjects.value.length) {
-            loadingMore.value = true;
-            setTimeout(() => {
-                loadCount.value += LOAD_INCREMENT;
-                loadingMore.value = false;
-            }, 250);
-        }
-    }
-}
-
-onMounted(() => {
-    window.addEventListener("scroll", handleWindowScroll);
-});
-onBeforeUnmount(() => {
-    window.removeEventListener("scroll", handleWindowScroll);
-});
-onMounted(async () => {
-    try {
-        const sessionData = await semesterApi.getCurrentSemesterInfo();
-        if (sessionData.length > 0) {
-            currentSession.value = sessionData[0].sesi;
-            currentSemester.value = sessionData[0].semester;
-
-            const subjectData = await subjekApi.getSubjectSections(
-                currentSession.value,
-                currentSemester.value
-            );
-
-            if (Array.isArray(subjectData)) {
-                subjectRows.value = subjectData.flatMap((subj) =>
-                    (Array.isArray(subj.seksyen_list)
-                        ? subj.seksyen_list
-                        : []
-                    ).map((section) => ({
-                        code: subj.kod_subjek,
-                        name: subj.nama_subjek,
-                        shortCode: subj.kod_fakulti ?? "-",
-                        kredit: subj.kredit ?? 0,
-                        seksyen: section.seksyen,
-                        drPensyarah: section.pensyarah,
-                        bilPelajar: section.bil_pelajar,
-                        bilSeksyen:
-                            subj.bil_seksyen ?? subj.seksyen_list?.length ?? 0,
-                        bilPensyarah:
-                            subj.bil_pensyarah ??
-                            new Set(
-                                (subj.seksyen_list ?? []).map(
-                                    (s) => s.pensyarah
-                                )
-                            ).size,
-                    }))
-                );
-            } else {
-                subjectRows.value = [];
-            }
-        }
-        nextTick(() => {
-            const scroller = document.getElementById("subjek-scroll-list");
-            if (scroller) scroller.addEventListener("scroll", handleScroll);
-        });
-    } catch (err) {
-        error.value = "Gagal mendapatkan data subjek.";
-        console.error("[ERROR] Failed to fetch subject data:", err);
-    }
 });
 </script>
 

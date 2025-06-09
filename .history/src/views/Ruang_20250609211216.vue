@@ -42,7 +42,7 @@ const formatRoomData = (room) => ({
 const fetchRooms = async () => {
     try {
         error.value = null;
-        loadCount.value = 3;
+        loadCount.value = 20;
         const data = await ruangApi.getRoomsByFaculty(selectedFaculty.value);
         rooms.value = Array.isArray(data)
             ? data.map(formatRoomData)
@@ -103,10 +103,12 @@ function handleScroll() {
     }
 }
 
+// Reset loadCount and scroll when search/filter changes
 watch([searchTerm, rooms], () => {
-    loadCount.value = 3; // Reset to 3
+    loadCount.value = 20;
     nextTick(() => {
-        window.scrollTo({ top: 0, behavior: "auto" });
+        const scroller = document.getElementById("ruang-scroll-list");
+        if (scroller) scroller.scrollTop = 0;
     });
 });
 
@@ -122,7 +124,7 @@ function handleWindowScroll() {
         if (loadCount.value < filteredRooms.value.length) {
             loadingMore.value = true;
             setTimeout(() => {
-                loadCount.value += 3;
+                loadCount.value += 20;
                 loadingMore.value = false;
             }, 250);
         }
