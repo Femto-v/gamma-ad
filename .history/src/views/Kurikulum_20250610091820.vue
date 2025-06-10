@@ -1,5 +1,5 @@
 <script setup>
-import { ref, onMounted, computed } from "vue";
+import { ref, onMounted } from "vue";
 import Toggle from "@/components/Toggle.vue";
 import { userInfo, userName, userMatric } from "@/constants/ApiConstants.js";
 import ProfileBanner from "@/components/ProfileBanner.vue";
@@ -14,20 +14,6 @@ if (lsData) {
 
 const curricula = ref([]);
 const searchTerm = ref("");
-
-const filteredCurricula = computed(() => {
-    if (!searchTerm.value) return curricula.value;
-    // Search by curriculum name or session (case-insensitive)
-    return curricula.value.filter(
-        (item) =>
-            (item.name?.toLowerCase() ?? "").includes(
-                searchTerm.value.toLowerCase()
-            ) ||
-            (item.sesi?.toLowerCase() ?? "").includes(
-                searchTerm.value.toLowerCase()
-            )
-    );
-});
 
 // For this example, load all curricula then for each sesi_masuk, fetch its cohort detail
 onMounted(async () => {
@@ -146,7 +132,7 @@ onMounted(async () => {
         <!-- Card List -->
         <div class="flex flex-col gap-4 px-4 py-2">
             <div
-                v-for="(item, index) in filteredCurricula"
+                v-for="(item, index) in curricula"
                 :key="index"
                 class="bg-blue-100 rounded-xl shadow p-4 relative"
             >

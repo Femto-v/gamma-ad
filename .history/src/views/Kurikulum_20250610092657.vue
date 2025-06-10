@@ -146,7 +146,7 @@ onMounted(async () => {
         <!-- Card List -->
         <div class="flex flex-col gap-4 px-4 py-2">
             <div
-                v-for="(item, index) in filteredCurricula"
+                v-for="(item, index) in curricula"
                 :key="index"
                 class="bg-blue-100 rounded-xl shadow p-4 relative"
             >

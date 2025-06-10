@@ -14,84 +14,64 @@ if (lsData) {
 
 const curricula = ref([]);
 const searchTerm = ref("");
+const loading = ref(false);
+const error = ref("");
 
-const filteredCurricula = computed(() => {
-    if (!searchTerm.value) return curricula.value;
-    // Search by curriculum name or session (case-insensitive)
-    return curricula.value.filter(
-        (item) =>
-            (item.name?.toLowerCase() ?? "").includes(
-                searchTerm.value.toLowerCase()
-            ) ||
-            (item.sesi?.toLowerCase() ?? "").includes(
-                searchTerm.value.toLowerCase()
-            )
-    );
-});
-
-// For this example, load all curricula then for each sesi_masuk, fetch its cohort detail
 onMounted(async () => {
+    loading.value = true;
+    error.value = "";
     const api = new KurikulumApi();
     try {
         const sesiList = await api.getCurricula();
-
-        // Use flatMap to flatten multiple curricula from each cohort
-        const cohortArrays = await Promise.all(
-            sesiList.map((item) =>
-                api
-                    .getCohort(item.sesi_masuk)
-                    .then((cohortResult) => {
-                        // If cohortResult is an array, process each
-                        if (Array.isArray(cohortResult)) {
-                            return cohortResult
-                                .filter(
-                                    (cohort) =>
-                                        cohort &&
-                                        cohort.nama_kurikulum &&
-                                        cohort.sesi_masuk &&
-                                        cohort.semester_masuk &&
-                                        cohort.tahun_masuk
-                                )
-                                .map((cohort) => ({
-                                    name: cohort.nama_kurikulum,
-                                    sesi: cohort.sesi_masuk,
-                                    semester: cohort.semester_masuk,
-                                    tahun: cohort.tahun_masuk,
-                                    kod_kurikulum: cohort.kod_kurikulum,
-                                    id_kurikulum: cohort.id_kurikulum,
-                                }));
-                        } else if (
-                            cohortResult &&
-                            cohortResult.nama_kurikulum &&
-                            cohortResult.sesi_masuk &&
-                            cohortResult.semester_masuk &&
-                            cohortResult.tahun_masuk
-                        ) {
-                            // If only single object
-                            return [
-                                {
-                                    name: cohortResult.nama_kurikulum,
-                                    sesi: cohortResult.sesi_masuk,
-                                    semester: cohortResult.semester_masuk,
-                                    tahun: cohortResult.tahun_masuk,
-                                    kod_kurikulum: cohortResult.kod_kurikulum,
-                                    id_kurikulum: cohortResult.id_kurikulum,
-                                },
-                            ];
-                        } else {
-                            return [];
-                        }
-                    })
-                    .catch(() => [])
-            )
+        // Defensive: filter duplicates by sesi_masuk
+        const uniqueSesi = Array.from(
+            new Set(sesiList.map((s) => s.sesi_masuk))
         );
-
-        // Flatten the array of arrays
-        curricula.value = cohortArrays.flat();
+        const cohortPromises = uniqueSesi.map(async (sesi_masuk) => {
+            try {
+                const cohort = await api.getCohort(sesi_masuk);
+                // You can add a check for cohort success here
+                if (
+                    cohort &&
+                    cohort.nama_kurikulum &&
+                    cohort.sesi_masuk &&
+                    cohort.semester_masuk &&
+                    cohort.tahun_masuk
+                ) {
+                    return {
+                        name: cohort.nama_kurikulum,
+                        sesi: cohort.sesi_masuk,
+                        semester: cohort.semester_masuk,
+                        tahun: cohort.tahun_masuk,
+                        kod_kurikulum: cohort.kod_kurikulum,
+                        id_kurikulum: cohort.id_kurikulum,
+                        // Optional dummy values
+                        teras: "-",
+                        elektif: "-",
+                        jumlah: "-",
+                    };
+                }
+            } catch (e) {
+                console.warn(`Cohort fetch failed for ${sesi_masuk}:`, e);
+            }
+            return null;
+        });
+        curricula.value = (await Promise.all(cohortPromises)).filter(Boolean);
+        if (!curricula.value.length) error.value = "No curriculum data found.";
     } catch (err) {
         console.error("Fetch error:", err);
+        error.value = "Failed to fetch curriculum data.";
         curricula.value = [];
     }
+    loading.value = false;
+});
+
+// Filtered list for search
+const filteredCurricula = computed(() => {
+    if (!searchTerm.value) return curricula.value;
+    return curricula.value.filter((item) =>
+        (item.name || "").toLowerCase().includes(searchTerm.value.toLowerCase())
+    );
 });
 </script>
 
@@ -146,7 +126,7 @@ onMounted(async () => {
         <!-- Card List -->
         <div class="flex flex-col gap-4 px-4 py-2">
             <div
-                v-for="(item, index) in filteredCurricula"
+                v-for="(item, index) in curricula"
                 :key="index"
                 class="bg-blue-100 rounded-xl shadow p-4 relative"
             >
@@ -192,7 +172,13 @@ onMounted(async () => {
                     <div>Semester: {{ item.semester }}</div>
                     <div>Year: {{ item.tahun }}</div>
                 </div>
-                >
+                <!-- You can add teras/elektif/jumlah below if you want -->
+
+                <div class="flex flex-row gap-x-6 text-gray-600 text-xs mt-1">
+                    <div>Teras: {{ item.teras }}</div>
+                    <div>Elektif: {{ item.elektif }}</div>
+                    <div>Jumlah: {{ item.jumlah }}</div>
+                </div>
             </div>
         </div>
         <Footer />

@@ -1,5 +1,5 @@
 <script setup>
-import { ref, onMounted, computed } from "vue";
+import { ref, onMounted } from "vue";
 import Toggle from "@/components/Toggle.vue";
 import { userInfo, userName, userMatric } from "@/constants/ApiConstants.js";
 import ProfileBanner from "@/components/ProfileBanner.vue";
@@ -15,79 +15,31 @@ if (lsData) {
 const curricula = ref([]);
 const searchTerm = ref("");
 
-const filteredCurricula = computed(() => {
-    if (!searchTerm.value) return curricula.value;
-    // Search by curriculum name or session (case-insensitive)
-    return curricula.value.filter(
-        (item) =>
-            (item.name?.toLowerCase() ?? "").includes(
-                searchTerm.value.toLowerCase()
-            ) ||
-            (item.sesi?.toLowerCase() ?? "").includes(
-                searchTerm.value.toLowerCase()
-            )
-    );
-});
-
 // For this example, load all curricula then for each sesi_masuk, fetch its cohort detail
 onMounted(async () => {
     const api = new KurikulumApi();
     try {
         const sesiList = await api.getCurricula();
+        console.log("Sesi List:", sesiList); // LOG
 
-        // Use flatMap to flatten multiple curricula from each cohort
-        const cohortArrays = await Promise.all(
-            sesiList.map((item) =>
-                api
-                    .getCohort(item.sesi_masuk)
-                    .then((cohortResult) => {
-                        // If cohortResult is an array, process each
-                        if (Array.isArray(cohortResult)) {
-                            return cohortResult
-                                .filter(
-                                    (cohort) =>
-                                        cohort &&
-                                        cohort.nama_kurikulum &&
-                                        cohort.sesi_masuk &&
-                                        cohort.semester_masuk &&
-                                        cohort.tahun_masuk
-                                )
-                                .map((cohort) => ({
-                                    name: cohort.nama_kurikulum,
-                                    sesi: cohort.sesi_masuk,
-                                    semester: cohort.semester_masuk,
-                                    tahun: cohort.tahun_masuk,
-                                    kod_kurikulum: cohort.kod_kurikulum,
-                                    id_kurikulum: cohort.id_kurikulum,
-                                }));
-                        } else if (
-                            cohortResult &&
-                            cohortResult.nama_kurikulum &&
-                            cohortResult.sesi_masuk &&
-                            cohortResult.semester_masuk &&
-                            cohortResult.tahun_masuk
-                        ) {
-                            // If only single object
-                            return [
-                                {
-                                    name: cohortResult.nama_kurikulum,
-                                    sesi: cohortResult.sesi_masuk,
-                                    semester: cohortResult.semester_masuk,
-                                    tahun: cohortResult.tahun_masuk,
-                                    kod_kurikulum: cohortResult.kod_kurikulum,
-                                    id_kurikulum: cohortResult.id_kurikulum,
-                                },
-                            ];
-                        } else {
-                            return [];
-                        }
-                    })
-                    .catch(() => [])
-            )
-        );
-
-        // Flatten the array of arrays
-        curricula.value = cohortArrays.flat();
+        const cohortPromises = sesiList.map(async (item) => {
+            try {
+                const cohort = await api.getCohort(item.sesi_masuk);
+                if (!cohort || !cohort.nama_kurikulum) return null; // skip invalid
+                return {
+                    name: cohort.nama_kurikulum,
+                    sesi: cohort.sesi_masuk,
+                    semester: cohort.semester_masuk,
+                    tahun: cohort.tahun_masuk,
+                    kod_kurikulum: cohort.kod_kurikulum,
+                    id_kurikulum: cohort.id_kurikulum,
+                };
+            } catch (e) {
+                console.error("Error for cohort", item.sesi_masuk, e);
+                return null;
+            }
+        });
+        curricula.value = (await Promise.all(cohortPromises)).filter(Boolean);
     } catch (err) {
         console.error("Fetch error:", err);
         curricula.value = [];
@@ -146,7 +98,7 @@ onMounted(async () => {
         <!-- Card List -->
         <div class="flex flex-col gap-4 px-4 py-2">
             <div
-                v-for="(item, index) in filteredCurricula"
+                v-for="(item, index) in curricula"
                 :key="index"
                 class="bg-blue-100 rounded-xl shadow p-4 relative"
             >
@@ -192,7 +144,14 @@ onMounted(async () => {
                     <div>Semester: {{ item.semester }}</div>
                     <div>Year: {{ item.tahun }}</div>
                 </div>
-                >
+                <!-- You can add teras/elektif/jumlah below if you want -->
+                <!--
+        <div class="flex flex-row gap-x-6 text-gray-600 text-xs mt-1">
+          <div>Teras: {{ item.teras }}</div>
+          <div>Elektif: {{ item.elektif }}</div>
+          <div>Jumlah: {{ item.jumlah }}</div>
+        </div>
+        -->
             </div>
         </div>
         <Footer />
