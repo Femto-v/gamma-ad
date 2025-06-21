@@ -141,7 +141,7 @@ onBeforeUnmount(() => {
 
             <div class="flex flex-col items-center">
                 <!-- Search Bar -->
-                <div class="w-full max-w-lg relative p-4">
+                <div class="w-full max-w-lg relative p-4 mb-4">
                     <div
                         class="flex items-center bg-white rounded-2xl shadow px-4 py-2 border border-gray-300"
                     >

@@ -10,9 +10,10 @@ import {
 import Toggle from "@/components/Toggle.vue";
 import ProfileBanner from "@/components/ProfileBanner.vue";
 import RuangApi from "@/api/RuangApi";
+import JadualRuangApi from "@/api/JadualRuangApi";
+import { days, timetable } from "@/constants/TimetableConstants";
 import { userInfo, userName, userMatric } from "@/constants/ApiConstants.js";
 import Footer from "@/components/Footer.vue";
-import RuangTimetablePanel from "./RuangTimetablePanel.vue";
 
 const lsData = JSON.parse(localStorage.getItem("web.fc.utm.my_usersession"));
 if (lsData) {
@@ -21,13 +22,16 @@ if (lsData) {
 }
 
 const ruangApi = new RuangApi();
+const jadualRuangApi = new JadualRuangApi();
 const selectedFaculty = ref("FSKSM");
 const rooms = ref([]);
 const error = ref(null);
 const searchTerm = ref("");
 const loadCount = ref(3);
 const loadingMore = ref(false);
+
 const selectedRoomCode = ref(null);
+const roomTimetable = ref(JSON.parse(JSON.stringify(timetable)));
 
 const formatRoomData = (room) => ({
     code: room.kod_ruang,
@@ -131,6 +135,21 @@ onMounted(() => {
 onBeforeUnmount(() => {
     window.removeEventListener("scroll", handleWindowScroll);
 });
+
+const loadTimetableForRoom = async (roomCode) => {
+    selectedRoomCode.value = roomCode;
+    roomTimetable.value = JSON.parse(JSON.stringify(timetable));
+    try {
+        const data = await jadualRuangApi.fetchByRoom("2024/2025", 2, roomCode);
+        for (const entry of data) {
+            if (!entry.masa || !entry.hari) continue;
+            const row = roomTimetable.value.find((r) => r.masa === entry.masa);
+            if (row) row.slots[entry.hari] = entry.kod_perkara;
+        }
+    } catch (err) {
+        console.error("Gagal memuatkan jadual ruang:", err);
+    }
+};
 </script>
 
 <template>
@@ -138,10 +157,8 @@ onBeforeUnmount(() => {
         <Toggle />
         <main>
             <ProfileBanner titleBanner="Venue" />
-
             <div class="flex flex-col items-center">
-                <!-- Search Bar -->
-                <div class="w-full max-w-lg relative p-4">
+                <div class="w-full max-w-lg relative px-4 mb-4">
                     <div
                         class="flex items-center bg-white rounded-2xl shadow px-4 py-2 border border-gray-300"
                     >
@@ -179,8 +196,6 @@ onBeforeUnmount(() => {
                     </div>
                 </div>
             </div>
-
-            <!-- Fakulti Dropdown -->
             <div class="flex flex-col items-center gap-2 py-4 text-sm">
                 <label>
                     Faculty:
@@ -195,7 +210,6 @@ onBeforeUnmount(() => {
                 </label>
             </div>
 
-            <!-- Room Cards -->
             <div class="flex flex-col items-center">
                 <div
                     id="ruang-scroll-list"
@@ -206,7 +220,6 @@ onBeforeUnmount(() => {
                         :key="index"
                         class="bg-blue-100 rounded-xl shadow flex flex-col relative p-4"
                     >
-                        <!-- Header (code + action button) -->
                         <div class="flex justify-between items-start">
                             <div>
                                 <div class="font-semibold text-lg">
@@ -216,7 +229,7 @@ onBeforeUnmount(() => {
                             <button
                                 class="rounded bg-gray-200 hover:bg-gray-300 p-2"
                                 title="Maklumat Jadual"
-                                @click="selectedRoomCode = room.code"
+                                @click="loadTimetableForRoom(room.code)"
                             >
                                 <svg
                                     xmlns="http://www.w3.org/2000/svg"
@@ -241,8 +254,6 @@ onBeforeUnmount(() => {
                                 </svg>
                             </button>
                         </div>
-
-                        <!-- Room Name -->
                         <div class="mt-1 mb-1 font-medium">
                             {{ room.name }}
                             <span
@@ -255,8 +266,6 @@ onBeforeUnmount(() => {
                                 ({{ room.shortName }})
                             </span>
                         </div>
-
-                        <!-- Bottom Info -->
                         <div
                             class="flex justify-between items-center mt-3 text-[15px] flex-wrap"
                         >
@@ -299,16 +308,84 @@ onBeforeUnmount(() => {
                     </div>
                 </div>
             </div>
+
+            <!-- Floating Timetable Modal -->
+            <div
+                v-if="selectedRoomCode"
+                class="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50"
+            >
+                <div
+                    class="bg-white max-w-6xl w-full mx-4 rounded-lg shadow-lg overflow-y-auto max-h-[90vh] relative"
+                >
+                    <!-- Close Button -->
+                    <button
+                        class="absolute top-3 right-3 text-gray-600 hover:text-black"
+                        @click="selectedRoomCode = null"
+                    >
+                        <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            class="w-6 h-6"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                            stroke="currentColor"
+                        >
+                            <path
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                                stroke-width="2"
+                                d="M6 18L18 6M6 6l12 12"
+                            />
+                        </svg>
+                    </button>
+                    <div class="p-6">
+                        <h2 class="text-xl font-semibold mb-4">
+                            Jadual: {{ selectedRoomCode }}
+                        </h2>
+                        <div
+                            class="overflow-x-auto border rounded bg-white shadow"
+                        >
+                            <table
+                                class="min-w-full table-fixed border-collapse text-sm"
+                            >
+                                <thead class="bg-gray-100 text-center">
+                                    <tr>
+                                        <th class="border px-2 py-1 w-24">
+                                            Waktu
+                                        </th>
+                                        <th
+                                            v-for="(day, i) in days"
+                                            :key="i"
+                                            class="border px-2 py-1"
+                                        >
+                                            {{ day }}
+                                        </th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr
+                                        v-for="row in roomTimetable"
+                                        :key="row.masa"
+                                    >
+                                        <td
+                                            class="border px-2 py-1 text-center font-medium"
+                                        >
+                                            {{ row.waktu }}
+                                        </td>
+                                        <td
+                                            v-for="(slot, index) in row.slots"
+                                            :key="index"
+                                            class="border px-2 py-1 text-center"
+                                        >
+                                            {{ slot }}
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </main>
-
-        <!-- Timetable Panel -->
-        <RuangTimetablePanel
-            v-if="selectedRoomCode"
-            :roomCode="selectedRoomCode"
-            :show="!!selectedRoomCode"
-            :onClose="() => (selectedRoomCode = null)"
-        />
-
         <Footer />
     </div>
 </template>

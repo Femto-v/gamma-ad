@@ -96,7 +96,7 @@ onMounted(async () => {
 </script>
 
 <template>
-    <div class="bg-transparent min-h-screen">
+    <div class="bg-white min-h-screen">
         <Toggle />
         <ProfileBanner />
 

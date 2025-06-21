@@ -12,7 +12,7 @@ import ProfileBanner from "@/components/ProfileBanner.vue";
 import RuangApi from "@/api/RuangApi";
 import { userInfo, userName, userMatric } from "@/constants/ApiConstants.js";
 import Footer from "@/components/Footer.vue";
-import RuangTimetablePanel from "./RuangTimetablePanel.vue";
+import RuangTimetablePanel from "@/components/RuangTimetablePanel.vue";
 
 const lsData = JSON.parse(localStorage.getItem("web.fc.utm.my_usersession"));
 if (lsData) {
@@ -141,7 +141,7 @@ onBeforeUnmount(() => {
 
             <div class="flex flex-col items-center">
                 <!-- Search Bar -->
-                <div class="w-full max-w-lg relative p-4">
+                <div class="w-full max-w-lg relative px-4 mb-4">
                     <div
                         class="flex items-center bg-white rounded-2xl shadow px-4 py-2 border border-gray-300"
                     >

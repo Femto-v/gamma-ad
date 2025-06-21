@@ -19,7 +19,7 @@ const properties = defineProps({
 
 <template>
     <div
-        class="bg-cover bg-center h-60 text-black bg-linear-to-b from-transparent via-blue-200 to-blue-300 flex flex-col justify-center items-center pt-18"
+        class="bg-cover bg-center h-60 text-black bg-gradient-to-b from-blue-500 via-blue-200 to-blue-300 flex flex-col justify-center items-center pt-18"
     >
         <img src="/UTM-LOGO.png" class="w-16 mb-2" alt="UTM Logo" />
         <h2 class="text-2xl font-bold drop-shadow-md">{{ titleBanner }}</h2>

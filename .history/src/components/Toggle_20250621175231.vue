@@ -114,7 +114,7 @@ const fetchWithErrorHandler = async (apiCall) => {
     <header
         :class="[
             'fixed top-0 left-0 z-2 w-full text-black p-4 flex justify-between items-center transition-colors duration-300',
-            isScrolled ? 'bg-blue-200' : 'bg-transparent',
+            isScrolled ? 'bg-blue-100' : 'bg-transparent',
         ]"
     >
         <button @click="toggleSidebar" class="text-xl">&#9776;</button>

@@ -1,22 +1,9 @@
 <script setup>
-import { ref, onMounted, onBeforeUnmount } from "vue";
+import { ref } from "vue";
 const sidebarOpen = ref(false);
 const analysisOpen = ref(false);
 import AppIcon from "./AppIcon.vue";
 const error = ref(null); //Buat error
-const isScrolled = ref(false);
-
-const handleScroll = () => {
-    isScrolled.value = window.scrollY > 0;
-};
-
-onMounted(() => {
-    window.addEventListener("scroll", handleScroll);
-});
-
-onBeforeUnmount(() => {
-    window.removeEventListener("scroll", handleScroll);
-});
 
 //button function
 const toggleSidebar = () => {
@@ -112,10 +99,7 @@ const fetchWithErrorHandler = async (apiCall) => {
 <template>
     <!-- header -->
     <header
-        :class="[
-            'fixed top-0 left-0 z-2 w-full text-black p-4 flex justify-between items-center transition-colors duration-300',
-            isScrolled ? 'bg-blue-200' : 'bg-transparent',
-        ]"
+        class="fixed top-0 left-0 z-2 w-full bg-transparent text-black p-4 flex justify-between items-center"
     >
         <button @click="toggleSidebar" class="text-xl">&#9776;</button>
         <h1 class="text-xl font-bold">FC Timetable</h1>

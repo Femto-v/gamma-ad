@@ -173,7 +173,7 @@ watch(
                     <div class="flex items-center space-x-2">
                         <select
                             v-model="activeSesi"
-                            class="text-sm border border-gray-300 rounded-lg px-3 py-1"
+                            class="text-sm border border-gray-300 rounded-lg px-3 py-1 bg-white"
                         >
                             <option
                                 v-for="session in availableSessions"
