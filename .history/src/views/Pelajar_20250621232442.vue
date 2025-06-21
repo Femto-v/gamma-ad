@@ -7,62 +7,25 @@ import PelajarApi from "@/api/PelajarApi.js";
 import { userName, userMatric } from "@/constants/ApiConstants.js";
 
 // States
-const nama = ref("");
-const tahun = ref("");
-const kursus = ref("");
+const nama = ref(""); // search by name (live)
+const tahun = ref(""); // can add search later if needed
+const kursus = ref(""); // can add search later if needed
 const students = ref([]);
+const offset = ref(0);
 const isLoading = ref(false);
+const hasMore = ref(true);
 const sessionId = ref("");
 
-// Session
+// Get session from local storage
 const lsData = JSON.parse(localStorage.getItem("web.fc.utm.my_usersession"));
 if (lsData) {
     userName.value = lsData.full_name;
     userMatric.value = lsData.login_name;
 }
 
-const loadAllStudents = async () => {
-    if (!sessionId.value) return;
-    isLoading.value = true;
-    try {
-        const api = new PelajarApi(sessionId.value);
-        let batchOffset = 0;
-        let batch;
-        let allStudents = [];
-        const PAGE_SIZE = 100; // increase if backend allows
+const PAGE_SIZE = 10; // how many students to load per scroll/page
 
-        do {
-            batch = await api.getPelajar(
-                "2024/2025",
-                2,
-                PAGE_SIZE,
-                batchOffset
-            );
-            if (Array.isArray(batch) && batch.length > 0) {
-                allStudents.push(
-                    ...batch.map((item) => ({
-                        name: item.nama,
-                        yearCourse: `${item.tahun_kursus}/${item.kod_kursus}`,
-                        faculty: item.kod_fakulti,
-                        subjectCount: item.bil_subjek,
-                        credit: 0,
-                    }))
-                );
-                batchOffset += PAGE_SIZE;
-            } else {
-                batch = [];
-            }
-        } while (batch.length === PAGE_SIZE);
-
-        students.value = allStudents;
-        console.log("All students loaded:", students.value.length);
-    } catch (err) {
-        students.value = [];
-        console.error("Failed to fetch students:", err);
-    }
-    isLoading.value = false;
-};
-
+// Validate session and fetch initial students
 const validateSession = async () => {
     const rawSessionId = lsData?.session_id;
     if (!rawSessionId) {
@@ -83,39 +46,67 @@ const validateSession = async () => {
             return;
         }
         sessionId.value = data[0].session_id;
-        await loadAllStudents();
+        loadStudents();
     } catch (err) {
         console.error("Error during session validation:", err);
     }
 };
 
-// Client-side computed filter
+// Infinite scroll / load more students
+const loadStudents = async () => {
+    if (!sessionId.value || isLoading.value || !hasMore.value) {
+        return;
+    }
+    isLoading.value = true;
+    try {
+        const api = new PelajarApi(sessionId.value);
+        const result = await api.getPelajar(
+            "2024/2025",
+            2,
+            PAGE_SIZE,
+            offset.value
+        );
+        if (Array.isArray(result) && result.length > 0) {
+            const newStudents = result.map((item) => ({
+                name: item.nama,
+                yearCourse: `${item.tahun_kursus}/${item.kod_kursus}`,
+                faculty: item.kod_fakulti,
+                subjectCount: item.bil_subjek,
+                credit: 0,
+            }));
+            students.value.push(...newStudents);
+            offset.value += PAGE_SIZE;
+        } else {
+            hasMore.value = false;
+        }
+    } catch (err) {
+        console.error("Failed to fetch students:", err);
+    }
+    isLoading.value = false;
+};
+
+// Client-side live filtering by name
 const filteredStudents = computed(() => {
-    let filtered = students.value;
-    if (nama.value.trim()) {
-        filtered = filtered.filter((s) =>
-            s.name?.toLowerCase().includes(nama.value.trim().toLowerCase())
-        );
-    }
-    if (tahun.value.trim()) {
-        filtered = filtered.filter((s) =>
-            s.yearCourse?.split("/")[0]?.trim().includes(tahun.value.trim())
-        );
-    }
-    if (kursus.value.trim()) {
-        filtered = filtered.filter((s) =>
-            s.yearCourse
-                ?.split("/")[1]
-                ?.trim()
-                .toLowerCase()
-                .includes(kursus.value.trim().toLowerCase())
-        );
-    }
-    return filtered;
+    const q = nama.value.trim().toLowerCase();
+    if (!q) return students.value;
+    return students.value.filter((student) =>
+        student.name?.toLowerCase().includes(q)
+    );
 });
+
+// Infinite scroll handler
+const handleScroll = () => {
+    if (
+        window.innerHeight + window.scrollY >=
+        document.body.offsetHeight - 50
+    ) {
+        loadStudents();
+    }
+};
 
 onMounted(() => {
     validateSession();
+    window.addEventListener("scroll", handleScroll);
 });
 </script>
 
@@ -124,7 +115,7 @@ onMounted(() => {
         <Toggle />
         <ProfileBanner titleBanner="Student" />
 
-        <!-- Search and Filters -->
+        <!-- Live Search Input -->
         <div
             class="p-4 flex flex-col gap-2 items-center text-sm max-w-md mx-auto"
         >
@@ -139,13 +130,13 @@ onMounted(() => {
                     />
                 </div>
             </div>
-            <div class="flex flex-row gap-2 w-full">
+            <!-- Year and Course fields kept for future extensibility -->
+            <div class="flex flex-row gap-2 w-full" v-if="false">
                 <div class="flex-1 flex flex-col">
                     <label class="mb-1 ml-1 text-xs">Year</label>
                     <input
                         v-model="tahun"
                         type="text"
-                        placeholder="Year"
                         class="border px-2 py-1 rounded w-full"
                     />
                 </div>
@@ -154,14 +145,13 @@ onMounted(() => {
                     <input
                         v-model="kursus"
                         type="text"
-                        placeholder="Course"
                         class="border px-2 py-1 rounded w-full"
                     />
                 </div>
             </div>
         </div>
 
-        <!-- Student Cards -->
+        <!-- Student Cards (filtered by live search) -->
         <div class="flex flex-col gap-4 px-4 py-2">
             <div
                 v-for="(student, index) in filteredStudents"
@@ -207,7 +197,7 @@ onMounted(() => {
                 </div>
             </div>
             <div
-                v-if="!filteredStudents.length && !isLoading"
+                v-if="filteredStudents.length === 0 && !isLoading"
                 class="text-center py-6 text-gray-400"
             >
                 No students found.
@@ -218,12 +208,15 @@ onMounted(() => {
             class="flex justify-center py-4 text-sm text-gray-500"
             v-if="isLoading"
         >
-            Loading students...
+            Loading more students...
         </div>
+        <div
+            class="flex justify-center py-4 text-sm text-gray-400"
+            v-if="!hasMore"
+        >
+            No more students to load.
+        </div>
+
         <Footer />
     </div>
 </template>
-
-<style scoped>
-/* You can keep your previous styles here or customize */
-</style>

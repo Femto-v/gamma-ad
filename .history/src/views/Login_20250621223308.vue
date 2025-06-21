@@ -1,7 +1,6 @@
 <script setup>
 import { ref } from "vue";
 import AuthApi from "@/api/AuthApi";
-import SessionService from "@/api/SessionService";
 
 const login = ref("");
 const password = ref("");
@@ -28,7 +27,7 @@ const handleLogin = async () => {
                 "web.fc.utm.my_usersession",
                 JSON.stringify(data[0])
             );
-            SessionService.saveSession(data[0]);
+            sessionId.value = data[0].session_id;
             setCookie("session_id", sessionId.value, 1); // 1 hour expiry
             window.location.replace("/main");
         } else {

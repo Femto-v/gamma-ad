@@ -112,11 +112,16 @@ function getCookie(name) {
 }
 
 router.beforeEach((to, from, next) => {
-    SessionService.validateSession().then((session) => {
-        if (to.meta.requiresAuth && !session) return next("/login");
-        if (to.path === "/login" && session) return next("/main");
-        next();
-    });
+    const session =
+        localStorage.getItem("web.fc.utm.my_usersession") ||
+        getCookie("session_id");
+    if (to.meta.requiresAuth && !session) {
+        return next("/login");
+    }
+    if (to.path === "/login" && session) {
+        return next("/main");
+    }
+    next();
 });
 
 export default router;

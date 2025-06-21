@@ -1,6 +1,5 @@
 <script setup>
 import { ref, onMounted, onBeforeUnmount } from "vue";
-import SessionService from "@/api/SessionService";
 const sidebarOpen = ref(false);
 const analysisOpen = ref(false);
 import AppIcon from "./AppIcon.vue";
@@ -60,7 +59,13 @@ const loadKurikulum = () => {
 };
 
 const logout = () => {
-    SessionService.clearSession();
+    // Remove from localStorage
+    localStorage.removeItem("web.fc.utm.my_usersession");
+
+    // Remove session_id cookie (set with same path as in login)
+    document.cookie =
+        "session_id=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+
     window.location.replace("/login");
 };
 
@@ -114,7 +119,7 @@ const fetchWithErrorHandler = async (apiCall) => {
     <!-- header -->
     <header
         :class="[
-            'fixed top-0 left-0 z-20 w-full text-black p-4 flex justify-between items-center transition-colors duration-300',
+            'fixed top-0 left-0 z-2 w-full text-black p-4 flex justify-between items-center transition-colors duration-300',
             isScrolled ? 'bg-blue-200' : 'bg-transparent',
         ]"
     >

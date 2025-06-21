@@ -1,21 +1,17 @@
 <script setup>
+console.log("Login Loaded . . . ");
 import { ref } from "vue";
 import AuthApi from "@/api/AuthApi";
-import SessionService from "@/api/SessionService";
 
 const login = ref("");
 const password = ref("");
 const sessionId = ref("");
 const isLoading = ref(false);
 
+// Instantiate the AuthApi class
 const authApi = new AuthApi();
 
-const setCookie = (name, value, hours) => {
-    const d = new Date();
-    d.setTime(d.getTime() + hours * 60 * 60 * 1000);
-    document.cookie = `${name}=${value};expires=${d.toUTCString()};path=/`;
-};
-
+// HANDLE LOGIN
 const handleLogin = async () => {
     try {
         isLoading.value = true;
@@ -23,13 +19,11 @@ const handleLogin = async () => {
 
         if (data?.[0]?.session_id) {
             alert("Login successful!");
-            // Store in both localStorage and cookie for compatibility
             localStorage.setItem(
                 "web.fc.utm.my_usersession",
                 JSON.stringify(data[0])
             );
-            SessionService.saveSession(data[0]);
-            setCookie("session_id", sessionId.value, 1); // 1 hour expiry
+            sessionId.value = data[0].session_id;
             window.location.replace("/main");
         } else {
             alert("Invalid login response!");
@@ -43,8 +37,6 @@ const handleLogin = async () => {
     }
 };
 </script>
-
-<!-- Keep your existing template/style -->
 
 <template>
     <div

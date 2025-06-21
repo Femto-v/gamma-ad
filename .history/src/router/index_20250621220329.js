@@ -13,7 +13,6 @@ import AnalysisPelajar from "@/views/AnalysisPelajar.vue";
 import ClashRuang from "@/views/ClashRuang.vue";
 import ClashPelajar from "@/views/ClashPelajar.vue";
 import ClashPensyarah from "@/views/ClashPensyarah.vue";
-import SessionService from "@/api/SessionService";
 
 const routes = [
     { path: "/", redirect: "/login" },
@@ -103,20 +102,23 @@ const router = createRouter({
     routes,
 });
 
-// Helper to read cookie
-function getCookie(name) {
-    const match = document.cookie.match(
-        new RegExp("(^| )" + name + "=([^;]+)")
-    );
-    return match ? match[2] : null;
-}
-
 router.beforeEach((to, from, next) => {
-    SessionService.validateSession().then((session) => {
-        if (to.meta.requiresAuth && !session) return next("/login");
-        if (to.path === "/login" && session) return next("/main");
-        next();
-    });
+    function getCookie(name) {
+        const match = document.cookie.match(
+            new RegExp("(^| )" + name + "=([^;]+)")
+        );
+        return match ? match[2] : null;
+    }
+    const session =
+        localStorage.getItem("web.fc.utm.my_usersession") ||
+        getCookie("session_id");
+    if (to.meta.requiresAuth && !session) {
+        return next("/login");
+    }
+    if (to.path === "/login" && session) {
+        return next("/main");
+    }
+    next();
 });
 
 export default router;

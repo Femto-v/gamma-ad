@@ -1,74 +1,43 @@
 <script setup>
-import { ref, computed, onMounted } from "vue";
+import { ref, onMounted, watch } from "vue";
 import Toggle from "@/components/Toggle.vue";
 import ProfileBanner from "@/components/ProfileBanner.vue";
 import Footer from "@/components/Footer.vue";
 import PelajarApi from "@/api/PelajarApi.js";
 import { userName, userMatric } from "@/constants/ApiConstants.js";
 
-// States
-const nama = ref("");
-const tahun = ref("");
-const kursus = ref("");
+// Filters
+const searchTerm = ref({
+    nama: "",
+    tahun: "",
+    kursus: "",
+});
+
+// Debounce timer
+let searchTimer = null;
+
+// Students & session state
 const students = ref([]);
+const offset = ref(0);
 const isLoading = ref(false);
+const hasMore = ref(true);
 const sessionId = ref("");
 
-// Session
+// Get session from local storage
 const lsData = JSON.parse(localStorage.getItem("web.fc.utm.my_usersession"));
 if (lsData) {
     userName.value = lsData.full_name;
     userMatric.value = lsData.login_name;
 }
 
-const loadAllStudents = async () => {
-    if (!sessionId.value) return;
-    isLoading.value = true;
-    try {
-        const api = new PelajarApi(sessionId.value);
-        let batchOffset = 0;
-        let batch;
-        let allStudents = [];
-        const PAGE_SIZE = 100; // increase if backend allows
-
-        do {
-            batch = await api.getPelajar(
-                "2024/2025",
-                2,
-                PAGE_SIZE,
-                batchOffset
-            );
-            if (Array.isArray(batch) && batch.length > 0) {
-                allStudents.push(
-                    ...batch.map((item) => ({
-                        name: item.nama,
-                        yearCourse: `${item.tahun_kursus}/${item.kod_kursus}`,
-                        faculty: item.kod_fakulti,
-                        subjectCount: item.bil_subjek,
-                        credit: 0,
-                    }))
-                );
-                batchOffset += PAGE_SIZE;
-            } else {
-                batch = [];
-            }
-        } while (batch.length === PAGE_SIZE);
-
-        students.value = allStudents;
-        console.log("All students loaded:", students.value.length);
-    } catch (err) {
-        students.value = [];
-        console.error("Failed to fetch students:", err);
-    }
-    isLoading.value = false;
-};
-
+// Validate session
 const validateSession = async () => {
     const rawSessionId = lsData?.session_id;
     if (!rawSessionId) {
         console.error("No session_id found in localStorage.");
         return;
     }
+
     try {
         const res = await fetch(
             `http://web.fc.utm.my/ttms/auth-admin.php?session_id=${rawSessionId}`
@@ -77,45 +46,97 @@ const validateSession = async () => {
             console.error("Session validation HTTP failed:", res.status);
             return;
         }
+
         const data = await res.json();
+
         if (!Array.isArray(data) || !data[0]?.session_id) {
             console.error("Invalid session response:", data);
             return;
         }
+
         sessionId.value = data[0].session_id;
-        await loadAllStudents();
+        loadStudents(true); // Initial load
     } catch (err) {
         console.error("Error during session validation:", err);
     }
 };
 
-// Client-side computed filter
-const filteredStudents = computed(() => {
-    let filtered = students.value;
-    if (nama.value.trim()) {
-        filtered = filtered.filter((s) =>
-            s.name?.toLowerCase().includes(nama.value.trim().toLowerCase())
-        );
+// Load students (reset on search)
+const loadStudents = async (isSearch = false) => {
+    if (!sessionId.value || isLoading.value || (!hasMore.value && !isSearch)) {
+        return;
     }
-    if (tahun.value.trim()) {
-        filtered = filtered.filter((s) =>
-            s.yearCourse?.split("/")[0]?.trim().includes(tahun.value.trim())
-        );
+
+    if (isSearch) {
+        students.value = [];
+        offset.value = 0;
+        hasMore.value = true;
     }
-    if (kursus.value.trim()) {
-        filtered = filtered.filter((s) =>
-            s.yearCourse
-                ?.split("/")[1]
-                ?.trim()
-                .toLowerCase()
-                .includes(kursus.value.trim().toLowerCase())
+
+    isLoading.value = true;
+
+    try {
+        const api = new PelajarApi(sessionId.value);
+        const filters = {
+            nama: searchTerm.value.nama || undefined,
+            tahun: searchTerm.value.tahun || undefined,
+            kod_kursus: searchTerm.value.kursus || undefined,
+        };
+
+        const result = await api.getPelajar(
+            "2024/2025",
+            2,
+            3,
+            offset.value,
+            filters
         );
+
+        if (Array.isArray(result) && result.length > 0) {
+            const newStudents = result.map((item) => ({
+                name: item.nama,
+                yearCourse: `${item.tahun_kursus}/${item.kod_kursus}`,
+                faculty: item.kod_fakulti,
+                subjectCount: item.bil_subjek,
+                credit: 0,
+            }));
+
+            students.value.push(...newStudents);
+            offset.value += 3;
+        } else {
+            hasMore.value = false;
+        }
+    } catch (err) {
+        console.error("Failed to fetch students:", err);
     }
-    return filtered;
-});
+
+    isLoading.value = false;
+};
+
+// Scroll loader
+const handleScroll = () => {
+    if (
+        window.innerHeight + window.scrollY >=
+        document.body.offsetHeight - 50
+    ) {
+        loadStudents();
+    }
+};
+
+// Watch for filter input (with debounce)
+watch(
+    searchTerm,
+    () => {
+        if (searchTimer) clearTimeout(searchTimer);
+        searchTimer = setTimeout(() => {
+            loadStudents(true);
+        }, 500); // 500ms delay
+    },
+    { deep: true }
+);
 
 onMounted(() => {
     validateSession();
+    window.addEventListener("scroll", handleScroll);
 });
 </script>
 
@@ -124,7 +145,7 @@ onMounted(() => {
         <Toggle />
         <ProfileBanner titleBanner="Student" />
 
-        <!-- Search and Filters -->
+        <!-- Filter Form -->
         <div
             class="p-4 flex flex-col gap-2 items-center text-sm max-w-md mx-auto"
         >
@@ -132,10 +153,10 @@ onMounted(() => {
                 <div class="flex-1 flex flex-col">
                     <label class="mb-1 ml-1 text-xs">Name</label>
                     <input
-                        v-model="nama"
+                        v-model="searchTerm.nama"
                         type="text"
-                        placeholder="Type to search student name"
                         class="border px-2 py-1 rounded w-full"
+                        placeholder="Enter student name"
                     />
                 </div>
             </div>
@@ -143,19 +164,19 @@ onMounted(() => {
                 <div class="flex-1 flex flex-col">
                     <label class="mb-1 ml-1 text-xs">Year</label>
                     <input
-                        v-model="tahun"
+                        v-model="searchTerm.tahun"
                         type="text"
-                        placeholder="Year"
                         class="border px-2 py-1 rounded w-full"
+                        placeholder="e.g. 2"
                     />
                 </div>
                 <div class="flex-1 flex flex-col">
                     <label class="mb-1 ml-1 text-xs">Course</label>
                     <input
-                        v-model="kursus"
+                        v-model="searchTerm.kursus"
                         type="text"
-                        placeholder="Course"
                         class="border px-2 py-1 rounded w-full"
+                        placeholder="e.g. SECRH"
                     />
                 </div>
             </div>
@@ -164,7 +185,8 @@ onMounted(() => {
         <!-- Student Cards -->
         <div class="flex flex-col gap-4 px-4 py-2">
             <div
-                v-for="(student, index) in filteredStudents"
+                v-if="students && students.length > 0"
+                v-for="(student, index) in students"
                 :key="index"
                 class="bg-blue-100 rounded-xl shadow p-4 relative"
             >
@@ -206,24 +228,26 @@ onMounted(() => {
                     <div>Total Credit: {{ student.credit }}</div>
                 </div>
             </div>
-            <div
-                v-if="!filteredStudents.length && !isLoading"
-                class="text-center py-6 text-gray-400"
-            >
+
+            <div v-else-if="!isLoading" class="text-center text-gray-400 py-6">
                 No students found.
             </div>
         </div>
 
+        <!-- Loading & Footer -->
         <div
             class="flex justify-center py-4 text-sm text-gray-500"
             v-if="isLoading"
         >
-            Loading students...
+            Loading more students...
         </div>
+        <div
+            class="flex justify-center py-4 text-sm text-gray-400"
+            v-if="!hasMore && students.length > 0"
+        >
+            No more students to load.
+        </div>
+
         <Footer />
     </div>
 </template>
-
-<style scoped>
-/* You can keep your previous styles here or customize */
-</style>

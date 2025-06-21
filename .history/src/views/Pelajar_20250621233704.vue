@@ -1,5 +1,5 @@
 <script setup>
-import { ref, computed, onMounted } from "vue";
+import { ref, watch, onMounted } from "vue";
 import Toggle from "@/components/Toggle.vue";
 import ProfileBanner from "@/components/ProfileBanner.vue";
 import Footer from "@/components/Footer.vue";
@@ -7,9 +7,9 @@ import PelajarApi from "@/api/PelajarApi.js";
 import { userName, userMatric } from "@/constants/ApiConstants.js";
 
 // States
-const nama = ref("");
-const tahun = ref("");
-const kursus = ref("");
+const nama = ref(""); // live search box (name)
+const tahun = ref(""); // year filter (optional, see below)
+const kursus = ref(""); // course filter (optional, see below)
 const students = ref([]);
 const isLoading = ref(false);
 const sessionId = ref("");
@@ -21,47 +21,7 @@ if (lsData) {
     userMatric.value = lsData.login_name;
 }
 
-const loadAllStudents = async () => {
-    if (!sessionId.value) return;
-    isLoading.value = true;
-    try {
-        const api = new PelajarApi(sessionId.value);
-        let batchOffset = 0;
-        let batch;
-        let allStudents = [];
-        const PAGE_SIZE = 100; // increase if backend allows
-
-        do {
-            batch = await api.getPelajar(
-                "2024/2025",
-                2,
-                PAGE_SIZE,
-                batchOffset
-            );
-            if (Array.isArray(batch) && batch.length > 0) {
-                allStudents.push(
-                    ...batch.map((item) => ({
-                        name: item.nama,
-                        yearCourse: `${item.tahun_kursus}/${item.kod_kursus}`,
-                        faculty: item.kod_fakulti,
-                        subjectCount: item.bil_subjek,
-                        credit: 0,
-                    }))
-                );
-                batchOffset += PAGE_SIZE;
-            } else {
-                batch = [];
-            }
-        } while (batch.length === PAGE_SIZE);
-
-        students.value = allStudents;
-        console.log("All students loaded:", students.value.length);
-    } catch (err) {
-        students.value = [];
-        console.error("Failed to fetch students:", err);
-    }
-    isLoading.value = false;
-};
+const PAGE_SIZE = 30; // result per query, adjust as needed
 
 const validateSession = async () => {
     const rawSessionId = lsData?.session_id;
@@ -83,35 +43,50 @@ const validateSession = async () => {
             return;
         }
         sessionId.value = data[0].session_id;
-        await loadAllStudents();
+        await fetchStudents(); // load on mount
     } catch (err) {
         console.error("Error during session validation:", err);
     }
 };
 
-// Client-side computed filter
-const filteredStudents = computed(() => {
-    let filtered = students.value;
-    if (nama.value.trim()) {
-        filtered = filtered.filter((s) =>
-            s.name?.toLowerCase().includes(nama.value.trim().toLowerCase())
+const fetchStudents = async () => {
+    if (!sessionId.value) return;
+    isLoading.value = true;
+    try {
+        const api = new PelajarApi(sessionId.value);
+        // Pass nama (and optional tahun/kursus) as filter
+        const filters = {};
+        if (nama.value.trim()) filters.nama = nama.value.trim();
+        if (tahun.value.trim()) filters.tahun = tahun.value.trim();
+        if (kursus.value.trim()) filters.kursus = kursus.value.trim();
+        const result = await api.getPelajar(
+            "2024/2025",
+            2,
+            PAGE_SIZE,
+            0,
+            filters
         );
+        students.value = (Array.isArray(result) ? result : []).map((item) => ({
+            name: item.nama,
+            yearCourse: `${item.tahun_kursus}/${item.kod_kursus}`,
+            faculty: item.kod_fakulti,
+            subjectCount: item.bil_subjek,
+            credit: 0,
+        }));
+    } catch (err) {
+        students.value = [];
+        console.error("Failed to fetch students:", err);
     }
-    if (tahun.value.trim()) {
-        filtered = filtered.filter((s) =>
-            s.yearCourse?.split("/")[0]?.trim().includes(tahun.value.trim())
-        );
-    }
-    if (kursus.value.trim()) {
-        filtered = filtered.filter((s) =>
-            s.yearCourse
-                ?.split("/")[1]
-                ?.trim()
-                .toLowerCase()
-                .includes(kursus.value.trim().toLowerCase())
-        );
-    }
-    return filtered;
+    isLoading.value = false;
+};
+
+// --- Debounce the API call (for nice UX) ---
+let debounceTimer = null;
+watch([nama, tahun, kursus], () => {
+    if (debounceTimer) clearTimeout(debounceTimer);
+    debounceTimer = setTimeout(() => {
+        fetchStudents();
+    }, 400); // 400ms debounce
 });
 
 onMounted(() => {
@@ -139,6 +114,8 @@ onMounted(() => {
                     />
                 </div>
             </div>
+            <!-- Enable these for year/course server-side filtering -->
+
             <div class="flex flex-row gap-2 w-full">
                 <div class="flex-1 flex flex-col">
                     <label class="mb-1 ml-1 text-xs">Year</label>
@@ -164,7 +141,7 @@ onMounted(() => {
         <!-- Student Cards -->
         <div class="flex flex-col gap-4 px-4 py-2">
             <div
-                v-for="(student, index) in filteredStudents"
+                v-for="(student, index) in students"
                 :key="index"
                 class="bg-blue-100 rounded-xl shadow p-4 relative"
             >
@@ -207,7 +184,7 @@ onMounted(() => {
                 </div>
             </div>
             <div
-                v-if="!filteredStudents.length && !isLoading"
+                v-if="!students.length && !isLoading"
                 class="text-center py-6 text-gray-400"
             >
                 No students found.
