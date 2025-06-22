@@ -13,9 +13,8 @@ const kursus = ref("");
 const students = ref([]);
 const isLoading = ref(false);
 const sessionId = ref("");
-const currentIndex = ref(0);
 
-const sliderRef = ref(null);
+const currentIndex = ref(0);
 
 const lsData = JSON.parse(localStorage.getItem("web.fc.utm.my_usersession"));
 if (lsData) {
@@ -23,7 +22,6 @@ if (lsData) {
     userMatric.value = lsData.login_name;
 }
 
-// --- Data Fetch ---
 const loadAllStudents = async () => {
     if (!sessionId.value) return;
     isLoading.value = true;
@@ -57,8 +55,6 @@ const loadAllStudents = async () => {
         } while (batch.length === PAGE_SIZE);
 
         students.value = allStudents;
-        await nextTick();
-        scrollToCard(0);
         currentIndex.value = 0;
     } catch (err) {
         students.value = [];
@@ -67,10 +63,10 @@ const loadAllStudents = async () => {
     isLoading.value = false;
 };
 
-// --- Session Validate ---
 const validateSession = async () => {
     const rawSessionId = lsData?.session_id;
     if (!rawSessionId) {
+        console.error("No session_id found in localStorage.");
         window.location.replace("/login");
         return;
     }
@@ -79,6 +75,7 @@ const validateSession = async () => {
             `http://web.fc.utm.my/ttms/auth-admin.php?session_id=${rawSessionId}`
         );
         if (!res.ok) {
+            console.error("Session validation HTTP failed:", res.status);
             window.location.replace("/login");
             return;
         }
@@ -86,21 +83,25 @@ const validateSession = async () => {
         try {
             data = await res.json();
         } catch (err) {
+            // If the API did not return valid JSON, redirect to login
+            console.error("Session API did not return valid JSON.", err);
             window.location.replace("/login");
             return;
         }
         if (!Array.isArray(data) || !data[0]?.session_id) {
+            console.error("Invalid session response:", data);
             window.location.replace("/login");
             return;
         }
         sessionId.value = data[0].session_id;
         await loadAllStudents();
-    } catch {
+    } catch (err) {
+        // If *any* error occurs, redirect to login
+        console.error("Error during session validation:", err);
         window.location.replace("/login");
     }
 };
 
-// --- Filtered Students ---
 const filteredStudents = computed(() => {
     let filtered = students.value;
     if (nama.value.trim()) {
@@ -122,70 +123,18 @@ const filteredStudents = computed(() => {
                 .includes(kursus.value.trim().toLowerCase())
         );
     }
-    if (currentIndex.value >= filtered.length)
-        currentIndex.value = Math.max(filtered.length - 1, 0);
     return filtered;
 });
 
-// --- Carousel Logic ---
-function scrollToCard(idx) {
-    // Center card in scroller
-    const scroller = sliderRef.value;
-    if (scroller && scroller.children[idx]) {
-        const card = scroller.children[idx];
-        const center =
-            card.offsetLeft - scroller.offsetWidth / 2 + card.offsetWidth / 2;
-        scroller.scrollTo({
-            left: center,
-            behavior: "smooth",
-        });
-        currentIndex.value = idx;
-    }
-}
 function nextCard() {
     if (currentIndex.value < filteredStudents.value.length - 1) {
-        scrollToCard(currentIndex.value + 1);
+        currentIndex.value++;
     }
 }
 function prevCard() {
     if (currentIndex.value > 0) {
-        scrollToCard(currentIndex.value - 1);
+        currentIndex.value--;
     }
-}
-function onScrollSlider() {
-    if (!sliderRef.value) return;
-    const cards = sliderRef.value.children;
-    let closest = 0;
-    let minDist = Infinity;
-    for (let i = 0; i < cards.length; i++) {
-        const cardCenter =
-            cards[i].offsetLeft -
-            sliderRef.value.scrollLeft +
-            cards[i].offsetWidth / 2;
-        const scrollerCenter = sliderRef.value.offsetWidth / 2;
-        const dist = Math.abs(cardCenter - scrollerCenter);
-        if (dist < minDist) {
-            minDist = dist;
-            closest = i;
-        }
-    }
-    currentIndex.value = closest;
-}
-
-// --- Touch/Swipe Support (Horizontal) ---
-let touchStartX = null;
-function handleTouchStart(e) {
-    touchStartX = e.touches[0].clientX;
-}
-function handleTouchEnd(e) {
-    if (touchStartX === null) return;
-    const touchEndX = e.changedTouches[0].clientX;
-    const deltaX = touchEndX - touchStartX;
-    if (Math.abs(deltaX) > 40) {
-        if (deltaX > 0) prevCard(); // swipe right = prev
-        else nextCard(); // swipe left = next
-    }
-    touchStartX = null;
 }
 
 onMounted(() => {
@@ -265,20 +214,79 @@ onMounted(() => {
             >
         </div>
 
-        <!-- Student Card Carousel -->
+        <!-- Student Card Vertical Carousel -->
         <div
             v-if="!isLoading"
-            class="w-full flex flex-col items-center px-0 mt-4"
+            class="w-full flex flex-col items-center justify-center px-0 mt-6"
         >
-            <div class="relative w-full max-w-full mx-auto">
+            <transition name="vertical-slide" mode="out-in">
+                <div
+                    v-if="filteredStudents.length"
+                    :key="currentIndex"
+                    class="bg-blue-100 rounded-2xl shadow-md border border-blue-200 px-6 py-7 w-[320px] max-w-[90vw] min-h-[330px] flex flex-col items-start justify-between relative transition-all duration-500"
+                >
+                    <div
+                        class="font-semibold text-base mb-2 w-full text-blue-900 leading-tight whitespace-normal break-words"
+                    >
+                        {{ filteredStudents[currentIndex].name }}
+                    </div>
+                    <div class="mb-2 text-base text-blue-800 font-medium">
+                        {{ filteredStudents[currentIndex].yearCourse }}
+                    </div>
+                    <div
+                        class="flex flex-col gap-1 w-full text-gray-700 text-sm mt-2"
+                    >
+                        <div>
+                            <span class="font-semibold">Faculty:</span>
+                            {{ filteredStudents[currentIndex].faculty }}
+                        </div>
+                        <div>
+                            <span class="font-semibold">Num. Subject:</span>
+                            {{ filteredStudents[currentIndex].subjectCount }}
+                        </div>
+                        <div>
+                            <span class="font-semibold">Total Credit:</span>
+                            {{ filteredStudents[currentIndex].credit }}
+                        </div>
+                    </div>
+                    <button
+                        class="absolute bottom-3 right-3 rounded bg-gray-200 hover:bg-gray-300 p-2"
+                        title="Maklumat Jadual"
+                    >
+                        <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            class="w-5 h-5 text-gray-600"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                            stroke="currentColor"
+                        >
+                            <rect
+                                x="6"
+                                y="3"
+                                width="12"
+                                height="18"
+                                rx="2"
+                                stroke-width="2"
+                            />
+                            <path
+                                d="M9 7h6M9 11h6M9 15h3"
+                                stroke-width="2"
+                                stroke-linecap="round"
+                            />
+                        </svg>
+                    </button>
+                </div>
+            </transition>
+
+            <!-- Up/Down Carousel Buttons -->
+            <div class="flex flex-col items-center mt-6 gap-2">
                 <button
-                    class="absolute left-1 top-1/2 -translate-y-1/2 z-10 bg-white/80 border shadow p-1.5 rounded-full hover:bg-blue-50 transition text-sm"
                     :disabled="currentIndex <= 0"
                     @click="prevCard"
-                    style="width: 32px; height: 32px"
+                    class="w-9 h-9 flex items-center justify-center bg-white/80 border shadow rounded-full hover:bg-blue-50 transition disabled:opacity-60"
                 >
                     <svg
-                        class="w-4 h-4 text-blue-700"
+                        class="w-5 h-5 text-blue-700"
                         fill="none"
                         stroke="currentColor"
                         viewBox="0 0 24 24"
@@ -287,91 +295,17 @@ onMounted(() => {
                             stroke-linecap="round"
                             stroke-linejoin="round"
                             stroke-width="2"
-                            d="M15 19l-7-7 7-7"
+                            d="M19 15l-7-7-7 7"
                         />
                     </svg>
                 </button>
-                <div
-                    ref="sliderRef"
-                    class="flex gap-2 overflow-x-auto snap-x snap-mandatory pb-6 pt-2 no-scrollbar"
-                    style="scroll-behavior: smooth; overflow-y: visible"
-                    @scroll="onScrollSlider"
-                    @touchstart="handleTouchStart"
-                    @touchend="handleTouchEnd"
-                    tabindex="0"
-                >
-                    <div
-                        v-for="(student, idx) in filteredStudents"
-                        :key="idx"
-                        class="w-[175px] min-w-[175px] max-w-[175px] h-[240px] snap-center bg-blue-100 rounded-xl shadow p-4 flex flex-col items-start relative transition-all duration-500 border border-blue-200"
-                        :style="{
-                            transform:
-                                currentIndex === idx
-                                    ? 'scale(1.02)'
-                                    : 'scale(1)',
-                            zIndex: currentIndex === idx ? 2 : 1,
-                        }"
-                    >
-                        <div
-                            class="font-semibold text-sm mb-1 w-full text-blue-900 leading-tight whitespace-normal break-words"
-                        >
-                            {{ student.name }}
-                        </div>
-                        <div class="mb-1 text-[14px] text-blue-800 font-medium">
-                            {{ student.yearCourse }}
-                        </div>
-                        <div
-                            class="flex flex-col gap-1 w-full text-gray-700 text-xs mt-1"
-                        >
-                            <div>
-                                <span class="font-semibold">Faculty:</span>
-                                {{ student.faculty }}
-                            </div>
-                            <div>
-                                <span class="font-semibold">Num. Subject:</span>
-                                {{ student.subjectCount }}
-                            </div>
-                            <div>
-                                <span class="font-semibold">Total Credit:</span>
-                                {{ student.credit }}
-                            </div>
-                        </div>
-                        <button
-                            class="absolute bottom-2 right-2 rounded bg-gray-200 hover:bg-gray-300 p-2"
-                            title="Maklumat Jadual"
-                        >
-                            <svg
-                                xmlns="http://www.w3.org/2000/svg"
-                                class="w-4 h-4 text-gray-600"
-                                fill="none"
-                                viewBox="0 0 24 24"
-                                stroke="currentColor"
-                            >
-                                <rect
-                                    x="6"
-                                    y="3"
-                                    width="12"
-                                    height="18"
-                                    rx="2"
-                                    stroke-width="2"
-                                />
-                                <path
-                                    d="M9 7h6M9 11h6M9 15h3"
-                                    stroke-width="2"
-                                    stroke-linecap="round"
-                                />
-                            </svg>
-                        </button>
-                    </div>
-                </div>
                 <button
-                    class="absolute right-1 top-1/2 -translate-y-1/2 z-10 bg-white/80 border shadow p-1.5 rounded-full hover:bg-blue-50 transition text-sm"
                     :disabled="currentIndex >= filteredStudents.length - 1"
                     @click="nextCard"
-                    style="width: 32px; height: 32px"
+                    class="w-9 h-9 flex items-center justify-center bg-white/80 border shadow rounded-full hover:bg-blue-50 transition disabled:opacity-60"
                 >
                     <svg
-                        class="w-4 h-4 text-blue-700"
+                        class="w-5 h-5 text-blue-700"
                         fill="none"
                         stroke="currentColor"
                         viewBox="0 0 24 24"
@@ -380,11 +314,12 @@ onMounted(() => {
                             stroke-linecap="round"
                             stroke-linejoin="round"
                             stroke-width="2"
-                            d="M9 5l7 7-7 7"
+                            d="M5 9l7 7 7-7"
                         />
                     </svg>
                 </button>
             </div>
+
             <div
                 v-if="!filteredStudents.length && !isLoading"
                 class="text-center py-8 text-gray-400"
@@ -392,16 +327,26 @@ onMounted(() => {
                 No students found.
             </div>
         </div>
+
         <Footer />
     </div>
 </template>
 
 <style scoped>
-.no-scrollbar::-webkit-scrollbar {
-    display: none;
+.vertical-slide-enter-active,
+.vertical-slide-leave-active {
+    transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
 }
-.no-scrollbar {
-    -ms-overflow-style: none;
-    scrollbar-width: none;
+.vertical-slide-enter-from {
+    opacity: 0;
+    transform: translateY(50px) scale(0.96);
+}
+.vertical-slide-leave-to {
+    opacity: 0;
+    transform: translateY(-50px) scale(0.96);
+}
+/* Optional: Hide scrollbars for a cleaner look */
+::-webkit-scrollbar {
+    display: none;
 }
 </style>

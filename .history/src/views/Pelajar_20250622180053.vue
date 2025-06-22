@@ -6,7 +6,6 @@ import Footer from "@/components/Footer.vue";
 import PelajarApi from "@/api/PelajarApi.js";
 import { userName, userMatric } from "@/constants/ApiConstants.js";
 
-// States
 const nama = ref("");
 const tahun = ref("");
 const kursus = ref("");
@@ -14,7 +13,6 @@ const students = ref([]);
 const isLoading = ref(false);
 const sessionId = ref("");
 const currentIndex = ref(0);
-
 const sliderRef = ref(null);
 
 const lsData = JSON.parse(localStorage.getItem("web.fc.utm.my_usersession"));
@@ -23,7 +21,6 @@ if (lsData) {
     userMatric.value = lsData.login_name;
 }
 
-// --- Data Fetch ---
 const loadAllStudents = async () => {
     if (!sessionId.value) return;
     isLoading.value = true;
@@ -67,7 +64,6 @@ const loadAllStudents = async () => {
     isLoading.value = false;
 };
 
-// --- Session Validate ---
 const validateSession = async () => {
     const rawSessionId = lsData?.session_id;
     if (!rawSessionId) {
@@ -100,7 +96,6 @@ const validateSession = async () => {
     }
 };
 
-// --- Filtered Students ---
 const filteredStudents = computed(() => {
     let filtered = students.value;
     if (nama.value.trim()) {
@@ -127,16 +122,14 @@ const filteredStudents = computed(() => {
     return filtered;
 });
 
-// --- Carousel Logic ---
 function scrollToCard(idx) {
-    // Center card in scroller
     const scroller = sliderRef.value;
     if (scroller && scroller.children[idx]) {
         const card = scroller.children[idx];
         const center =
-            card.offsetLeft - scroller.offsetWidth / 2 + card.offsetWidth / 2;
+            card.offsetTop - scroller.offsetHeight / 2 + card.offsetHeight / 2;
         scroller.scrollTo({
-            left: center,
+            top: center,
             behavior: "smooth",
         });
         currentIndex.value = idx;
@@ -159,10 +152,10 @@ function onScrollSlider() {
     let minDist = Infinity;
     for (let i = 0; i < cards.length; i++) {
         const cardCenter =
-            cards[i].offsetLeft -
-            sliderRef.value.scrollLeft +
-            cards[i].offsetWidth / 2;
-        const scrollerCenter = sliderRef.value.offsetWidth / 2;
+            cards[i].offsetTop -
+            sliderRef.value.scrollTop +
+            cards[i].offsetHeight / 2;
+        const scrollerCenter = sliderRef.value.offsetHeight / 2;
         const dist = Math.abs(cardCenter - scrollerCenter);
         if (dist < minDist) {
             minDist = dist;
@@ -172,20 +165,19 @@ function onScrollSlider() {
     currentIndex.value = closest;
 }
 
-// --- Touch/Swipe Support (Horizontal) ---
-let touchStartX = null;
+let touchStartY = null;
 function handleTouchStart(e) {
-    touchStartX = e.touches[0].clientX;
+    touchStartY = e.touches[0].clientY;
 }
 function handleTouchEnd(e) {
-    if (touchStartX === null) return;
-    const touchEndX = e.changedTouches[0].clientX;
-    const deltaX = touchEndX - touchStartX;
-    if (Math.abs(deltaX) > 40) {
-        if (deltaX > 0) prevCard(); // swipe right = prev
-        else nextCard(); // swipe left = next
+    if (touchStartY === null) return;
+    const touchEndY = e.changedTouches[0].clientY;
+    const deltaY = touchEndY - touchStartY;
+    if (Math.abs(deltaY) > 40) {
+        if (deltaY > 0) prevCard(); // swipe down
+        else nextCard(); // swipe up
     }
-    touchStartX = null;
+    touchStartY = null;
 }
 
 onMounted(() => {
@@ -265,126 +257,133 @@ onMounted(() => {
             >
         </div>
 
-        <!-- Student Card Carousel -->
+        <!-- Student Card Vertical Carousel -->
         <div
             v-if="!isLoading"
-            class="w-full flex flex-col items-center px-0 mt-4"
+            class="w-full flex flex-col items-center px-0 mt-4 relative"
+            style="min-height: 320px"
         >
-            <div class="relative w-full max-w-full mx-auto">
-                <button
-                    class="absolute left-1 top-1/2 -translate-y-1/2 z-10 bg-white/80 border shadow p-1.5 rounded-full hover:bg-blue-50 transition text-sm"
-                    :disabled="currentIndex <= 0"
-                    @click="prevCard"
-                    style="width: 32px; height: 32px"
+            <!-- The fade overlays: -->
+            <div class="fade-top"></div>
+            <div class="fade-bottom"></div>
+
+            <!-- Up Button -->
+            <button
+                class="mb-2 w-9 h-9 flex items-center justify-center bg-white/80 border shadow rounded-full hover:bg-blue-50 transition disabled:opacity-60 z-10"
+                :disabled="currentIndex <= 0"
+                @click="prevCard"
+            >
+                <svg
+                    class="w-5 h-5 text-blue-700"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
                 >
-                    <svg
-                        class="w-4 h-4 text-blue-700"
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
-                    >
-                        <path
-                            stroke-linecap="round"
-                            stroke-linejoin="round"
-                            stroke-width="2"
-                            d="M15 19l-7-7 7-7"
-                        />
-                    </svg>
-                </button>
+                    <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="2"
+                        d="M19 15l-7-7-7 7"
+                    />
+                </svg>
+            </button>
+            <div
+                ref="sliderRef"
+                class="flex flex-col gap-2 overflow-y-auto snap-y snap-mandatory no-scrollbar relative student-list-area"
+                style="
+                    height: 230px;
+                    max-height: 55vh;
+                    min-height: 180px;
+                    scroll-behavior: smooth;
+                "
+                @scroll="onScrollSlider"
+                @touchstart="handleTouchStart"
+                @touchend="handleTouchEnd"
+                tabindex="0"
+            >
                 <div
-                    ref="sliderRef"
-                    class="flex gap-2 overflow-x-auto snap-x snap-mandatory pb-6 pt-2 no-scrollbar"
-                    style="scroll-behavior: smooth; overflow-y: visible"
-                    @scroll="onScrollSlider"
-                    @touchstart="handleTouchStart"
-                    @touchend="handleTouchEnd"
-                    tabindex="0"
+                    v-for="(student, idx) in filteredStudents"
+                    :key="idx"
+                    class="student-card w-[92vw] max-w-[250px] min-w-[140px] h-[150px] snap-center bg-blue-100 rounded-xl shadow p-3 flex flex-col items-start relative transition-all duration-500 border border-blue-200 mx-auto"
+                    :style="{
+                        transform:
+                            currentIndex === idx ? 'scale(1.04)' : 'scale(1)',
+                        zIndex: currentIndex === idx ? 2 : 1,
+                    }"
                 >
                     <div
-                        v-for="(student, idx) in filteredStudents"
-                        :key="idx"
-                        class="w-[175px] min-w-[175px] max-w-[175px] h-[240px] snap-center bg-blue-100 rounded-xl shadow p-4 flex flex-col items-start relative transition-all duration-500 border border-blue-200"
-                        :style="{
-                            transform:
-                                currentIndex === idx
-                                    ? 'scale(1.02)'
-                                    : 'scale(1)',
-                            zIndex: currentIndex === idx ? 2 : 1,
-                        }"
+                        class="font-semibold text-sm mb-1 w-full text-blue-900 leading-tight whitespace-normal break-words"
                     >
-                        <div
-                            class="font-semibold text-sm mb-1 w-full text-blue-900 leading-tight whitespace-normal break-words"
-                        >
-                            {{ student.name }}
-                        </div>
-                        <div class="mb-1 text-[14px] text-blue-800 font-medium">
-                            {{ student.yearCourse }}
-                        </div>
-                        <div
-                            class="flex flex-col gap-1 w-full text-gray-700 text-xs mt-1"
-                        >
-                            <div>
-                                <span class="font-semibold">Faculty:</span>
-                                {{ student.faculty }}
-                            </div>
-                            <div>
-                                <span class="font-semibold">Num. Subject:</span>
-                                {{ student.subjectCount }}
-                            </div>
-                            <div>
-                                <span class="font-semibold">Total Credit:</span>
-                                {{ student.credit }}
-                            </div>
-                        </div>
-                        <button
-                            class="absolute bottom-2 right-2 rounded bg-gray-200 hover:bg-gray-300 p-2"
-                            title="Maklumat Jadual"
-                        >
-                            <svg
-                                xmlns="http://www.w3.org/2000/svg"
-                                class="w-4 h-4 text-gray-600"
-                                fill="none"
-                                viewBox="0 0 24 24"
-                                stroke="currentColor"
-                            >
-                                <rect
-                                    x="6"
-                                    y="3"
-                                    width="12"
-                                    height="18"
-                                    rx="2"
-                                    stroke-width="2"
-                                />
-                                <path
-                                    d="M9 7h6M9 11h6M9 15h3"
-                                    stroke-width="2"
-                                    stroke-linecap="round"
-                                />
-                            </svg>
-                        </button>
+                        {{ student.name }}
                     </div>
-                </div>
-                <button
-                    class="absolute right-1 top-1/2 -translate-y-1/2 z-10 bg-white/80 border shadow p-1.5 rounded-full hover:bg-blue-50 transition text-sm"
-                    :disabled="currentIndex >= filteredStudents.length - 1"
-                    @click="nextCard"
-                    style="width: 32px; height: 32px"
-                >
-                    <svg
-                        class="w-4 h-4 text-blue-700"
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
+                    <div class="mb-1 text-[13px] text-blue-800 font-medium">
+                        {{ student.yearCourse }}
+                    </div>
+                    <div
+                        class="flex flex-col gap-1 w-full text-gray-700 text-xs mt-1"
                     >
-                        <path
-                            stroke-linecap="round"
-                            stroke-linejoin="round"
-                            stroke-width="2"
-                            d="M9 5l7 7-7 7"
-                        />
-                    </svg>
-                </button>
+                        <div>
+                            <span class="font-semibold">Faculty:</span>
+                            {{ student.faculty }}
+                        </div>
+                        <div>
+                            <span class="font-semibold">Num. Subject:</span>
+                            {{ student.subjectCount }}
+                        </div>
+                        <div>
+                            <span class="font-semibold">Total Credit:</span>
+                            {{ student.credit }}
+                        </div>
+                    </div>
+                    <button
+                        class="absolute bottom-2 right-2 rounded bg-gray-200 hover:bg-gray-300 p-2"
+                        title="Maklumat Jadual"
+                    >
+                        <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            class="w-4 h-4 text-gray-600"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                            stroke="currentColor"
+                        >
+                            <rect
+                                x="6"
+                                y="3"
+                                width="12"
+                                height="18"
+                                rx="2"
+                                stroke-width="2"
+                            />
+                            <path
+                                d="M9 7h6M9 11h6M9 15h3"
+                                stroke-width="2"
+                                stroke-linecap="round"
+                            />
+                        </svg>
+                    </button>
+                </div>
             </div>
+            <!-- Down Button -->
+            <button
+                class="mt-2 w-9 h-9 flex items-center justify-center bg-white/80 border shadow rounded-full hover:bg-blue-50 transition disabled:opacity-60 z-10"
+                :disabled="currentIndex >= filteredStudents.length - 1"
+                @click="nextCard"
+            >
+                <svg
+                    class="w-5 h-5 text-blue-700"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                >
+                    <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="2"
+                        d="M5 9l7 7 7-7"
+                    />
+                </svg>
+            </button>
+
             <div
                 v-if="!filteredStudents.length && !isLoading"
                 class="text-center py-8 text-gray-400"
@@ -403,5 +402,42 @@ onMounted(() => {
 .no-scrollbar {
     -ms-overflow-style: none;
     scrollbar-width: none;
+}
+.snap-y {
+    scroll-snap-type: y mandatory;
+}
+.snap-center {
+    scroll-snap-align: center;
+}
+.student-list-area {
+    position: relative;
+    width: 100%;
+}
+.fade-top,
+.fade-bottom {
+    position: absolute;
+    left: 0;
+    width: 100%;
+    height: 32px;
+    z-index: 22;
+    pointer-events: none;
+}
+.fade-top {
+    top: 0;
+    background: linear-gradient(
+        to bottom,
+        #f8fafc 88%,
+        rgba(248, 250, 252, 0.7) 94%,
+        transparent 100%
+    );
+}
+.fade-bottom {
+    bottom: 0;
+    background: linear-gradient(
+        to top,
+        #f8fafc 88%,
+        rgba(248, 250, 252, 0.7) 94%,
+        transparent 100%
+    );
 }
 </style>
