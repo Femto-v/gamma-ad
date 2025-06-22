@@ -1,5 +1,5 @@
 <script setup>
-import { ref, computed, onMounted, nextTick, watch } from "vue";
+import { ref, computed, onMounted, nextTick } from "vue";
 import Toggle from "@/components/Toggle.vue";
 import ProfileBanner from "@/components/ProfileBanner.vue";
 import Footer from "@/components/Footer.vue";
@@ -206,7 +206,7 @@ onMounted(() => {
         <ProfileBanner titleBanner="Student" />
 
         <!-- Sesi & Semester Selectors -->
-        <div class="flex flex-row gap-4 items-center justify-center px-4 pt-4">
+        <div class="flex flex-row gap-4 items-center justify-center mb-3">
             <div>
                 <label class="mr-1 text-xs font-semibold text-gray-600"
                     >Sesi:</label
@@ -234,7 +234,7 @@ onMounted(() => {
 
         <!-- Search and Filters -->
         <div
-            class="px-4 flex flex-col gap-2 items-center text-sm max-w-md mx-auto"
+            class="p-4 flex flex-col gap-2 items-center text-sm max-w-md mx-auto"
         >
             <div class="flex flex-row gap-2 w-full">
                 <div class="flex-1 flex flex-col">

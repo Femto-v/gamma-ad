@@ -206,7 +206,7 @@ onMounted(() => {
         <ProfileBanner titleBanner="Student" />
 
         <!-- Sesi & Semester Selectors -->
-        <div class="flex flex-row gap-4 items-center justify-center px-4 pt-4">
+        <div class="flex flex-row gap-4 items-center justify-center p-4">
             <div>
                 <label class="mr-1 text-xs font-semibold text-gray-600"
                     >Sesi:</label

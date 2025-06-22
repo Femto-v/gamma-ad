@@ -206,7 +206,7 @@ onMounted(() => {
         <ProfileBanner titleBanner="Student" />
 
         <!-- Sesi & Semester Selectors -->
-        <div class="flex flex-row gap-4 items-center justify-center px-4 pt-4">
+        <div class="flex flex-row gap-4 items-center justify-center mt-4">
             <div>
                 <label class="mr-1 text-xs font-semibold text-gray-600"
                     >Sesi:</label
@@ -233,9 +233,7 @@ onMounted(() => {
         </div>
 
         <!-- Search and Filters -->
-        <div
-            class="px-4 flex flex-col gap-2 items-center text-sm max-w-md mx-auto"
-        >
+        <div class="flex flex-col gap-2 items-center text-sm max-w-md mx-auto">
             <div class="flex flex-row gap-2 w-full">
                 <div class="flex-1 flex flex-col">
                     <label class="mb-1 ml-1 text-xs">Name</label>

@@ -1,6 +1,6 @@
 <template>
     <footer
-        class="text-black justify-center items-center mx-3 mb-3 p-4 text-center bg-gray-200 rounded-lg shadow-md"
+        class="text-black justify-center items-center mx-3 mb-3 px-4 text-center"
     >
         <p class="text-sm">
             If you have any comments or questions about this web page, <br />
