@@ -295,9 +295,10 @@ onMounted(() => {
                 <div
                     class="pointer-events-none absolute right-0 top-0 w-16 h-full z-20 bg-gradient-to-l from-white/80 via-white/10 to-transparent"
                 ></div>
+
                 <div
                     ref="sliderRef"
-                    class="flex gap-2 overflow-x-auto snap-x snap-mandatory pb-6 pt-2 no-scrollbar gap-6"
+                    class="flex gap-2 overflow-x-auto snap-x snap-mandatory pb-6 pt-2 no-scrollbar gap-4 bg-black justify-center"
                     style="scroll-behavior: smooth; overflow-y: visible"
                     @scroll="onScrollSlider"
                     @touchstart="handleTouchStart"
@@ -312,11 +313,11 @@ onMounted(() => {
                     <div
                         v-for="(student, idx) in filteredStudents"
                         :key="idx"
-                        class="overflow-visible w-[175px] min-w-[175px] max-w-[175px] h-[240px] snap-center bg-blue-100 rounded-xl shadow p-4 flex flex-col items-start relative transition-all duration-500 border border-blue-200"
+                        class="w-[175px] min-w-[175px] max-w-[175px] h-[240px] snap-center bg-blue-100 rounded-xl shadow p-4 flex flex-col items-start relative transition-all duration-500 border border-blue-200"
                         :style="{
                             transform:
                                 currentIndex === idx
-                                    ? 'scale(1.07)'
+                                    ? 'scale(1.1)'
                                     : 'scale(1)',
                             zIndex: currentIndex === idx ? 2 : 1,
                         }"

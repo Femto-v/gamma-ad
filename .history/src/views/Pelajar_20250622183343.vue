@@ -316,7 +316,7 @@ onMounted(() => {
                         :style="{
                             transform:
                                 currentIndex === idx
-                                    ? 'scale(1.07)'
+                                    ? 'scale(1.1)'
                                     : 'scale(1)',
                             zIndex: currentIndex === idx ? 2 : 1,
                         }"

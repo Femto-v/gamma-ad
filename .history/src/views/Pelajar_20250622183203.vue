@@ -297,7 +297,7 @@ onMounted(() => {
                 ></div>
                 <div
                     ref="sliderRef"
-                    class="flex gap-2 overflow-x-auto snap-x snap-mandatory pb-6 pt-2 no-scrollbar gap-6"
+                    class="flex gap-2 overflow-x-auto snap-x snap-mandatory pb-6 pt-2 no-scrollbar gap-4"
                     style="scroll-behavior: smooth; overflow-y: visible"
                     @scroll="onScrollSlider"
                     @touchstart="handleTouchStart"
@@ -316,7 +316,7 @@ onMounted(() => {
                         :style="{
                             transform:
                                 currentIndex === idx
-                                    ? 'scale(1.07)'
+                                    ? 'scale(1.1)'
                                     : 'scale(1)',
                             zIndex: currentIndex === idx ? 2 : 1,
                         }"

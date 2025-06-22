@@ -296,87 +296,97 @@ onMounted(() => {
                     class="pointer-events-none absolute right-0 top-0 w-16 h-full z-20 bg-gradient-to-l from-white/80 via-white/10 to-transparent"
                 ></div>
                 <div
-                    ref="sliderRef"
-                    class="flex gap-2 overflow-x-auto snap-x snap-mandatory pb-6 pt-2 no-scrollbar gap-6"
-                    style="scroll-behavior: smooth; overflow-y: visible"
-                    @scroll="onScrollSlider"
-                    @touchstart="handleTouchStart"
-                    @touchend="handleTouchEnd"
-                    tabindex="0"
+                    class="flex flex-col items-center justify-center w-full min-h-[350px]"
                 >
-                    <!-- Left phantom padder for centering first card -->
                     <div
-                        :style="{ minWidth: 'calc(50vw - 88px)' }"
-                        aria-hidden="true"
-                    ></div>
-                    <div
-                        v-for="(student, idx) in filteredStudents"
-                        :key="idx"
-                        class="overflow-visible w-[175px] min-w-[175px] max-w-[175px] h-[240px] snap-center bg-blue-100 rounded-xl shadow p-4 flex flex-col items-start relative transition-all duration-500 border border-blue-200"
-                        :style="{
-                            transform:
-                                currentIndex === idx
-                                    ? 'scale(1.07)'
-                                    : 'scale(1)',
-                            zIndex: currentIndex === idx ? 2 : 1,
-                        }"
+                        ref="sliderRef"
+                        class="flex gap-2 overflow-x-auto snap-x snap-mandatory pb-6 pt-2 no-scrollbar gap-4 bg-black"
+                        style="scroll-behavior: smooth; overflow-y: visible"
+                        @scroll="onScrollSlider"
+                        @touchstart="handleTouchStart"
+                        @touchend="handleTouchEnd"
+                        tabindex="0"
                     >
+                        <!-- Left phantom padder for centering first card -->
                         <div
-                            class="font-semibold text-sm mb-1 w-full text-blue-900 leading-tight whitespace-normal break-words"
-                        >
-                            {{ student.name }}
-                        </div>
-                        <div class="mb-1 text-[14px] text-blue-800 font-medium">
-                            {{ student.yearCourse }}
-                        </div>
+                            :style="{ minWidth: 'calc(50vw - 88px)' }"
+                            aria-hidden="true"
+                        ></div>
                         <div
-                            class="flex flex-col gap-1 w-full text-gray-700 text-xs mt-1"
+                            v-for="(student, idx) in filteredStudents"
+                            :key="idx"
+                            class="w-[175px] min-w-[175px] max-w-[175px] h-[240px] snap-center bg-blue-100 rounded-xl shadow p-4 flex flex-col items-start relative transition-all duration-500 border border-blue-200"
+                            :style="{
+                                transform:
+                                    currentIndex === idx
+                                        ? 'scale(1.1)'
+                                        : 'scale(1)',
+                                zIndex: currentIndex === idx ? 2 : 1,
+                            }"
                         >
-                            <div>
-                                <span class="font-semibold">Faculty:</span>
-                                {{ student.faculty }}
-                            </div>
-                            <div>
-                                <span class="font-semibold">Num. Subject:</span>
-                                {{ student.subjectCount }}
-                            </div>
-                            <div>
-                                <span class="font-semibold">Total Credit:</span>
-                                {{ student.credit }}
-                            </div>
-                        </div>
-                        <button
-                            class="absolute bottom-2 right-2 rounded bg-gray-200 hover:bg-gray-300 p-2"
-                            title="Maklumat Jadual"
-                        >
-                            <svg
-                                xmlns="http://www.w3.org/2000/svg"
-                                class="w-4 h-4 text-gray-600"
-                                fill="none"
-                                viewBox="0 0 24 24"
-                                stroke="currentColor"
+                            <div
+                                class="font-semibold text-sm mb-1 w-full text-blue-900 leading-tight whitespace-normal break-words"
                             >
-                                <rect
-                                    x="6"
-                                    y="3"
-                                    width="12"
-                                    height="18"
-                                    rx="2"
-                                    stroke-width="2"
-                                />
-                                <path
-                                    d="M9 7h6M9 11h6M9 15h3"
-                                    stroke-width="2"
-                                    stroke-linecap="round"
-                                />
-                            </svg>
-                        </button>
+                                {{ student.name }}
+                            </div>
+                            <div
+                                class="mb-1 text-[14px] text-blue-800 font-medium"
+                            >
+                                {{ student.yearCourse }}
+                            </div>
+                            <div
+                                class="flex flex-col gap-1 w-full text-gray-700 text-xs mt-1"
+                            >
+                                <div>
+                                    <span class="font-semibold">Faculty:</span>
+                                    {{ student.faculty }}
+                                </div>
+                                <div>
+                                    <span class="font-semibold"
+                                        >Num. Subject:</span
+                                    >
+                                    {{ student.subjectCount }}
+                                </div>
+                                <div>
+                                    <span class="font-semibold"
+                                        >Total Credit:</span
+                                    >
+                                    {{ student.credit }}
+                                </div>
+                            </div>
+                            <button
+                                class="absolute bottom-2 right-2 rounded bg-gray-200 hover:bg-gray-300 p-2"
+                                title="Maklumat Jadual"
+                            >
+                                <svg
+                                    xmlns="http://www.w3.org/2000/svg"
+                                    class="w-4 h-4 text-gray-600"
+                                    fill="none"
+                                    viewBox="0 0 24 24"
+                                    stroke="currentColor"
+                                >
+                                    <rect
+                                        x="6"
+                                        y="3"
+                                        width="12"
+                                        height="18"
+                                        rx="2"
+                                        stroke-width="2"
+                                    />
+                                    <path
+                                        d="M9 7h6M9 11h6M9 15h3"
+                                        stroke-width="2"
+                                        stroke-linecap="round"
+                                    />
+                                </svg>
+                            </button>
+                        </div>
+                        <!-- Right phantom padder for centering last card -->
+                        <div
+                            :style="{ minWidth: 'calc(50vw - 88px)' }"
+                            aria-hidden="true"
+                        ></div>
                     </div>
-                    <!-- Right phantom padder for centering last card -->
-                    <div
-                        :style="{ minWidth: 'calc(50vw - 88px)' }"
-                        aria-hidden="true"
-                    ></div>
                 </div>
                 <button
                     class="absolute right-1 top-1/2 -translate-y-1/2 z-10 bg-white/80 border shadow p-1.5 rounded-full hover:bg-blue-50 transition text-sm"
