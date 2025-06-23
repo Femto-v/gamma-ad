@@ -3,7 +3,6 @@ import { ref, computed, onMounted, nextTick, watch } from "vue";
 import Toggle from "@/components/Toggle.vue";
 import ProfileBanner from "@/components/ProfileBanner.vue";
 import Footer from "@/components/Footer.vue";
-import PensyarahApi from "@/api/PensyarahApi.js";
 import { userName, userMatric } from "@/constants/ApiConstants.js";
 
 // --- Sesi & Semester State ---
@@ -17,6 +16,8 @@ const sessionId = ref("");
 const currentIndex = ref(0);
 const sliderRef = ref(null);
 
+const CARD_WIDTH = 175; // px, should match the card's width
+
 const lsData = JSON.parse(localStorage.getItem("web.fc.utm.my_usersession"));
 if (lsData) {
     userName.value = lsData.full_name;
@@ -28,9 +29,19 @@ const loadAllLecturers = async () => {
     if (!sessionId.value) return;
     isLoading.value = true;
     try {
-        const api = new PensyarahApi(sessionId.value);
-        const data = await api.getPensyarah(sesi.value, semester.value);
-        lecturers.value = (Array.isArray(data) ? data : []).map((item) => ({
+        // Change this URL if you use a proxy or a wrapper class
+        const url = `http://web.fc.utm.my/ttms/web_man_webservice_json.cgi?entity=pensyarah&session_id=${
+            sessionId.value
+        }&sesi=${encodeURIComponent(sesi.value)}&semester=${semester.value}`;
+        const res = await fetch(url);
+        let data = [];
+        try {
+            data = await res.json();
+        } catch (err) {
+            data = [];
+        }
+        if (!Array.isArray(data)) data = [];
+        lecturers.value = data.map((item) => ({
             name: item.nama,
             subjectCount: item.bil_subjek || 0,
             sectionCount: item.bil_seksyen || 0,
