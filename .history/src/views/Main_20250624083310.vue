@@ -100,7 +100,7 @@ onMounted(async () => {
         <Toggle />
         <ProfileBanner />
 
-        <main class="flex-1 flex flex-col items-center justify-center p-10">
+        <main class="flex-1 flex flex-col items-center justify-center p-4">
             <!-- Profile Icon -->
             <div
                 class="w-28 h-28 rounded-full bg-white flex items-center justify-center shadow-lg mb-4 mt-4"
