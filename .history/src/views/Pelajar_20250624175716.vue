@@ -3,22 +3,27 @@ import { ref, computed, onMounted, nextTick, watch } from "vue";
 import Toggle from "@/components/Toggle.vue";
 import ProfileBanner from "@/components/ProfileBanner.vue";
 import Footer from "@/components/Footer.vue";
-import PensyarahApi from "@/api/PensyarahApi.js";
-import PensyarahTimetableModal from "./PensyarahTimetableModal.vue"; // create this
+import PelajarApi from "@/api/PelajarApi.js";
+import TimetableStudentPopup from "@/TimetableStudentPopup.vue";
 import { userName, userMatric } from "@/constants/ApiConstants.js";
 
+// --- New State for Sesi & Semester ---
 const sesi = ref("2024/2025");
 const semester = ref(2);
 
 const nama = ref("");
-const lecturers = ref([]);
+const tahun = ref("");
+const kursus = ref("");
+const students = ref([]);
 const isLoading = ref(false);
 const sessionId = ref("");
 const currentIndex = ref(0);
 const sliderRef = ref(null);
 
-const showTimetable = ref(false);
-const selectedLecturer = ref(null); // Will hold the selected lecturer's object
+const showTimetablePopup = ref(false);
+const selectedMatric = ref("");
+
+const CARD_WIDTH = 175;
 
 const lsData = JSON.parse(localStorage.getItem("web.fc.utm.my_usersession"));
 if (lsData) {
@@ -26,25 +31,48 @@ if (lsData) {
     userMatric.value = lsData.login_name;
 }
 
-const loadAllLecturers = async () => {
+// Data fetching
+const loadAllStudents = async () => {
     if (!sessionId.value) return;
     isLoading.value = true;
     try {
-        const api = new PensyarahApi(sessionId.value);
-        const data = await api.getPensyarah(sesi.value, semester.value);
-        lecturers.value = (Array.isArray(data) ? data : []).map((item) => ({
-            name: item.nama,
-            subjectCount: item.bil_subjek || 0,
-            sectionCount: item.bil_seksyen || 0,
-            studentCount: item.bil_pelajar || 0,
-            no_pekerja: item.no_pekerja,
-        }));
+        const api = new PelajarApi(sessionId.value);
+        let batchOffset = 0;
+        let batch;
+        let allStudents = [];
+        const PAGE_SIZE = 100;
+        do {
+            batch = await api.getPelajar(
+                sesi.value,
+                semester.value,
+                PAGE_SIZE,
+                batchOffset
+            );
+            if (Array.isArray(batch) && batch.length > 0) {
+                allStudents.push(
+                    ...batch.map((item) => ({
+                        name: item.nama,
+                        year: item.tahun_kursus,
+                        course: item.kod_kursus,
+                        faculty: item.kod_fakulti,
+                        subjectCount: item.bil_subjek,
+                        no_matrik: item.no_matrik,
+                        no_kp: item.no_kp,
+                    }))
+                );
+                batchOffset += PAGE_SIZE;
+            } else {
+                batch = [];
+            }
+        } while (batch.length === PAGE_SIZE);
+
+        students.value = allStudents;
         await nextTick();
         scrollToCard(0);
         currentIndex.value = 0;
     } catch (err) {
-        lecturers.value = [];
-        console.error("Failed to fetch lecturers:", err);
+        students.value = [];
+        console.error("Failed to fetch students:", err);
     }
     isLoading.value = false;
 };
@@ -75,17 +103,27 @@ const validateSession = async () => {
             return;
         }
         sessionId.value = data[0].session_id;
-        await loadAllLecturers();
+        await loadAllStudents();
     } catch {
         window.location.replace("/login");
     }
 };
 
-const filteredLecturers = computed(() => {
-    let filtered = lecturers.value;
+const filteredStudents = computed(() => {
+    let filtered = students.value;
     if (nama.value.trim()) {
-        filtered = filtered.filter((l) =>
-            l.name?.toLowerCase().includes(nama.value.trim().toLowerCase())
+        filtered = filtered.filter((s) =>
+            s.name?.toLowerCase().includes(nama.value.trim().toLowerCase())
+        );
+    }
+    if (tahun.value.trim()) {
+        filtered = filtered.filter((s) =>
+            String(s.year).includes(tahun.value.trim())
+        );
+    }
+    if (kursus.value.trim()) {
+        filtered = filtered.filter((s) =>
+            s.course?.toLowerCase().includes(kursus.value.trim().toLowerCase())
         );
     }
     if (currentIndex.value >= filtered.length)
@@ -93,10 +131,11 @@ const filteredLecturers = computed(() => {
     return filtered;
 });
 
-// Carousel logic
+// Carousel logic with centering
 function scrollToCard(idx) {
     const scroller = sliderRef.value;
     if (scroller && scroller.children[idx + 1]) {
+        // +1 for left phantom
         const card = scroller.children[idx + 1];
         const center =
             card.offsetLeft - scroller.offsetWidth / 2 + card.offsetWidth / 2;
@@ -108,7 +147,7 @@ function scrollToCard(idx) {
     }
 }
 function nextCard() {
-    if (currentIndex.value < filteredLecturers.value.length - 1) {
+    if (currentIndex.value < filteredStudents.value.length - 1) {
         scrollToCard(currentIndex.value + 1);
     }
 }
@@ -136,7 +175,8 @@ function onScrollSlider() {
     }
     currentIndex.value = closest - 1;
 }
-// Swipe
+
+// Swipe support
 let touchStartX = null;
 function handleTouchStart(e) {
     touchStartX = e.touches[0].clientX;
@@ -146,34 +186,35 @@ function handleTouchEnd(e) {
     const touchEndX = e.changedTouches[0].clientX;
     const deltaX = touchEndX - touchStartX;
     if (Math.abs(deltaX) > 40) {
-        if (deltaX > 0) prevCard();
-        else nextCard();
+        if (deltaX > 0) prevCard(); // swipe right = prev
+        else nextCard(); // swipe left = next
     }
     touchStartX = null;
 }
 
-function openTimetable(lecturer) {
-    selectedLecturer.value = lecturer;
-    showTimetable.value = true;
-}
-
-function closeTimetable() {
-    showTimetable.value = false;
-    selectedLecturer.value = null;
-}
-
+// Reload students when sesi or semester changes
 watch([sesi, semester], () => {
-    loadAllLecturers();
+    loadAllStudents();
 });
+
 onMounted(() => {
     validateSession();
 });
+
+function openStudentTimetable(matric) {
+    selectedMatric.value = matric;
+    showTimetablePopup.value = true;
+}
+function closeTimetablePopup() {
+    showTimetablePopup.value = false;
+}
 </script>
 
 <template>
     <div class="bg-transparent min-h-screen">
         <Toggle />
-        <ProfileBanner titleBanner="Lecturer" />
+        <ProfileBanner titleBanner="Student" />
+
         <!-- Sesi & Semester Selectors -->
         <div class="flex flex-row gap-4 items-center justify-center px-4 pt-4">
             <div>
@@ -199,7 +240,8 @@ onMounted(() => {
                 </select>
             </div>
         </div>
-        <!-- Search Filter -->
+
+        <!-- Search and Filters -->
         <div
             class="px-4 flex flex-col gap-2 items-center text-sm max-w-md mx-auto"
         >
@@ -209,12 +251,33 @@ onMounted(() => {
                     <input
                         v-model="nama"
                         type="text"
-                        placeholder="Type to search lecturer name"
+                        placeholder="Type to search student name"
+                        class="border px-2 py-1 rounded w-full"
+                    />
+                </div>
+            </div>
+            <div class="flex flex-row gap-2 w-full">
+                <div class="flex-1 flex flex-col">
+                    <label class="mb-1 ml-1 text-xs">Year</label>
+                    <input
+                        v-model="tahun"
+                        type="text"
+                        placeholder="Year"
+                        class="border px-2 py-1 rounded w-full"
+                    />
+                </div>
+                <div class="flex-1 flex flex-col">
+                    <label class="mb-1 ml-1 text-xs">Course</label>
+                    <input
+                        v-model="kursus"
+                        type="text"
+                        placeholder="Course"
                         class="border px-2 py-1 rounded w-full"
                     />
                 </div>
             </div>
         </div>
+
         <!-- Loading Spinner -->
         <div
             v-if="isLoading"
@@ -241,10 +304,11 @@ onMounted(() => {
                 />
             </svg>
             <span class="text-blue-700 font-medium text-base mt-2"
-                >Loading lecturers...</span
+                >Loading students...</span
             >
         </div>
-        <!-- Lecturer Card Carousel -->
+
+        <!-- Student Card Carousel with Centered First Card -->
         <div
             v-if="!isLoading"
             class="w-full flex flex-col items-center px-0 mt-4"
@@ -286,14 +350,15 @@ onMounted(() => {
                     @touchend="handleTouchEnd"
                     tabindex="0"
                 >
+                    <!-- Left phantom padder for centering first card -->
                     <div
                         :style="{ minWidth: 'calc(50vw - 88px)' }"
                         aria-hidden="true"
                     ></div>
                     <div
-                        v-for="(lecturer, idx) in filteredLecturers"
+                        v-for="(student, idx) in filteredStudents"
                         :key="idx"
-                        class="overflow-visible w-[175px] min-w-[175px] max-w-[175px] h-[200px] snap-center bg-blue-100 rounded-xl shadow p-4 flex flex-col items-start relative transition-all duration-500 border border-blue-200"
+                        class="overflow-visible w-[175px] min-w-[175px] max-w-[175px] h-[260px] snap-center bg-blue-100 rounded-xl shadow p-4 flex flex-col items-start relative transition-all duration-500 border border-blue-200"
                         :style="{
                             transform:
                                 currentIndex === idx
@@ -302,34 +367,38 @@ onMounted(() => {
                             zIndex: currentIndex === idx ? 2 : 1,
                         }"
                     >
-                        <div
-                            class="font-semibold text-sm mb-1 w-full text-blue-900 leading-tight whitespace-normal break-words"
-                        >
-                            {{ lecturer.name }}
+                        <div class="font-bold text-base mb-1 text-blue-900">
+                            {{ student.name }}
                         </div>
-                        <div
-                            class="flex flex-col gap-1 w-full text-gray-700 text-xs mt-1"
-                        >
-                            <div>
-                                <span class="font-semibold">Num. Section:</span>
-                                {{ lecturer.sectionCount }}
-                            </div>
-                            <div>
-                                <span class="font-semibold">Num. Subject:</span>
-                                {{ lecturer.subjectCount }}
-                            </div>
-                            <div>
-                                <span class="font-semibold">Num. Student:</span>
-                                {{ lecturer.studentCount }}
-                            </div>
+                        <div class="text-xs text-gray-700 mb-1">
+                            <span class="font-semibold">No. Matriks:</span>
+                            {{ student.no_matrik }}<br />
+                            <span class="font-semibold">No. KP:</span>
+                            {{ student.no_kp }}
+                        </div>
+                        <div class="mb-1 text-xs">
+                            <span class="font-semibold">Year:</span>
+                            {{ student.year }}<br />
+                            <span class="font-semibold">Course:</span>
+                            {{ student.course }}
+                        </div>
+                        <div class="mb-1 text-xs">
+                            <span class="font-semibold">Faculty:</span>
+                            {{ student.faculty }}
+                        </div>
+                        <div class="mb-1 text-xs">
+                            <span class="font-semibold">Num. Subject:</span>
+                            {{ student.subjectCount }}
                         </div>
                         <button
-                            class="absolute bottom-2 right-2 px-3 py-1.5 rounded-full bg-gradient-to-tr from-blue-200 via-blue-400 to-blue-600 text-white font-bold text-xs shadow hover:scale-105 hover:shadow-lg hover:from-blue-500 hover:to-blue-800 transition active:scale-95 flex items-center gap-1"
-                            @click="openTimetable(lecturer)"
+                            class="absolute bottom-2 right-2 rounded bg-gradient-to-tr from-blue-300 via-blue-400 to-blue-600 text-white font-bold text-xs px-3 py-1.5 shadow hover:scale-105 hover:shadow-lg transition active:scale-95 flex items-center gap-1"
+                            title="Lihat Jadual Pelajar"
+                            @click="openStudentTimetable(student.no_matrik)"
                         >
                             📅 Jadual
                         </button>
                     </div>
+                    <!-- Right phantom padder for centering last card -->
                     <div
                         :style="{ minWidth: 'calc(50vw - 88px)' }"
                         aria-hidden="true"
@@ -337,7 +406,7 @@ onMounted(() => {
                 </div>
                 <button
                     class="absolute right-1 top-1/2 -translate-y-1/2 z-10 bg-white/80 border shadow p-1.5 rounded-full hover:bg-blue-50 transition text-sm"
-                    :disabled="currentIndex >= filteredLecturers.length - 1"
+                    :disabled="currentIndex >= filteredStudents.length - 1"
                     @click="nextCard"
                     style="width: 32px; height: 32px"
                 >
@@ -357,18 +426,20 @@ onMounted(() => {
                 </button>
             </div>
             <div
-                v-if="!filteredLecturers.length && !isLoading"
+                v-if="!filteredStudents.length && !isLoading"
                 class="text-center py-8 text-gray-400"
             >
-                No lecturers found.
+                No students found.
             </div>
         </div>
-        <PensyarahTimetableModal
-            v-if="showTimetable"
-            :lecturer="selectedLecturer"
-            :on-close="closeTimetable"
-        />
         <Footer />
+
+        <!-- Timetable Popup Modal -->
+        <TimetableStudentPopup
+            :show="showTimetablePopup"
+            :matric="selectedMatric"
+            :onClose="closeTimetablePopup"
+        />
     </div>
 </template>
 

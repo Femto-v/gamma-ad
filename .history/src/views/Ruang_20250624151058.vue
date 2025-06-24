@@ -142,37 +142,57 @@ onBeforeUnmount(() => {
             <div class="flex flex-col items-center">
                 <!-- Search Bar -->
                 <div class="w-full max-w-lg relative p-4">
-                    <div class="relative w-full">
+                    <div
+                        class="flex items-center bg-white rounded-2xl shadow px-4 py-2 border border-gray-300"
+                    >
+                        <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            class="w-5 h-5 mr-2 text-gray-500"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                            stroke="currentColor"
+                        >
+                            <circle
+                                cx="11"
+                                cy="11"
+                                r="8"
+                                stroke="currentColor"
+                                stroke-width="2"
+                                fill="none"
+                            />
+                            <line
+                                x1="21"
+                                y1="21"
+                                x2="16.65"
+                                y2="16.65"
+                                stroke="currentColor"
+                                stroke-width="2"
+                                stroke-linecap="round"
+                            />
+                        </svg>
                         <input
                             v-model="searchTerm"
                             type="text"
-                            placeholder="Cari venue, kode, jenis, fakultas..."
-                            class="w-full bg-gradient-to-r from-blue-50 via-white to-blue-100 border-2 border-blue-200 focus:ring-2 focus:ring-blue-400 focus:border-blue-400 rounded-xl py-3 pl-12 pr-4 text-base shadow transition placeholder-gray-400"
+                            placeholder="Search"
+                            class="w-full outline-none border-0 bg-transparent text-base"
                         />
-                        <span
-                            class="absolute left-4 top-1/2 -translate-y-1/2 text-blue-400 text-2xl pointer-events-none"
-                        >
-                            🔍
-                        </span>
                     </div>
                 </div>
             </div>
 
             <!-- Fakulti Dropdown -->
             <div class="flex flex-col items-center gap-2 py-4 text-sm">
-                <div class="flex items-center gap-3">
-                    <span class="font-semibold text-blue-800 text-lg"
-                        >🏫 Fakultas:</span
-                    >
+                <label>
+                    Faculty:
                     <select
                         v-model="selectedFaculty"
-                        class="bg-gradient-to-r from-blue-50 via-white to-blue-100 border-2 border-blue-200 focus:ring-2 focus:ring-blue-400 focus:border-blue-400 rounded-xl px-4 py-2 shadow text-base transition"
+                        class="border px-2 py-1 rounded ml-2"
                     >
                         <option value="FSKSM">FSKSM</option>
                         <option value="FKE">FKE</option>
                         <option value="FABU">FABU</option>
                     </select>
-                </div>
+                </label>
             </div>
 
             <!-- Room Cards -->
@@ -196,7 +216,7 @@ onBeforeUnmount(() => {
                                 </span>
                             </div>
                             <button
-                                class="flex gap-3 rounded-full bg-blue-50 border border-blue-200 p-2 shadow hover:bg-blue-200 hover:shadow-lg hover:scale-110 active:bg-blue-300 text-blue-600 transition duration-200 outline-none focus-visible:ring-2 focus-visible:ring-blue-400"
+                                class="flex rounded-full bg-blue-50 border border-blue-200 p-2 shadow hover:bg-blue-200 hover:shadow-lg hover:scale-110 active:bg-blue-300 text-blue-600 transition duration-200 outline-none focus-visible:ring-2 focus-visible:ring-blue-400"
                                 title="Lihat Maklumat Jadual"
                                 @click="selectedRoomCode = room.code"
                             >

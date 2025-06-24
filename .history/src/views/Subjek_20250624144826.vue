@@ -427,11 +427,11 @@ function handleCloseModal() {
             <!-- Student Modal -->
             <div
                 v-if="showModal"
-                class="fixed inset-0 z-50 flex items-center justify-center bg-transparent backdrop-blur-sm bg-opacity-40"
+                class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40"
                 @click.self="handleCloseModal"
             >
                 <div
-                    class="bg-white max-w-lg w-full rounded-2xl shadow-lg p-6 relative m-4"
+                    class="bg-white max-w-lg w-full rounded-2xl shadow-lg p-6 relative"
                 >
                     <button
                         @click="handleCloseModal"
@@ -464,57 +464,56 @@ function handleCloseModal() {
                     >
                         Tiada pelajar dijumpai.
                     </div>
-                    <div
-                        v-else
-                        class="overflow-auto max-h-96 flex flex-col gap-3"
-                    >
-                        <div
-                            v-for="(student, idx) in modalStudentList"
-                            :key="student.no_matrik"
-                            class="flex gap-3 items-center bg-gradient-to-tr from-blue-50 via-white to-blue-100 rounded-xl shadow border border-blue-200 px-4 py-3 transition hover:shadow-lg"
-                        >
-                            <div class="flex-shrink-0">
-                                <span
-                                    class="inline-flex items-center justify-center rounded-full bg-blue-200 text-blue-700 w-10 h-10 text-2xl font-bold border border-blue-300"
+                    <div v-else class="overflow-auto max-h-96">
+                        <table class="min-w-full text-sm">
+                            <thead>
+                                <tr class="bg-blue-50">
+                                    <th class="py-2 px-2 border-b text-left">
+                                        #
+                                    </th>
+                                    <th class="py-2 px-2 border-b text-left">
+                                        No. Matrik
+                                    </th>
+                                    <th class="py-2 px-2 border-b text-left">
+                                        Nama
+                                    </th>
+                                    <th class="py-2 px-2 border-b text-left">
+                                        Status
+                                    </th>
+                                    <th class="py-2 px-2 border-b text-left">
+                                        Fakulti
+                                    </th>
+                                    <th class="py-2 px-2 border-b text-left">
+                                        Tahun
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr
+                                    v-for="(student, idx) in modalStudentList"
+                                    :key="student.no_matrik"
                                 >
-                                    {{ idx + 1 }}
-                                </span>
-                            </div>
-                            <div class="flex-1">
-                                <div
-                                    class="font-semibold text-blue-800 text-lg flex items-center gap-1"
-                                >
-                                    <span class="text-xl">🆔</span>
-                                    {{ student.no_matrik }}
-                                </div>
-                                <div
-                                    class="text-base font-bold text-gray-800 mb-1 flex items-center gap-1"
-                                >
-                                    <span class="text-lg">👤</span>
-                                    {{ student.nama }}
-                                </div>
-                                <div class="flex flex-wrap gap-2 text-sm mt-1">
-                                    <span
-                                        class="px-2 py-0.5 bg-green-100 border border-green-300 text-green-700 rounded-full flex items-center gap-1"
-                                    >
-                                        <span>🎯 Status:</span>
-                                        <b>{{ student.status || "-" }}</b>
-                                    </span>
-                                    <span
-                                        class="px-2 py-0.5 bg-purple-100 border border-purple-300 text-purple-800 rounded-full flex items-center gap-1"
-                                    >
-                                        <span>🏛️ Fakulti:</span>
-                                        <b>{{ student.kod_fakulti || "-" }}</b>
-                                    </span>
-                                    <span
-                                        class="px-2 py-0.5 bg-yellow-100 border border-yellow-300 text-yellow-800 rounded-full flex items-center gap-1"
-                                    >
-                                        <span>📅 Tahun:</span>
-                                        <b>{{ student.tahun_kursus || "-" }}</b>
-                                    </span>
-                                </div>
-                            </div>
-                        </div>
+                                    <td class="py-1 px-2 border-b">
+                                        {{ idx + 1 }}
+                                    </td>
+                                    <td class="py-1 px-2 border-b">
+                                        {{ student.no_matrik }}
+                                    </td>
+                                    <td class="py-1 px-2 border-b">
+                                        {{ student.nama }}
+                                    </td>
+                                    <td class="py-1 px-2 border-b">
+                                        {{ student.status }}
+                                    </td>
+                                    <td class="py-1 px-2 border-b">
+                                        {{ student.kod_fakulti }}
+                                    </td>
+                                    <td class="py-1 px-2 border-b">
+                                        {{ student.tahun_kursus }}
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
                     </div>
                 </div>
             </div>

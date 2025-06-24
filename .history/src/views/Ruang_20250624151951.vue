@@ -160,19 +160,17 @@ onBeforeUnmount(() => {
 
             <!-- Fakulti Dropdown -->
             <div class="flex flex-col items-center gap-2 py-4 text-sm">
-                <div class="flex items-center gap-3">
-                    <span class="font-semibold text-blue-800 text-lg"
-                        >🏫 Fakultas:</span
-                    >
+                <label>
+                    Faculty:
                     <select
                         v-model="selectedFaculty"
-                        class="bg-gradient-to-r from-blue-50 via-white to-blue-100 border-2 border-blue-200 focus:ring-2 focus:ring-blue-400 focus:border-blue-400 rounded-xl px-4 py-2 shadow text-base transition"
+                        class="border px-2 py-1 rounded ml-2"
                     >
                         <option value="FSKSM">FSKSM</option>
                         <option value="FKE">FKE</option>
                         <option value="FABU">FABU</option>
                     </select>
-                </div>
+                </label>
             </div>
 
             <!-- Room Cards -->

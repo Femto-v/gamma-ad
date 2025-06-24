@@ -4,7 +4,7 @@ import Toggle from "@/components/Toggle.vue";
 import ProfileBanner from "@/components/ProfileBanner.vue";
 import Footer from "@/components/Footer.vue";
 import PensyarahApi from "@/api/PensyarahApi.js";
-import PensyarahTimetableModal from "./PensyarahTimetableModal.vue"; // create this
+import PensyarahTimetableModal from "@/components/PensyarahTimetableModal.vue"; // create this
 import { userName, userMatric } from "@/constants/ApiConstants.js";
 
 const sesi = ref("2024/2025");

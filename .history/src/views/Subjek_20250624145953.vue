@@ -431,7 +431,7 @@ function handleCloseModal() {
                 @click.self="handleCloseModal"
             >
                 <div
-                    class="bg-white max-w-lg w-full rounded-2xl shadow-lg p-6 relative m-4"
+                    class="bg-white max-w-lg w-full rounded-2xl shadow-lg p-6 relative"
                 >
                     <button
                         @click="handleCloseModal"
