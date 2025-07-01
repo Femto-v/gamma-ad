@@ -1,13 +1,13 @@
 import TimetableRow from "./TimetableRow";
 
 export const days = [
-    "Ahad",
-    "Isnin",
-    "Selasa",
-    "Rabu",
-    "Khamis",
-    "Jumaat",
-    "Sabtu",
+    "Sunday",
+    "Monday",
+    "Tuesday",
+    "Wednesday",
+    "Thurday",
+    "Friday",
+    "Saturday",
 ];
 
 export const timetable = [

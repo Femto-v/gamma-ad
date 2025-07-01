@@ -79,7 +79,7 @@ function getTime(masa) {
             <h2
                 class="text-2xl font-extrabold mb-4 text-blue-900 flex items-center gap-2 justify-center"
             >
-                <span class="text-2xl">🏛️</span> Jadual
+                <span class="text-2xl">🏛️</span> Timetable
                 <span class="text-pink-500">{{ roomCode }}</span>
             </h2>
 
@@ -153,7 +153,7 @@ function getTime(masa) {
                 class="text-center text-blue-300 py-8 font-semibold text-lg"
             >
                 <span class="text-3xl">😴</span><br />
-                Tiada data untuk hari ini.
+                No Schedule for today.
             </div>
         </div>
     </div>

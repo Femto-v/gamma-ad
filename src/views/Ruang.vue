@@ -55,7 +55,7 @@ const fetchRooms = async () => {
             if (scroller) scroller.scrollTop = 0;
         });
     } catch (err) {
-        error.value = "Gagal memuatkan data ruang.";
+        error.value = "Failed to load venue data.";
         rooms.value = [];
     }
 };
@@ -162,7 +162,7 @@ onBeforeUnmount(() => {
             <div class="flex flex-col items-center gap-2 py-4 text-sm">
                 <div class="flex items-center gap-3">
                     <span class="font-semibold text-blue-800 text-lg"
-                        >🏫 Fakultas:</span
+                        >🏫 Faculty:</span
                     >
                     <select
                         v-model="selectedFaculty"
@@ -200,7 +200,7 @@ onBeforeUnmount(() => {
                                 title="Lihat Maklumat Jadual"
                                 @click="selectedRoomCode = room.code"
                             >
-                                <span class="sr-only">Maklumat Jadual</span>
+                                <span class="sr-only">Timetable Information</span>
                                 Timetable
                                 <svg
                                     xmlns="http://www.w3.org/2000/svg"

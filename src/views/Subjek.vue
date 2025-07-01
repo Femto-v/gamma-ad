@@ -398,7 +398,7 @@ function handleCloseModal() {
                                 class="px-5 py-2 bg-gradient-to-tr from-blue-100 via-blue-200 to-blue-300 text-white text-sm font-bold rounded-full shadow-lg flex items-center gap-2 border border-blue-400/20 transition hover:from-blue-600 hover:to-blue-800 hover:scale-105 hover:shadow-blue-300/40 active:scale-95 active:bg-blue-900 focus-visible:ring-2 focus-visible:ring-blue-300 focus-visible:outline-none duration-200"
                             >
                                 <span class="text-xl">👥</span>
-                                <span>Pelajar</span>
+                                <span>Students</span>
                             </button>
                         </div>
                     </div>
@@ -443,7 +443,7 @@ function handleCloseModal() {
                     <div
                         class="font-bold text-lg text-blue-700 mb-2 flex gap-2 items-center"
                     >
-                        👥 Pelajar - {{ modalSubject?.code }} (Seksyen
+                        👥 Students - {{ modalSubject?.code }} (Section
                         {{ modalSubject?.seksyen }})
                     </div>
                     <div
@@ -462,7 +462,7 @@ function handleCloseModal() {
                         v-else-if="modalStudentList.length === 0"
                         class="py-4 text-center text-gray-500"
                     >
-                        Tiada pelajar dijumpai.
+                        No student found.
                     </div>
                     <div
                         v-else
@@ -503,13 +503,13 @@ function handleCloseModal() {
                                     <span
                                         class="px-2 py-0.5 bg-purple-100 border border-purple-300 text-purple-800 rounded-full flex items-center gap-1"
                                     >
-                                        <span>🏛️ Fakulti:</span>
+                                        <span>🏛️ Faculty:</span>
                                         <b>{{ student.kod_fakulti || "-" }}</b>
                                     </span>
                                     <span
                                         class="px-2 py-0.5 bg-yellow-100 border border-yellow-300 text-yellow-800 rounded-full flex items-center gap-1"
                                     >
-                                        <span>📅 Tahun:</span>
+                                        <span>📅 Year:</span>
                                         <b>{{ student.tahun_kursus || "-" }}</b>
                                     </span>
                                 </div>

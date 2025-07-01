@@ -181,7 +181,7 @@ onMounted(() => {
         >
             <div>
                 <label class="mr-1 text-xs font-semibold text-blue-700"
-                    >📅 Sesi:</label
+                    >📅 Sesion:</label
                 >
                 <select
                     v-model="sesi"
@@ -374,7 +374,7 @@ onMounted(() => {
                             @click.stop="openTimetable(lecturer)"
                             title="View Timetable"
                         >
-                            <span class="text-sm">📅 Jadual</span>
+                            <span class="text-sm">📅 Timetable</span>
                         </button>
                         <span
                             v-if="currentIndex === idx"

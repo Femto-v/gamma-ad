@@ -82,11 +82,11 @@ async function showElective(id_kurikulum_subjek) {
                         <div class="flex flex-wrap gap-2 mt-1">
                             <span
                                 class="inline-block bg-blue-100 border border-blue-300 rounded-lg px-2 py-0.5 text-xs font-semibold text-blue-900"
-                                >🎯 {{ subject.kredit }} Kredit</span
+                                >🎯 {{ subject.kredit }} Credit</span
                             >
                             <span
                                 class="inline-block bg-yellow-100 border border-yellow-300 rounded-lg px-2 py-0.5 text-xs font-semibold text-yellow-900"
-                                >🗓️ Tahun: {{ subject.tahun_ambil }}</span
+                                >🗓️ Year: {{ subject.tahun_ambil }}</span
                             >
                             <span
                                 class="inline-block bg-pink-100 border border-pink-300 rounded-lg px-2 py-0.5 text-xs font-semibold text-pink-900"
@@ -96,7 +96,7 @@ async function showElective(id_kurikulum_subjek) {
                                 class="inline-block bg-green-100 border border-green-300 rounded-lg px-2 py-0.5 text-xs font-semibold text-green-900"
                             >
                                 <span v-if="subject.mod_elektif"
-                                    >🌈 Elektif</span
+                                    >🌈 Elective</span
                                 >
                                 <span v-else>🎓 Teras</span>
                             </span>
@@ -121,18 +121,18 @@ async function showElective(id_kurikulum_subjek) {
                 <div
                     class="mb-1 font-semibold text-blue-900 flex items-center gap-1"
                 >
-                    🌈 Detail Elektif:
+                    🌈 Detail Elective:
                 </div>
                 <div>
-                    <b>Kod Subjek:</b> {{ electiveDetail["se.kod_subjek"] }}
+                    <b>Subject Code:</b> {{ electiveDetail["se.kod_subjek"] }}
                 </div>
                 <div>
-                    <b>Nama Subjek:</b> {{ electiveDetail["s.nama_subjek"] }}
+                    <b>Subject Name:</b> {{ electiveDetail["s.nama_subjek"] }}
                 </div>
-                <div><b>Kredit:</b> {{ electiveDetail["s.kredit"] }}</div>
+                <div><b>Credit:</b> {{ electiveDetail["s.kredit"] }}</div>
             </div>
             <div v-if="loadingElective" class="text-xs text-blue-400 mt-2">
-                Memuat detail elektif...
+                Loading detail elective...
             </div>
         </div>
     </div>

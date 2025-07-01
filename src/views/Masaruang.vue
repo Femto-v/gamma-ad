@@ -131,7 +131,7 @@ const handleSubmit = () => {
                                                 v-model="selectedWeek"
                                                 class="mr-2"
                                             />
-                                            Minggu Kuliah<br />
+                                            College Week<br />
                                             <span class="text-xs ml-4"
                                                 >2025-03-16 ↔ 2025-06-28</span
                                             >
@@ -143,7 +143,7 @@ const handleSubmit = () => {
                                                 v-model="selectedWeek"
                                                 class="mr-2"
                                             />
-                                            Minggu Semasa<br />
+                                            Current Week<br />
                                             <span class="text-xs ml-4"
                                                 >2025-04-20 ↔ 2025-04-26</span
                                             >
@@ -155,7 +155,7 @@ const handleSubmit = () => {
                                                 v-model="selectedWeek"
                                                 class="mr-2"
                                             />
-                                            Input Pengguna
+                                            User Input
                                             <div class="flex gap-2 mt-1 ml-4">
                                                 <input
                                                     v-model="userStart"

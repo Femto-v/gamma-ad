@@ -79,7 +79,7 @@
             <span
                 class="rounded-xl border-2 border-pink-300 px-3 py-1 flex items-center gap-1 bg-pink-100"
             >
-                🧩 Elektif:
+                🧩 Elective:
                 <span class="font-bold text-pink-900">{{ electiveCount }}</span>
             </span>
             <span

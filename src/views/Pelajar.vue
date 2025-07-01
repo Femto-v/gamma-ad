@@ -221,7 +221,7 @@ function closeTimetablePopup() {
         >
             <div>
                 <label class="mr-1 text-xs font-semibold text-blue-700"
-                    >📅 Sesi:</label
+                    >📅 Sesion:</label
                 >
                 <select
                     v-model="sesi"
@@ -434,7 +434,7 @@ function closeTimetablePopup() {
                                 openStudentTimetable(student.no_matrik)
                             "
                         >
-                            <span>📅 Jadual</span>
+                            <span>📅 Timetable</span>
                         </button>
                         <!-- animated emoji badge -->
                         <span
