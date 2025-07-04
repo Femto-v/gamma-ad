@@ -57,7 +57,7 @@ const modalError = ref(null);
 const subjectOptions = computed(() => {
     const set = new Set();
     subjectRows.value.forEach((row) => {
-        if (row.code && row.name) set.add(`${row.code} - ${row.name}`);
+        if (row.code && row.name) set.add(`${row.code}`);
         else if (row.code) set.add(row.code);
         else if (row.name) set.add(row.name);
     });
