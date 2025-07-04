@@ -107,6 +107,38 @@ watch(
     },
     { immediate: true }
 );
+
+const mergedDaySchedule = computed(() => {
+  if (!daySchedule.value.length) return [];
+
+  const merged = [];
+  let prev = null;
+
+  daySchedule.value.forEach((item) => {
+    if (
+      prev &&
+      prev.subject === item.subject &&
+      prev.section === item.section &&
+      prev.room === item.room
+    ) {
+      // Extend previous block's end time
+      prev.endTime = item.time.split("-")[1].trim();
+    } else {
+      // Push new block
+      if (prev) merged.push(prev);
+      prev = {
+        ...item,
+        startTime: item.time.split("-")[0].trim(),
+        endTime: item.time.split("-")[1].trim(),
+      };
+    }
+  });
+
+  // Push the last block
+  if (prev) merged.push(prev);
+
+  return merged;
+});
 </script>
 
 <template>
@@ -178,7 +210,7 @@ watch(
             <!-- Day Schedule -->
             <div class="space-y-4 mt-1">
                 <div
-                    v-for="(item, index) in daySchedule"
+                    v-for="(item, index) in mergedDaySchedule"
                     :key="index"
                     class="flex gap-3 items-center p-4 rounded-2xl border-2 shadow-xl bg-gradient-to-br"
                     :class="item.color"
@@ -191,10 +223,10 @@ watch(
                         <span
                             class="font-black text-base text-blue-800 tracking-tight leading-none"
                         >
-                            {{ item.time.split("-")[0] }}
+                            {{ item.startTime }}
                         </span>
                         <span class="text-xs text-blue-400 font-mono">
-                            {{ item.time.split("-")[1] }}
+                            {{ item.endTime }}
                         </span>
                     </div>
                     <!-- Main Info -->
