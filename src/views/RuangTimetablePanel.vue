@@ -1,7 +1,9 @@
 <script setup>
 import { ref, watch, computed, onMounted } from "vue";
 import JadualRuangApi from "@/api/JadualRuangApi";
+import JadualSubjekApi from "@/api/JadualSubjekApi";
 import { days, timetable } from "@/constants/TimetableConstants";
+import { currentSemester, currentSession } from "@/constants/ApiConstants";
 
 const props = defineProps({
     roomCode: String,
@@ -13,6 +15,7 @@ const sesiOptions = ["2024/2025", "2023/2024"];
 const selectedSesi = ref("2024/2025");
 const selectedSemester = ref(1);
 const selectedDay = ref(0);
+const selectedFilter = ref(1);
 
 const entries = ref([]);
 const jadualRuangApi = new JadualRuangApi();
@@ -25,7 +28,19 @@ async function fetchTimetable() {
             selectedSemester.value,
             props.roomCode
         );
+        if (selectedFilter.value === 1) {
         entries.value = Array.isArray(data) ? data : [];
+        } else if (selectedFilter.value === 2) {
+          entries.value = Array.isArray(data)
+            ? data.map((item) => ({
+                masa: item.masa,
+                hari: item.hari,
+                subject: item.subjek?.kod_subjek ?? "-",
+                subjectName: item.subjek?.nama_subjek ?? "-",
+                section: item.subjek?.seksyen ?? "-",
+              }))
+            : [];
+        }
     } catch (err) {
         console.error("Failed to fetch timetable:", err);
         entries.value = [];
@@ -33,16 +48,82 @@ async function fetchTimetable() {
 }
 
 onMounted(fetchTimetable);
-watch([selectedSesi, selectedSemester, () => props.roomCode], fetchTimetable);
+watch([selectedSesi, selectedSemester, selectedFilter,() => props.roomCode], fetchTimetable);
 
-const filteredEntries = computed(() =>
-    entries.value.filter((e) => e.hari === selectedDay.value + 1)
-);
+const filteredEntries = computed(() => {
+  if (selectedFilter.value === 1) {
+    return entries.value
+      .filter((e) => e.hari === selectedDay.value + 1 && e.subjek === null)
+      .map((e) => ({
+        kod_perkara: e.kod_perkara ?? "-",
+        section: e.subjek?.seksyen ?? "-",
+        room: props.roomCode,
+        time: getTime(e.masa),
+      }))
+      .filter((e) => e.time);
+  } else if (selectedFilter.value === 2) {
+    // Filter for daily subjects: subjek is not null
+    return entries.value
+        .filter((e) => e.hari === selectedDay.value + 1)
+        .map((e) => ({
+          subject: e.subject,
+          section: e.section,
+          room: props.roomCode,
+          time: getTime(e.masa),
+        }))
+        .filter((e) => e.time);
+  } else {
+    return [];
+  }
+});
+
 
 function getTime(masa) {
     const row = timetable.find((t) => t.masa === masa);
     return row ? row.waktu : "";
 }
+
+const mergedDaySchedule = computed(() => {
+  if (!filteredEntries.value.length) return [];
+
+  const merged = [];
+  let prev = null;
+
+  filteredEntries.value.forEach((item) => {
+    if (selectedFilter.value === 1) {
+      // Event merging logic: merge same kod_perkara
+      if (prev && prev.kod_perkara === item.kod_perkara) {
+        prev.endTime = item.time.split("-")[1].trim();
+      } else {
+        if (prev) merged.push(prev);
+        prev = {
+          ...item,
+          startTime: item.time.split("-")[0].trim(),
+          endTime: item.time.split("-")[1].trim(),
+        };
+      }
+    } else if (selectedFilter.value === 2) {
+      // Subject merging logic
+      if (
+        prev &&
+        prev.subject === item.subject &&
+        prev.section === item.section
+      ) {
+        prev.endTime = item.time.split("-")[1].trim();
+      } else {
+        if (prev) merged.push(prev);
+        prev = {
+          ...item,
+          startTime: item.time.split("-")[0].trim(),
+          endTime: item.time.split("-")[1].trim(),
+        };
+      }
+    }
+  });
+  if (prev) merged.push(prev);
+  return merged;
+});
+
 </script>
 
 <template>
@@ -101,13 +182,21 @@ function getTime(masa) {
                     <option :value="1">Sem 1</option>
                     <option :value="2">Sem 2</option>
                 </select>
+                
+                <select
+                    v-model="selectedFilter"
+                    class="border-2 border-blue-200 bg-white/80 rounded-xl px-3 py-2 text-sm font-semibold shadow focus:border-blue-400 focus:ring-blue-200 transition"
+                >
+                    <option :value="1">Event</option>
+                    <option :value="2">Daily</option>
+                </select>
 
                 <div class="flex gap-1">
                     <button
                         v-for="(d, i) in days"
                         :key="i"
                         :class="[
-                            'px-3 py-1 rounded-xl text-sm font-semibold border transition-all duration-200',
+                            'px-2 py-1 rounded-xl text-sm font-semibold border transition-all duration-200',
                             selectedDay === i
                                 ? 'bg-blue-500 text-white border-blue-400 shadow'
                                 : 'bg-white border-blue-100 text-blue-800 hover:bg-blue-50',
@@ -120,29 +209,52 @@ function getTime(masa) {
             </div>
 
             <!-- Timetable List -->
-            <div v-if="filteredEntries.length" class="space-y-3">
+            <div v-if="mergedDaySchedule.length" class="space-y-3">
                 <div
-                    v-for="(entry, i) in filteredEntries"
+                    v-for="(entry, i) in mergedDaySchedule"
                     :key="i"
                     class="bg-gradient-to-br from-purple-100 via-white to-pink-50 border-2 border-purple-200 p-4 rounded-2xl shadow-md flex flex-col gap-1 animate-timetable-card"
                 >
-                    <div class="flex items-center gap-2 mb-1">
-                        <span class="text-xl">📚</span>
-                        <span class="font-bold text-blue-900 text-base">{{
-                            entry.kod_perkara
-                        }}</span>
-                    </div>
-                    <div class="flex items-center gap-2 text-sm text-blue-800">
+                    <div v-if="selectedFilter === 1">
+                        <div  class="flex items-center gap-2 mb-1">
+                            <span class="text-xl">📚</span>
+                            <span class="font-bold text-blue-900 text-base">{{
+                                entry.kod_perkara
+                            }}</span>
+                        </div>
+                        <div class="flex items-center gap-2 text-sm text-blue-800">
                         <span class="text-lg">🕑</span>
-                        <span>{{ getTime(entry.masa) }}</span>
-                    </div>
-                    <div
-                        class="flex items-center gap-2 text-sm text-pink-700 mt-1"
-                    >
-                        <span class="text-lg">🔖</span>
-                        <span
-                            >Section: <b>{{ entry.section || "-" }}</b></span
+                        <span>{{ entry.startTime }} - {{ entry.endTime }}</span>
+                        </div>
+                        <div
+                            class="flex items-center gap-2 text-sm text-pink-700 mt-1"
                         >
+                            <span class="text-lg">🔖</span>
+                            <span
+                                >Section: <b>{{ entry.section || "-" }}</b></span
+                            >
+                        </div>
+                    </div>
+                    
+                    <div v-else-if="selectedFilter === 2">
+                        <div class="flex items-center gap-2 mb-1">
+                            <span class="text-xl">📚</span>
+                            <span class="font-bold text-blue-900 text-base">{{
+                                entry.subject
+                            }}</span>
+                        </div>
+                        <div class="flex items-center gap-2 text-sm text-blue-800">
+                            <span class="text-lg">🕑</span>
+                            <span>{{ entry.startTime}} - {{ entry.endTime }}</span>
+                        </div>
+                        <div
+                            class="flex items-center gap-2 text-sm text-pink-700 mt-1"
+                        >
+                            <span class="text-lg">🔖</span>
+                            <span
+                                >Section: <b>{{ entry.section || "-" }}</b></span
+                            >
+                        </div>
                     </div>
                 </div>
             </div>
