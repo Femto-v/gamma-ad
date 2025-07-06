@@ -13,7 +13,7 @@ const subjectList = ref([]);
 const timetableData = ref(JSON.parse(JSON.stringify(timetable)));
 const sesi = ref("2024/2025");
 const semester = ref(2);
-const selectedDay = ref(new Date().getDay());
+const selectedDay = ref(0);
 
 const subjectColors = [
     "from-violet-200 to-violet-100 border-violet-300",
@@ -203,7 +203,7 @@ const mergedDaySchedule = computed(() => {
                                 : 'bg-blue-50 border-blue-100 text-blue-500 hover:bg-blue-100',
                         ]"
                     >
-                        {{ day }}
+                        {{ day.slice(0,3) }}
                     </button>
                 </div>
             </div>
