@@ -16,6 +16,7 @@ const selectedSesi = ref("2024/2025");
 const selectedSemester = ref(1);
 const selectedDay = ref(0);
 const selectedFilter = ref(1);
+const selectedDate = ref('null');
 
 const entries = ref([]);
 const jadualRuangApi = new JadualRuangApi();
@@ -28,19 +29,7 @@ async function fetchTimetable() {
             selectedSemester.value,
             props.roomCode
         );
-        if (selectedFilter.value === 1) {
         entries.value = Array.isArray(data) ? data : [];
-        } else if (selectedFilter.value === 2) {
-          entries.value = Array.isArray(data)
-            ? data.map((item) => ({
-                masa: item.masa,
-                hari: item.hari,
-                subject: item.subjek?.kod_subjek ?? "-",
-                subjectName: item.subjek?.nama_subjek ?? "-",
-                section: item.subjek?.seksyen ?? "-",
-              }))
-            : [];
-        }
     } catch (err) {
         console.error("Failed to fetch timetable:", err);
         entries.value = [];
@@ -51,9 +40,19 @@ onMounted(fetchTimetable);
 watch([selectedSesi, selectedSemester, selectedFilter,() => props.roomCode], fetchTimetable);
 
 const filteredEntries = computed(() => {
+  const chosenDate = selectedDate.value;
+
   if (selectedFilter.value === 1) {
     return entries.value
-      .filter((e) => e.hari === selectedDay.value + 1 && e.subjek === null)
+      .filter((e) => {
+        if (chosenDate) {
+          // If date selected, show event if tarikh_mula equals chosenDate
+          return e.subjek === null && e.tarikh_mula === chosenDate;
+        } else {
+          // Otherwise, show by day
+          return e.hari === selectedDay.value + 1 && e.subjek === null;
+        }
+      })
       .map((e) => ({
         kod_perkara: e.kod_perkara ?? "-",
         section: e.subjek?.seksyen ?? "-",
@@ -62,21 +61,19 @@ const filteredEntries = computed(() => {
       }))
       .filter((e) => e.time);
   } else if (selectedFilter.value === 2) {
-    // Filter for daily subjects: subjek is not null
     return entries.value
-        .filter((e) => e.hari === selectedDay.value + 1)
-        .map((e) => ({
-          subject: e.subject,
-          section: e.section,
-          room: props.roomCode,
-          time: getTime(e.masa),
-        }))
-        .filter((e) => e.time);
+      .filter((e) => e.hari === selectedDay.value + 1)
+      .map((e) => ({
+        subject: e.subjek?.kod_subjek ?? "-",
+        section: e.subjek?.seksyen ?? "-",
+        room: props.roomCode,
+        time: getTime(e.masa),
+      }))
+      .filter((e) => e.time);
   } else {
     return [];
   }
 });
-
 
 function getTime(masa) {
     const row = timetable.find((t) => t.masa === masa);
@@ -123,6 +120,16 @@ const mergedDaySchedule = computed(() => {
   if (prev) merged.push(prev);
   return merged;
 });
+
+function onDateChange() {
+  console.log("Selected date:", selectedDate.value);
+  if (selectedDate.value) {
+    const dateObj = new Date(selectedDate.value);
+    const dayIndex = dateObj.getDay();
+    selectedDay.value = dayIndex;
+    console.log("Updated selectedDay:", dayIndex);
+  }
+}
 
 </script>
 
@@ -190,6 +197,11 @@ const mergedDaySchedule = computed(() => {
                     <option :value="1">Event</option>
                     <option :value="2">Daily</option>
                 </select>
+
+                <div class="border-2 border-blue-200 bg-white/80 rounded-xl px-3 py-2 text-sm font-semibold shadow focus:border-blue-400 focus:ring-blue-200">
+                  <label for="date">Select Date: </label>
+                  <input class="ml-2" type="date" id="date" v-model="selectedDate" @change="onDateChange" />
+                </div>
 
                 <div class="flex gap-1">
                     <button
