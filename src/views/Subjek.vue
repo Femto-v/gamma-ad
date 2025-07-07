@@ -328,7 +328,7 @@ function handleCloseModal() {
                         <input
                             v-model="searchTerm"
                             type="text"
-                            placeholder="Cari subjek, pensyarah, atau kod..."
+                            placeholder="Search subjek, pensyarah, atau kod..."
                             class="w-full outline-none border-0 bg-transparent text-base"
                         />
                     </div>

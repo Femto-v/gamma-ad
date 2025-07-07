@@ -146,7 +146,7 @@ onBeforeUnmount(() => {
                         <input
                             v-model="searchTerm"
                             type="text"
-                            placeholder="Cari venue, kode, jenis, fakultas..."
+                            placeholder="Search venue, kode, jenis, fakultas..."
                             class="w-full bg-gradient-to-r from-blue-50 via-white to-blue-100 border-2 border-blue-200 focus:ring-2 focus:ring-blue-400 focus:border-blue-400 rounded-xl py-3 pl-12 pr-4 text-base shadow transition placeholder-gray-400"
                         />
                         <span
