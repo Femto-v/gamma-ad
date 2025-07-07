@@ -8,11 +8,6 @@ import Pensyarah from "@/views/Pensyarah.vue";
 import Pelajar from "@/views/Pelajar.vue";
 import Kurikulum from "@/views/Kurikulum.vue";
 import Masaruang from "@/views/Masaruang.vue";
-import AnalysisSubjek from "@/views/AnalysisSubjek.vue";
-import AnalysisPelajar from "@/views/AnalysisPelajar.vue";
-import ClashRuang from "@/views/ClashRuang.vue";
-import ClashPelajar from "@/views/ClashPelajar.vue";
-import ClashPensyarah from "@/views/ClashPensyarah.vue";
 import SessionService from "@/api/SessionService";
 
 const routes = [
@@ -64,36 +59,6 @@ const routes = [
         path: "/masaruang",
         name: "Masaruang",
         component: Masaruang,
-        meta: { requiresAuth: true },
-    },
-    {
-        path: "/analysissubjek",
-        name: "AnalysiSubjek",
-        component: AnalysisSubjek,
-        meta: { requiresAuth: true },
-    },
-    {
-        path: "/analysispelajar",
-        name: "AnalysiPelajar",
-        component: AnalysisPelajar,
-        meta: { requiresAuth: true },
-    },
-    {
-        path: "/clashruang",
-        name: "ClashRuang",
-        component: ClashRuang,
-        meta: { requiresAuth: true },
-    },
-    {
-        path: "/clashpelajar",
-        name: "ClashPelajar",
-        component: ClashPelajar,
-        meta: { requiresAuth: true },
-    },
-    {
-        path: "/clashpensyarah",
-        name: "ClashPensyarah",
-        component: ClashPensyarah,
         meta: { requiresAuth: true },
     },
 ];
