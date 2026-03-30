@@ -1,3 +1,4 @@
+.history
 # Logs
 logs
 *.log
@@ -18,8 +19,7 @@ coverage
 /cypress/screenshots/
 
 # Editor directories and files
-.vscode/*
-!.vscode/extensions.json
+.vscode
 .idea
 *.suo
 *.ntvs*
