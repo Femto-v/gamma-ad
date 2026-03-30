@@ -1,6 +1,5 @@
 # UTM Timetable Web Application
-This project is a web application built using Vue 3 to display timetable and academic-related information for Universiti Teknologi Malaysia (UTM).
-The main objective of this project is to practice API integration, state management, and frontend development using modern web technologies.
+##### This project is a web application built using Vue 3 to display timetable and academic-related information for Universiti Teknologi Malaysia (UTM). The main objective of this project is to practice API integration, state management, and frontend development using modern web technologies.
 ---
 ## Overview
 This application consumes an API provided by the lecturer and presents structured information such as:
