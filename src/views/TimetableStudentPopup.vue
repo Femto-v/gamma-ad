@@ -165,13 +165,12 @@ const mergedDaySchedule = computed(() => {
                 >
                     &times;
                 </button>
-                <h3
-                    class="text-2xl font-extrabold text-blue-900 mb-1 flex items-center gap-2 tracking-tight"
-                >
-                    <span class="text-3xl">📅</span> Student Timetable
-                    <span class="text-xs text-blue-400 ml-2 font-mono"
-                        >({{ matric }})</span
-                    >
+                <h3 class="text-xl font-bold text-gray-900 mb-1 flex items-center gap-2 tracking-tight">
+                    <svg class="w-5 h-5 text-blue-500 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                    </svg>
+                    Student Timetable
+                    <span class="text-xs text-gray-400 ml-1 font-mono">({{ matric }})</span>
                 </h3>
                 <!-- Controls -->
                 <div
@@ -284,7 +283,7 @@ const mergedDaySchedule = computed(() => {
                                 <span
                                     v-if="item.room"
                                     class="bg-white/60 rounded-lg px-2 py-0.5 border border-pink-200 font-semibold text-pink-700"
-                                    >📍 {{ item.room }}</span
+                                    >{{ item.room }}</span
                                 >
                             </div>
                         </div>
@@ -293,7 +292,9 @@ const mergedDaySchedule = computed(() => {
                         v-if="daySchedule.length === 0"
                         class="text-center py-16 text-blue-300 font-bold text-lg"
                     >
-                        <span class="text-2xl">💤</span><br />
+                        <svg class="w-10 h-10 text-gray-300 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                        </svg>
                         No classes scheduled for {{ days[selectedDay] }}
                     </div>
                 </div>

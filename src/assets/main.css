@@ -2,5 +2,9 @@
 @import "tailwindcss";
 
 :root {
-    background-color: #f3f3ff;
+    background-color: #f2f2f7;
+    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display",
+        "Helvetica Neue", Arial, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
 }

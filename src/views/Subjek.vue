@@ -267,9 +267,7 @@ function handleCloseModal() {
             <!-- Sesi & Semester Selectors -->
             <div class="flex flex-wrap gap-4 justify-center mt-4 mb-2 px-4">
                 <div class="flex items-center gap-2">
-                    <span class="font-medium text-blue-800"
-                        >🗓️ Session (Sesi):</span
-                    >
+                    <span class="font-medium text-gray-700">Session:</span>
                     <select
                         v-model="selectedSesi"
                         class="px-2 py-1 border-2 border-blue-200 rounded-lg focus:ring-2 focus:ring-blue-300"
@@ -284,7 +282,7 @@ function handleCloseModal() {
                     </select>
                 </div>
                 <div class="flex items-center gap-2">
-                    <span class="font-medium text-blue-800">📆 Semester:</span>
+                    <span class="font-medium text-gray-700">Semester:</span>
                     <select
                         v-model="selectedSemester"
                         class="px-2 py-1 border-2 border-blue-200 rounded-lg focus:ring-2 focus:ring-blue-300"
@@ -303,7 +301,7 @@ function handleCloseModal() {
             <!-- Filters -->
             <div class="flex flex-wrap gap-4 justify-center px-4 py-2">
                 <div class="flex items-center gap-2">
-                    <span class="font-medium text-blue-800">📕 Subject:</span>
+                    <span class="font-medium text-gray-700">Subject:</span>
                     <select
                         v-model="selectedSubject"
                         class="px-2 py-1 border-2 border-blue-200 rounded-lg w-52 focus:ring-2 focus:ring-blue-300"
@@ -324,7 +322,7 @@ function handleCloseModal() {
                     <div
                         class="flex items-center bg-white rounded-2xl shadow px-4 py-2 border-2 border-blue-200 focus-within:ring-2 ring-blue-300"
                     >
-                        <span class="mr-2 text-blue-400 text-lg">🔍</span>
+                        <svg class="mr-2 w-4 h-4 text-gray-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
                         <input
                             v-model="searchTerm"
                             type="text"
@@ -370,24 +368,22 @@ function handleCloseModal() {
                             <span
                                 class="px-3 py-1 bg-yellow-100 border border-yellow-300 text-yellow-800 text-xs rounded-full"
                             >
-                                🎓 Credit: <b>{{ subject.kredit }}</b>
+                                Credit: <b>{{ subject.kredit }}</b>
                             </span>
                             <span
                                 class="px-3 py-1 bg-purple-100 border border-purple-300 text-purple-800 text-xs rounded-full"
                             >
-                                🏷️ Section: <b>{{ subject.seksyen ?? "-" }}</b>
+                                Section: <b>{{ subject.seksyen ?? "-" }}</b>
                             </span>
                             <span
                                 class="px-3 py-1 bg-green-100 border border-green-300 text-green-800 text-xs rounded-full"
                             >
-                                👨‍🏫 Lecturer:
-                                <b>{{ subject.drPensyarah ?? "-" }}</b>
+                                Lecturer: <b>{{ subject.drPensyarah ?? "-" }}</b>
                             </span>
                             <span
                                 class="px-3 py-1 bg-blue-100 border border-blue-300 text-blue-800 text-xs rounded-full"
                             >
-                                🧑‍🎓 Student:
-                                <b>{{ subject.bilPelajar ?? "-" }}</b>
+                                Students: <b>{{ subject.bilPelajar ?? "-" }}</b>
                             </span>
                         </div>
                         <!-- Button to view students -->
@@ -397,7 +393,7 @@ function handleCloseModal() {
                                 title="Lihat Senarai Pelajar"
                                 class="px-5 py-2 bg-gradient-to-tr from-blue-100 via-blue-200 to-blue-300 text-white text-sm font-bold rounded-full shadow-lg flex items-center gap-2 border border-blue-400/20 transition hover:from-blue-600 hover:to-blue-800 hover:scale-105 hover:shadow-blue-300/40 active:scale-95 active:bg-blue-900 focus-visible:ring-2 focus-visible:ring-blue-300 focus-visible:outline-none duration-200"
                             >
-                                <span class="text-xl">👥</span>
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
                                 <span>Students</span>
                             </button>
                         </div>
@@ -406,20 +402,20 @@ function handleCloseModal() {
                         v-if="loadingMore"
                         class="py-2 text-center text-blue-400 text-base animate-pulse"
                     >
-                        ⏳ Loading more...
+                        Loading more&hellip;
                     </div>
                     <div
                         v-if="!visibleSubjects.length && !error"
                         class="py-10 text-center text-blue-300 text-base"
                     >
-                        <span class="text-3xl">🙈</span><br />
+                        <svg class="w-10 h-10 text-gray-300 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" /></svg>
                         No Subject Found.
                     </div>
                     <div
                         v-if="error"
                         class="py-10 text-center text-red-500 text-base"
                     >
-                        <span class="text-2xl">⚠️</span><br />
+                        <svg class="w-8 h-8 text-red-300 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg>
                         {{ error }}
                     </div>
                 </div>
@@ -438,13 +434,11 @@ function handleCloseModal() {
                         class="absolute top-2 right-2 text-gray-500 hover:text-red-600 rounded-full bg-gray-100 p-1"
                         title="Close"
                     >
-                        ✖️
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12" /></svg>
                     </button>
-                    <div
-                        class="font-bold text-lg text-blue-700 mb-2 flex gap-2 items-center"
-                    >
-                        👥 Students - {{ modalSubject?.code }} (Section
-                        {{ modalSubject?.seksyen }})
+                    <div class="font-bold text-lg text-gray-900 mb-2 flex gap-2 items-center">
+                        <svg class="w-5 h-5 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
+                        Students &mdash; {{ modalSubject?.code }} (Section {{ modalSubject?.seksyen }})
                     </div>
                     <div
                         v-if="modalLoading"
@@ -481,36 +475,17 @@ function handleCloseModal() {
                                 </span>
                             </div>
                             <div class="flex-1">
-                                <div
-                                    class="font-semibold text-blue-800 text-lg flex items-center gap-1"
-                                >
-                                    <span class="text-xl">🆔</span>
-                                    {{ student.no_matrik }}
-                                </div>
-                                <div
-                                    class="text-base font-bold text-gray-800 mb-1 flex items-center gap-1"
-                                >
-                                    <span class="text-lg">👤</span>
-                                    {{ student.nama }}
-                                </div>
-                                <div class="flex flex-wrap gap-2 text-sm mt-1">
-                                    <span
-                                        class="px-2 py-0.5 bg-green-100 border border-green-300 text-green-700 rounded-full flex items-center gap-1"
-                                    >
-                                        <span>🎯 Status:</span>
-                                        <b>{{ student.status || "-" }}</b>
+                                <div class="font-semibold text-gray-900 text-[13px] font-mono">{{ student.no_matrik }}</div>
+                                <div class="text-[14px] font-semibold text-gray-800 mb-1">{{ student.nama }}</div>
+                                <div class="flex flex-wrap gap-2 text-xs mt-1">
+                                    <span class="px-2 py-0.5 bg-green-50 border border-green-200 text-green-700 rounded-full">
+                                        Status: <b>{{ student.status || "—" }}</b>
                                     </span>
-                                    <span
-                                        class="px-2 py-0.5 bg-purple-100 border border-purple-300 text-purple-800 rounded-full flex items-center gap-1"
-                                    >
-                                        <span>🏛️ Faculty:</span>
-                                        <b>{{ student.kod_fakulti || "-" }}</b>
+                                    <span class="px-2 py-0.5 bg-purple-50 border border-purple-200 text-purple-700 rounded-full">
+                                        Faculty: <b>{{ student.kod_fakulti || "—" }}</b>
                                     </span>
-                                    <span
-                                        class="px-2 py-0.5 bg-yellow-100 border border-yellow-300 text-yellow-800 rounded-full flex items-center gap-1"
-                                    >
-                                        <span>📅 Year:</span>
-                                        <b>{{ student.tahun_kursus || "-" }}</b>
+                                    <span class="px-2 py-0.5 bg-amber-50 border border-amber-200 text-amber-700 rounded-full">
+                                        Year: <b>{{ student.tahun_kursus || "—" }}</b>
                                     </span>
                                 </div>
                             </div>

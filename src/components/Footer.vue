@@ -1,16 +1,11 @@
 <template>
-    <footer
-        class="text-black justify-center items-center m-4 p-4 text-center bg-gray-200 rounded-lg shadow-md"
-    >
-        <p class="text-sm">
-            If you have any comments or questions about this web page, <br />
-            please contact the webmaster at
-            <a href="mailto:ttms@fc.utm.my" class="underline font-medium"
-                >ttms@fc.utm.my</a
-            >.
+    <footer class="px-6 py-8 mt-4 border-t border-gray-100">
+        <p class="text-[12px] text-gray-400 text-center leading-relaxed">
+            Questions? Contact
+            <a href="mailto:ttms@fc.utm.my" class="text-blue-500 hover:text-blue-600 transition-colors">ttms@fc.utm.my</a>
         </p>
-        <p class="text-sm mt-3 font-light">
-            Copyright © 2002–2025, Faculty of Computing, UTM.
+        <p class="text-[11px] text-gray-300 text-center mt-1">
+            &copy; 2002&#8211;2025 Faculty of Computing, UTM
         </p>
     </footer>
 </template>

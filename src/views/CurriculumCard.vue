@@ -1,101 +1,51 @@
 <template>
     <div
-        class="bg-white/90 border-2 m-4 border-blue-200 rounded-3xl shadow-xl px-7 py-6 flex flex-col gap-2 relative group hover:scale-105 hover:shadow-2xl transition cursor-pointer overflow-hidden"
+        class="bg-white border border-gray-100 rounded-2xl shadow-sm px-5 py-5 flex flex-col gap-2 relative hover:shadow-md transition-shadow duration-200 cursor-pointer"
         @click="onShowDetail"
     >
-        <!-- Top emoji border -->
-        <div
-            class="absolute -top-5 left-0 w-full flex justify-between pointer-events-none"
-        >
-            <span class="text-2xl">📚</span>
-            <span class="text-2xl">🌟</span>
-            <span class="text-2xl">🎓</span>
-            <span class="text-2xl">✨</span>
-        </div>
-
-        <!-- Modal Button -->
+        <!-- Info button -->
         <button
-            class="absolute top-3 right-3 rounded-full bg-blue-100 hover:bg-blue-200 border-2 border-blue-300 p-2 z-10 shadow-md transition"
-            title="Maklumat Subjek"
+            class="absolute top-3 right-3 w-8 h-8 rounded-full bg-gray-50 hover:bg-blue-50 border border-gray-200 flex items-center justify-center z-10 transition-colors duration-150"
+            title="View subjects"
             @click.stop="onShowDetail"
         >
-            <svg
-                xmlns="http://www.w3.org/2000/svg"
-                class="w-6 h-6 text-blue-600"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-            >
-                <rect
-                    x="6"
-                    y="3"
-                    width="12"
-                    height="18"
-                    rx="2"
-                    stroke-width="2"
-                />
-                <path
-                    d="M9 7h6M9 11h6M9 15h3"
-                    stroke-width="2"
-                    stroke-linecap="round"
-                />
+            <svg class="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
             </svg>
         </button>
 
-        <!-- Main curriculum info -->
-        <div
-            class="text-xl font-bold text-blue-900 mt-4 mb-1 flex items-center gap-2"
-        >
+        <!-- Curriculum name -->
+        <div class="text-[15px] font-bold text-gray-900 pr-10 leading-snug">
             {{ curriculum.name }}
-            <span class="ml-1 text-lg">📒</span>
         </div>
-        <div class="mb-1 text-base flex items-center gap-2">
-            <span class="font-light text-gray-500">Admission Start:</span>
-            <span class="text-yellow-500 text-xl">🛎️</span>
-        </div>
-        <div
-            class="flex flex-row flex-wrap gap-3 text-gray-700 text-[15px] mb-2"
-        >
-            <span
-                class="rounded-full bg-blue-50 px-3 py-1 border border-blue-200 flex items-center gap-1"
-                >📅 <b>{{ curriculum.sesi }}</b></span
-            >
-            <span
-                class="rounded-full bg-pink-50 px-3 py-1 border border-pink-200 flex items-center gap-1"
-                >🏷️ Sem: <b>{{ curriculum.semester }}</b></span
-            >
-            <span
-                class="rounded-full bg-amber-50 px-3 py-1 border border-yellow-200 flex items-center gap-1"
-                >📆 Year: <b>{{ curriculum.tahun }}</b></span
-            >
-        </div>
-        <div class="flex flex-row gap-4 mt-1 mb-2 text-[15px] font-semibold">
-            <span
-                class="rounded-xl border-2 border-blue-300 px-3 py-1 flex items-center gap-1 bg-blue-100"
-            >
-                🎯 Teras:
-                <span class="font-bold text-blue-900">{{ terasCount }}</span>
+
+        <div class="text-[12px] text-gray-400 font-medium">Admission Start</div>
+
+        <!-- Session / Semester / Year pills -->
+        <div class="flex flex-row flex-wrap gap-2 text-[12px] mb-1">
+            <span class="rounded-full bg-blue-50 px-2.5 py-1 border border-blue-100 text-blue-700 font-medium">
+                {{ curriculum.sesi }}
             </span>
-            <span
-                class="rounded-xl border-2 border-pink-300 px-3 py-1 flex items-center gap-1 bg-pink-100"
-            >
-                🧩 Elective:
-                <span class="font-bold text-pink-900">{{ electiveCount }}</span>
+            <span class="rounded-full bg-gray-50 px-2.5 py-1 border border-gray-200 text-gray-600 font-medium">
+                Sem {{ curriculum.semester }}
             </span>
-            <span
-                class="rounded-xl border-2 border-amber-300 px-3 py-1 flex items-center gap-1 bg-amber-100"
-            >
-                🧮 Total:
-                <span class="font-bold text-amber-900">{{ totalCount }}</span>
+            <span class="rounded-full bg-amber-50 px-2.5 py-1 border border-amber-100 text-amber-700 font-medium">
+                Year {{ curriculum.tahun }}
             </span>
         </div>
-        <!-- Bottom emoji border -->
-        <div
-            class="absolute -bottom-4 left-0 w-full flex justify-evenly pointer-events-none"
-        >
-            <span class="text-2xl">🌈</span>
-            <span class="text-2xl">🦄</span>
-            <span class="text-2xl">📖</span>
+
+        <!-- Stats row -->
+        <div class="flex flex-row gap-2 mt-1 text-[12px] font-semibold">
+            <span class="flex-1 rounded-xl border border-blue-100 px-2.5 py-1.5 flex items-center gap-1 bg-blue-50 text-blue-800">
+                <svg class="w-3 h-3 text-blue-400" fill="currentColor" viewBox="0 0 20 20"><path d="M9 2a1 1 0 000 2h2a1 1 0 100-2H9z"/><path fill-rule="evenodd" d="M4 5a2 2 0 012-2 3 3 0 003 3h2a3 3 0 003-3 2 2 0 012 2v11a2 2 0 01-2 2H6a2 2 0 01-2-2V5zm3 4a1 1 0 000 2h.01a1 1 0 100-2H7zm3 0a1 1 0 000 2h3a1 1 0 100-2h-3zm-3 4a1 1 0 100 2h.01a1 1 0 100-2H7zm3 0a1 1 0 100 2h3a1 1 0 100-2h-3z" clip-rule="evenodd"/></svg>
+                Core: <span class="font-bold text-blue-900 ml-0.5">{{ terasCount }}</span>
+            </span>
+            <span class="flex-1 rounded-xl border border-pink-100 px-2.5 py-1.5 flex items-center gap-1 bg-pink-50 text-pink-800">
+                Elective: <span class="font-bold text-pink-900 ml-0.5">{{ electiveCount }}</span>
+            </span>
+            <span class="flex-1 rounded-xl border border-amber-100 px-2.5 py-1.5 flex items-center gap-1 bg-amber-50 text-amber-800">
+                Total: <span class="font-bold text-amber-900 ml-0.5">{{ totalCount }}</span>
+            </span>
         </div>
     </div>
 </template>

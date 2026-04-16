@@ -46,18 +46,12 @@ async function showElective(id_kurikulum_subjek) {
                 class="absolute top-3 right-4 text-2xl bg-blue-100 rounded-full px-2 py-1 hover:bg-pink-200 z-10 font-bold shadow transition"
                 title="Tutup"
             >
-                ✕
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12" /></svg>
             </button>
-            <h3
-                class="font-extrabold text-2xl text-blue-900 mb-3 pr-10 flex items-center gap-2"
-            >
-                <span>📖</span> Subjects — {{ curriculumName }}
+            <h3 class="font-bold text-xl text-gray-900 mb-3 pr-10 flex items-center gap-2">
+                <svg class="w-5 h-5 text-blue-500 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" /></svg>
+                Subjects &mdash; {{ curriculumName }}
             </h3>
-            <div class="w-full flex justify-center gap-2 mb-3">
-                <span class="text-lg">🔸</span>
-                <span class="text-lg">✨</span>
-                <span class="text-lg">🔸</span>
-            </div>
 
             <!-- Timeline/List Style -->
             <div
@@ -70,44 +64,30 @@ async function showElective(id_kurikulum_subjek) {
                     class="flex flex-col sm:flex-row items-start sm:items-center gap-2 rounded-xl border-2 border-blue-100 shadow-sm bg-gradient-to-r from-blue-50 via-white to-pink-50 p-4 relative"
                 >
                     <div class="flex flex-row items-center gap-2 mb-2 sm:mb-0">
-                        <span class="text-2xl">📘</span>
-                        <span class="font-mono text-blue-800 font-bold">{{
-                            subject.kod_subjek
-                        }}</span>
+                        <div class="w-8 h-8 rounded-lg bg-blue-50 flex items-center justify-center shrink-0">
+                            <svg class="w-4 h-4 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" /></svg>
+                        </div>
+                        <span class="font-mono text-blue-800 font-bold text-sm">{{ subject.kod_subjek }}</span>
                     </div>
                     <div class="flex-1">
-                        <div class="font-semibold text-blue-900 text-lg">
-                            {{ subject.nama_subjek }}
-                        </div>
+                        <div class="font-semibold text-gray-900 text-[14px]">{{ subject.nama_subjek }}</div>
                         <div class="flex flex-wrap gap-2 mt-1">
-                            <span
-                                class="inline-block bg-blue-100 border border-blue-300 rounded-lg px-2 py-0.5 text-xs font-semibold text-blue-900"
-                                >🎯 {{ subject.kredit }} Credit</span
-                            >
-                            <span
-                                class="inline-block bg-yellow-100 border border-yellow-300 rounded-lg px-2 py-0.5 text-xs font-semibold text-yellow-900"
-                                >🗓️ Year: {{ subject.tahun_ambil }}</span
-                            >
-                            <span
-                                class="inline-block bg-pink-100 border border-pink-300 rounded-lg px-2 py-0.5 text-xs font-semibold text-pink-900"
-                                >📅 Semester: {{ subject.semester_ambil }}</span
-                            >
-                            <span
-                                class="inline-block bg-green-100 border border-green-300 rounded-lg px-2 py-0.5 text-xs font-semibold text-green-900"
-                            >
-                                <span v-if="subject.mod_elektif"
-                                    >🌈 Elective</span
-                                >
-                                <span v-else>🎓 Teras</span>
+                            <span class="inline-block bg-blue-50 border border-blue-200 rounded-lg px-2 py-0.5 text-[11px] font-semibold text-blue-800">
+                                {{ subject.kredit }} Credit
                             </span>
-                            <button
-                                v-if="subject.mod_elektif"
-                                class="text-blue-600 underline font-semibold hover:text-pink-500 text-xs ml-2"
-                                @click="
-                                    showElective(subject.id_kurikulum_subjek)
-                                "
-                            >
-                                Detail 🌟
+                            <span class="inline-block bg-amber-50 border border-amber-200 rounded-lg px-2 py-0.5 text-[11px] font-semibold text-amber-800">
+                                Year {{ subject.tahun_ambil }}
+                            </span>
+                            <span class="inline-block bg-pink-50 border border-pink-200 rounded-lg px-2 py-0.5 text-[11px] font-semibold text-pink-800">
+                                Sem {{ subject.semester_ambil }}
+                            </span>
+                            <span class="inline-block bg-green-50 border border-green-200 rounded-lg px-2 py-0.5 text-[11px] font-semibold text-green-800">
+                                <span v-if="subject.mod_elektif">Elective</span>
+                                <span v-else>Core</span>
+                            </span>
+                            <button v-if="subject.mod_elektif" class="text-blue-600 underline font-semibold hover:text-blue-800 text-[11px] ml-1 transition-colors"
+                                @click="showElective(subject.id_kurikulum_subjek)">
+                                Details
                             </button>
                         </div>
                     </div>
@@ -121,7 +101,7 @@ async function showElective(id_kurikulum_subjek) {
                 <div
                     class="mb-1 font-semibold text-blue-900 flex items-center gap-1"
                 >
-                    🌈 Detail Elective:
+                    Elective Detail:
                 </div>
                 <div>
                     <b>Subject Code:</b> {{ electiveDetail["se.kod_subjek"] }}

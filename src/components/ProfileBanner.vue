@@ -18,32 +18,25 @@ const properties = defineProps({
 </script>
 
 <template>
-    <div
-        class="bg-cover bg-center pb-10 text-black flex flex-col justify-center items-center bg-gradient-to-b from-transparent via-blue-200 to-blue-300"
-    >
-        <img
-            src="/UTM-LOGO.png"
-            class="w-14 sm:w-16 mb-1 sm:mb-2 drop-shadow-xl rounded-full border-4 border-white"
-            alt="UTM Logo"
-        />
-        <div
-            class="flex items-center gap-2 sm:gap-3 mb-1 flex-wrap justify-center w-full px-2"
-        >
-            <h2
-                class="text-xl sm:text-3xl font-extrabold text-blue-900 drop-shadow tracking-tight text-center break-words"
-            >
-                {{ titleBanner }}
-            </h2>
+    <div class="bg-white border-b border-gray-100 px-5 pt-5 pb-5 text-center">
+        <div class="flex items-center justify-center mb-3">
+            <div class="w-10 h-10 rounded-full bg-gray-50 border border-gray-200 shadow-sm overflow-hidden flex items-center justify-center">
+                <img
+                    src="/UTM-LOGO.png"
+                    class="w-7 h-7 object-contain"
+                    alt="UTM"
+                />
+            </div>
         </div>
-        <div
-            class="flex flex-col sm:flex-row items-center justify-center gap-1 sm:gap-2 mt-1 w-full px-2"
-        >
-            <span
-                class="flex items-center gap-1 text-base sm:text-lg text-blue-700"
-            >
-                👤
-                <span class="font-bold text-blue-800">{{ userInfo }}</span>
-            </span>
+        <h2 class="text-[22px] font-bold text-gray-900 tracking-tight leading-tight mb-1">
+            {{ titleBanner }}
+        </h2>
+        <div class="flex items-center justify-center gap-1.5">
+            <svg class="w-3.5 h-3.5 text-gray-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+            </svg>
+            <span class="text-[13px] font-medium text-gray-500">{{ userInfo }}</span>
         </div>
     </div>
 </template>

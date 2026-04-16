@@ -165,10 +165,12 @@ function onDateChange() {
 
             <!-- Panel Header -->
             <h2
-                class="text-2xl font-extrabold mb-4 text-blue-900 flex items-center gap-2 justify-center"
+                class="text-xl font-bold mb-4 text-gray-900 flex items-center gap-2 justify-center"
             >
-                <span class="text-2xl">🏛️</span> Timetable
-                <span class="text-pink-500">{{ roomCode }}</span>
+                <svg class="w-5 h-5 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                </svg>
+                Timetable &mdash; <span class="text-blue-600 font-mono">{{ roomCode }}</span>
             </h2>
 
             <!-- Filter Controls -->
@@ -228,44 +230,44 @@ function onDateChange() {
                     class="bg-gradient-to-br from-purple-100 via-white to-pink-50 border-2 border-purple-200 p-4 rounded-2xl shadow-md flex flex-col gap-1 animate-timetable-card"
                 >
                     <div v-if="selectedFilter === 1">
-                        <div  class="flex items-center gap-2 mb-1">
-                            <span class="text-xl">📚</span>
-                            <span class="font-bold text-blue-900 text-base">{{
-                                entry.kod_perkara
-                            }}</span>
+                        <div class="flex items-center gap-2 mb-1">
+                            <svg class="w-4 h-4 text-blue-500 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+                            </svg>
+                            <span class="font-bold text-gray-900 text-sm">{{ entry.kod_perkara }}</span>
                         </div>
-                        <div class="flex items-center gap-2 text-sm text-blue-800">
-                        <span class="text-lg">🕑</span>
-                        <span>{{ entry.startTime }} - {{ entry.endTime }}</span>
+                        <div class="flex items-center gap-2 text-sm text-gray-600">
+                            <svg class="w-3.5 h-3.5 text-gray-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                            <span>{{ entry.startTime }} &ndash; {{ entry.endTime }}</span>
                         </div>
-                        <div
-                            class="flex items-center gap-2 text-sm text-pink-700 mt-1"
-                        >
-                            <span class="text-lg">🔖</span>
-                            <span
-                                >Section: <b>{{ entry.section || "-" }}</b></span
-                            >
+                        <div class="flex items-center gap-2 text-sm text-gray-500 mt-1">
+                            <svg class="w-3.5 h-3.5 text-gray-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A2 2 0 013 12V7a4 4 0 014-4z" />
+                            </svg>
+                            <span>Section: <b>{{ entry.section || "—" }}</b></span>
                         </div>
                     </div>
-                    
+
                     <div v-else-if="selectedFilter === 2">
                         <div class="flex items-center gap-2 mb-1">
-                            <span class="text-xl">📚</span>
-                            <span class="font-bold text-blue-900 text-base">{{
-                                entry.subject
-                            }}</span>
+                            <svg class="w-4 h-4 text-blue-500 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+                            </svg>
+                            <span class="font-bold text-gray-900 text-sm">{{ entry.subject }}</span>
                         </div>
-                        <div class="flex items-center gap-2 text-sm text-blue-800">
-                            <span class="text-lg">🕑</span>
-                            <span>{{ entry.startTime}} - {{ entry.endTime }}</span>
+                        <div class="flex items-center gap-2 text-sm text-gray-600">
+                            <svg class="w-3.5 h-3.5 text-gray-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                            <span>{{ entry.startTime }} &ndash; {{ entry.endTime }}</span>
                         </div>
-                        <div
-                            class="flex items-center gap-2 text-sm text-pink-700 mt-1"
-                        >
-                            <span class="text-lg">🔖</span>
-                            <span
-                                >Section: <b>{{ entry.section || "-" }}</b></span
-                            >
+                        <div class="flex items-center gap-2 text-sm text-gray-500 mt-1">
+                            <svg class="w-3.5 h-3.5 text-gray-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A2 2 0 013 12V7a4 4 0 014-4z" />
+                            </svg>
+                            <span>Section: <b>{{ entry.section || "—" }}</b></span>
                         </div>
                     </div>
                 </div>
@@ -276,8 +278,10 @@ function onDateChange() {
                 v-else
                 class="text-center text-blue-300 py-8 font-semibold text-lg"
             >
-                <span class="text-3xl">😴</span><br />
-                No Schedule for today.
+                <svg class="w-10 h-10 text-gray-300 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                </svg>
+                No schedule for today.
             </div>
         </div>
     </div>

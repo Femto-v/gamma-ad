@@ -15,6 +15,8 @@ function removeCookie(name) {
 }
 
 // Get raw session_id from localStorage or cookie
+const STUDENT_CACHE_KEY = "web.fc.utm.student_cache";
+
 function getSessionIdRaw() {
     let sessionId = null;
     const local = localStorage.getItem("web.fc.utm.my_usersession");
@@ -25,6 +27,24 @@ function getSessionIdRaw() {
     }
     if (!sessionId) sessionId = getCookie("session_id");
     return sessionId;
+}
+
+function savePrefetchedStudents(students) {
+    localStorage.setItem(STUDENT_CACHE_KEY, JSON.stringify(students || []));
+}
+
+function getPrefetchedStudents() {
+    const cached = localStorage.getItem(STUDENT_CACHE_KEY);
+    if (!cached) return [];
+    try {
+        return JSON.parse(cached) || [];
+    } catch (e) {
+        return [];
+    }
+}
+
+function clearPrefetchedStudents() {
+    localStorage.removeItem(STUDENT_CACHE_KEY);
 }
 
 // Validate session and get session object from server (returns { session_id, ... } or null)
@@ -62,6 +82,7 @@ function saveSession(sessionObj) {
 function clearSession() {
     localStorage.removeItem("web.fc.utm.my_usersession");
     removeCookie("session_id");
+    clearPrefetchedStudents();
 }
 
 // Export functions
@@ -70,4 +91,7 @@ export default {
     validateSession,
     saveSession,
     clearSession,
+    savePrefetchedStudents,
+    getPrefetchedStudents,
+    clearPrefetchedStudents,
 };

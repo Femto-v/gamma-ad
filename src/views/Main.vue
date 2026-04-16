@@ -96,123 +96,87 @@ onMounted(async () => {
 </script>
 
 <template>
-    <div
-        class="bg-gradient-to-br from-blue-50 via-pink-50 to-yellow-50 min-h-screen"
-    >
+    <div class="min-h-screen bg-[#f2f2f7]">
         <Toggle />
         <ProfileBanner />
 
-        <main class="flex-1 flex flex-col items-center p-2 pt-5">
-            <!-- Floating Profile Avatar Card -->
-            <div class="relative w-full max-w-xs flex justify-center mb-5">
-                <div
-                    class="absolute top-6 left-1/2 -translate-x-1/2 w-36 h-16 bg-gradient-to-br from-blue-200 via-white to-pink-100 blur-lg rounded-full opacity-70 pointer-events-none"
-                ></div>
-                <div
-                    class="w-28 h-28 rounded-full bg-white flex items-center justify-center shadow-xl border-4 border-blue-100 relative z-10"
-                >
-                    <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        class="h-20 w-20 text-blue-400"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        stroke="currentColor"
-                    >
-                        <circle cx="12" cy="8" r="4" stroke-width="2" />
-                        <path
-                            stroke-linecap="round"
-                            stroke-linejoin="round"
-                            stroke-width="2"
-                            d="M4 20c0-4 4-7 8-7s8 3 8 7"
-                        />
-                    </svg>
+        <main class="px-4 pt-6 pb-10 max-w-md mx-auto">
+
+            <!-- Stat Cards Row -->
+            <div class="grid grid-cols-2 gap-3 mb-4">
+                <!-- Credit Card -->
+                <div class="bg-white rounded-2xl p-4 shadow-sm border border-gray-100">
+                    <div class="flex items-center justify-center w-9 h-9 rounded-xl bg-blue-50 mb-3">
+                        <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75"
+                                d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z" />
+                        </svg>
+                    </div>
+                    <div class="text-2xl font-bold text-gray-900 leading-none mb-1">{{ creditInfo }}</div>
+                    <div class="text-[11px] font-medium text-gray-400 uppercase tracking-wide">Credits</div>
+                </div>
+
+                <!-- Year / Course Card -->
+                <div class="bg-white rounded-2xl p-4 shadow-sm border border-gray-100">
+                    <div class="flex items-center justify-center w-9 h-9 rounded-xl bg-indigo-50 mb-3">
+                        <svg class="w-5 h-5 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75"
+                                d="M12 14l9-5-9-5-9 5 9 5z" />
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75"
+                                d="M12 14l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14z" />
+                        </svg>
+                    </div>
+                    <div class="text-lg font-bold text-gray-900 leading-none mb-1 truncate">{{ yearCourse }}</div>
+                    <div class="text-[11px] font-medium text-gray-400 uppercase tracking-wide">Year / Course</div>
                 </div>
             </div>
 
-            <!-- 2 Badge Info Cards Side-by-Side -->
-            <div class="flex flex-row gap-3 mb-4 w-full max-w-xs">
-                <!-- Credit Info -->
-                <div
-                    class="flex-1 glass-card flex flex-col items-center justify-center p-3 rounded-xl border-2 border-blue-200 shadow-lg"
-                >
-                    <div
-                        class="flex items-center gap-1 text-xl font-bold text-blue-800"
-                    >
-                        <span class="text-2xl">💠</span>
-                        {{ creditInfo }}
+            <!-- Info List -->
+            <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+                <!-- Session -->
+                <div class="flex items-center justify-between px-4 py-3.5 border-b border-gray-50">
+                    <div class="flex items-center gap-3">
+                        <div class="w-8 h-8 rounded-lg bg-blue-50 flex items-center justify-center">
+                            <svg class="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                            </svg>
+                        </div>
+                        <span class="text-[14px] font-medium text-gray-700">Session</span>
                     </div>
-                    <div
-                        class="text-xs text-blue-600 mt-1 tracking-wide font-medium"
-                    >
-                        Credit Counted
-                    </div>
+                    <span class="text-[14px] font-semibold text-gray-900">{{ currentSession }}</span>
                 </div>
-                <!-- Year/Course Info -->
-                <div
-                    class="flex-1 glass-card flex flex-col items-center justify-center p-3 rounded-xl border-2 border-pink-200 shadow-lg"
-                >
-                    <div
-                        class="flex items-center gap-1 text-xl font-bold text-pink-700"
-                    >
-                        <span class="text-2xl">🎓</span>
-                        {{ yearCourse }}
+
+                <!-- Semester -->
+                <div class="flex items-center justify-between px-4 py-3.5 border-b border-gray-50">
+                    <div class="flex items-center gap-3">
+                        <div class="w-8 h-8 rounded-lg bg-purple-50 flex items-center justify-center">
+                            <svg class="w-4 h-4 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A2 2 0 013 12V7a4 4 0 014-4z" />
+                            </svg>
+                        </div>
+                        <span class="text-[14px] font-medium text-gray-700">Semester</span>
                     </div>
-                    <div
-                        class="text-xs text-pink-600 mt-1 tracking-wide font-medium"
-                    >
-                        Year / Course
+                    <span class="text-[14px] font-semibold text-gray-900">{{ currentSemester }}</span>
+                </div>
+
+                <!-- Date Range -->
+                <div class="flex items-center justify-between px-4 py-3.5">
+                    <div class="flex items-center gap-3">
+                        <div class="w-8 h-8 rounded-lg bg-green-50 flex items-center justify-center">
+                            <svg class="w-4 h-4 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                        </div>
+                        <span class="text-[14px] font-medium text-gray-700">Period</span>
                     </div>
+                    <span class="text-[13px] font-medium text-gray-500 text-right">{{ startDate }} &ndash; {{ endDate }}</span>
                 </div>
             </div>
 
-            <!-- Session, Semester, Date: Large Info Cards -->
-            <div class="w-full max-w-xs flex flex-col gap-3">
-                <div
-                    class="glass-card bg-blue-100/70 rounded-2xl border-2 border-blue-200 shadow flex justify-between items-center px-5 py-3"
-                >
-                    <span
-                        class="font-semibold flex items-center gap-2 text-blue-700"
-                        >📆 Session</span
-                    >
-                    <span
-                        class="text-blue-900 font-bold text-lg tracking-wide"
-                        >{{ currentSession }}</span
-                    >
-                </div>
-                <div
-                    class="glass-card bg-blue-100/70 rounded-2xl border-2 border-blue-200 shadow flex justify-between items-center px-5 py-3"
-                >
-                    <span
-                        class="font-semibold flex items-center gap-2 text-blue-700"
-                        >🎯 Semester</span
-                    >
-                    <span
-                        class="text-blue-900 font-bold text-lg tracking-wide"
-                        >{{ currentSemester }}</span
-                    >
-                </div>
-                <div
-                    class="glass-card bg-blue-100/70 rounded-2xl border-2 border-blue-200 shadow flex justify-between items-center px-5 py-3"
-                >
-                    <span
-                        class="font-semibold flex items-center gap-2 text-blue-700"
-                        >📅 Date</span
-                    >
-                    <span
-                        class="text-blue-800 font-semibold text-sm text-right leading-tight"
-                        >{{ startDate }}<br class="block sm:hidden" />/
-                        {{ endDate }}</span
-                    >
-                </div>
-            </div>
         </main>
         <Footer />
     </div>
 </template>
-
-<style scoped>
-.glass-card {
-    background: rgba(255, 255, 255, 0.85);
-    backdrop-filter: blur(4px);
-}
-</style>

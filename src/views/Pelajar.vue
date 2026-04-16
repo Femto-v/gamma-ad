@@ -4,6 +4,7 @@ import Toggle from "@/components/Toggle.vue";
 import ProfileBanner from "@/components/ProfileBanner.vue";
 import Footer from "@/components/Footer.vue";
 import PelajarApi from "@/api/PelajarApi.js";
+import SessionService from "@/api/SessionService";
 import TimetableStudentPopup from "./TimetableStudentPopup.vue";
 import { userName, userMatric } from "@/constants/ApiConstants.js";
 
@@ -16,14 +17,15 @@ const tahun = ref("");
 const kursus = ref("");
 const students = ref([]);
 const isLoading = ref(false);
+const isLoadingMore = ref(false);
 const sessionId = ref("");
 const currentIndex = ref(0);
+const nextOffset = ref(0);
+const hasMorePages = ref(true);
 const sliderRef = ref(null);
 
 const showTimetablePopup = ref(false);
 const selectedMatric = ref("");
-
-const CARD_WIDTH = 175;
 
 const lsData = JSON.parse(localStorage.getItem("web.fc.utm.my_usersession"));
 if (lsData) {
@@ -31,83 +33,15 @@ if (lsData) {
     userMatric.value = lsData.login_name;
 }
 
-// Data fetching
-const loadAllStudents = async () => {
-    if (!sessionId.value) return;
-    isLoading.value = true;
-    try {
-        const api = new PelajarApi(sessionId.value);
-        let batchOffset = 0;
-        let batch;
-        let allStudents = [];
-        const PAGE_SIZE = 100;
-        do {
-            batch = await api.getPelajar(
-                sesi.value,
-                semester.value,
-                PAGE_SIZE,
-                batchOffset
-            );
-            if (Array.isArray(batch) && batch.length > 0) {
-                allStudents.push(
-                    ...batch.map((item) => ({
-                        name: item.nama,
-                        year: item.tahun_kursus,
-                        course: item.kod_kursus,
-                        faculty: item.kod_fakulti,
-                        subjectCount: item.bil_subjek,
-                        no_matrik: item.no_matrik,
-                        no_kp: item.no_kp,
-                    }))
-                );
-                batchOffset += PAGE_SIZE;
-            } else {
-                batch = [];
-            }
-        } while (batch.length === PAGE_SIZE);
-
-        students.value = allStudents;
-        await nextTick();
-        scrollToCard(0);
-        currentIndex.value = 0;
-    } catch (err) {
-        students.value = [];
-        console.error("Failed to fetch students:", err);
-    }
-    isLoading.value = false;
-};
-
-const validateSession = async () => {
-    const rawSessionId = lsData?.session_id;
-    if (!rawSessionId) {
-        window.location.replace("/login");
-        return;
-    }
-    try {
-        const res = await fetch(
-            `http://web.fc.utm.my/ttms/auth-admin.php?session_id=${rawSessionId}`
-        );
-        if (!res.ok) {
-            window.location.replace("/login");
-            return;
-        }
-        let data;
-        try {
-            data = await res.json();
-        } catch (err) {
-            window.location.replace("/login");
-            return;
-        }
-        if (!Array.isArray(data) || !data[0]?.session_id) {
-            window.location.replace("/login");
-            return;
-        }
-        sessionId.value = data[0].session_id;
-        await loadAllStudents();
-    } catch {
-        window.location.replace("/login");
-    }
-};
+const mapStudent = (item) => ({
+    name: item.nama,
+    year: item.tahun_kursus,
+    course: item.kod_kursus,
+    faculty: item.kod_fakulti,
+    subjectCount: item.bil_subjek,
+    no_matrik: item.no_matrik,
+    no_kp: item.no_kp,
+});
 
 const filteredStudents = computed(() => {
     let filtered = students.value;
@@ -129,6 +63,113 @@ const filteredStudents = computed(() => {
     if (currentIndex.value >= filtered.length)
         currentIndex.value = Math.max(filtered.length - 1, 0);
     return filtered;
+});
+
+const setStudentsFromCache = (cached) => {
+    if (Array.isArray(cached) && cached.length) {
+        students.value = cached;
+        nextOffset.value = cached.length;
+        hasMorePages.value = cached.length >= 20;
+    }
+};
+
+const loadStudentBatch = async (limit = 20, offset = 0) => {
+    if (!sessionId.value) return;
+    if (offset > 0 && isLoadingMore.value) return;
+    if (offset === 0) {
+        isLoading.value = true;
+    } else {
+        isLoadingMore.value = true;
+    }
+
+    try {
+        const api = new PelajarApi(sessionId.value);
+        const batch = await api.getPelajar(
+            sesi.value,
+            semester.value,
+            limit,
+            offset
+        );
+        const mapped = Array.isArray(batch) ? batch.map(mapStudent) : [];
+        if (mapped.length) {
+            const existingIds = new Set(
+                students.value.map((student) => student.no_matrik)
+            );
+            const uniqueNew = mapped.filter(
+                (student) => student.no_matrik && !existingIds.has(student.no_matrik)
+            );
+            if (uniqueNew.length) {
+                students.value.push(...uniqueNew);
+            }
+            nextOffset.value = students.value.length;
+            if (mapped.length < limit) {
+                hasMorePages.value = false;
+            }
+            SessionService.savePrefetchedStudents(students.value);
+        } else {
+            hasMorePages.value = false;
+        }
+    } catch (err) {
+        console.error("Failed to fetch student batch:", err);
+    } finally {
+        if (offset === 0) {
+            isLoading.value = false;
+        } else {
+            isLoadingMore.value = false;
+        }
+    }
+};
+
+const loadInitialStudents = async () => {
+    isLoading.value = true;
+    try {
+        const cached = SessionService.getPrefetchedStudents();
+        setStudentsFromCache(cached);
+        if (!cached.length) {
+            await loadStudentBatch(20, 0);
+        } else if (hasMorePages.value) {
+            loadStudentBatch(20, nextOffset.value);
+        }
+        await nextTick();
+        scrollToCard(0);
+        currentIndex.value = 0;
+    } catch (err) {
+        console.error("Failed to load initial students:", err);
+    } finally {
+        isLoading.value = false;
+    }
+};
+
+const validateSession = async () => {
+    const session = await SessionService.validateSession();
+    if (!session) {
+        window.location.replace("/login");
+        return;
+    }
+    sessionId.value = session.session_id;
+    await loadInitialStudents();
+};
+
+const loadMoreOnDemand = () => {
+    if (
+        filteredStudents.value.length > 0 &&
+        currentIndex.value >= filteredStudents.value.length - 5 &&
+        hasMorePages.value &&
+        !isLoadingMore.value
+    ) {
+        loadStudentBatch(20, nextOffset.value);
+    }
+};
+
+watch(currentIndex, () => {
+    loadMoreOnDemand();
+});
+
+watch([sesi, semester], () => {
+    students.value = [];
+    nextOffset.value = 0;
+    hasMorePages.value = true;
+    validateSession();
 });
 
 // Carousel logic with centering
@@ -186,15 +227,17 @@ function handleTouchEnd(e) {
     const touchEndX = e.changedTouches[0].clientX;
     const deltaX = touchEndX - touchStartX;
     if (Math.abs(deltaX) > 40) {
-        if (deltaX > 0) prevCard(); // swipe right = prev
-        else nextCard(); // swipe left = next
+        if (deltaX > 0) prevCard();
+        else nextCard();
     }
     touchStartX = null;
 }
 
-// Reload students when sesi or semester changes
 watch([sesi, semester], () => {
-    loadAllStudents();
+    students.value = [];
+    nextOffset.value = 0;
+    hasMorePages.value = true;
+    validateSession();
 });
 
 onMounted(() => {
@@ -211,264 +254,289 @@ function closeTimetablePopup() {
 </script>
 
 <template>
-    <div class="bg-gradient-to-br from-blue-50 to-cyan-100 min-h-screen pb-8">
+    <div class="min-h-screen bg-[#f2f2f7] pb-10">
         <Toggle />
         <ProfileBanner titleBanner="Student Explorer" />
 
-        <!-- Sesi & Semester Selectors -->
-        <div
-            class="flex flex-row gap-4 items-center justify-center px-4 pt-6 pb-2"
-        >
-            <div>
-                <label class="mr-1 text-xs font-semibold text-blue-700"
-                    >📅 Sesion:</label
-                >
-                <select
-                    v-model="sesi"
-                    class="border-2 border-blue-200 bg-white rounded-xl px-3 py-2 text-sm font-semibold shadow focus:border-blue-400 focus:ring-blue-200 transition"
-                >
-                    <option value="2024/2025">2024/2025</option>
-                    <option value="2023/2024">2023/2024</option>
-                    <option value="2022/2023">2022/2023</option>
-                </select>
-            </div>
-            <div>
-                <label class="mr-1 text-xs font-semibold text-blue-700"
-                    >🧭 Semester:</label
-                >
-                <select
-                    v-model="semester"
-                    class="border-2 border-blue-200 bg-white rounded-xl px-3 py-2 text-sm font-semibold shadow focus:border-blue-400 focus:ring-blue-200 transition"
-                >
-                    <option :value="1">1</option>
-                    <option :value="2">2</option>
-                </select>
-            </div>
-        </div>
+        <!-- Filters Section -->
+        <div class="px-4 pt-5 pb-2">
 
-        <!-- Search and Filters -->
-        <div
-            class="max-w-md mx-auto mt-2 flex flex-col gap-2 items-center px-4"
-        >
-            <div class="flex flex-row gap-2 w-full">
-                <div class="flex-1 flex flex-col">
-                    <label class="mb-1 ml-1 text-xs font-bold text-blue-800"
-                        >🔎 Name</label
-                    >
+            <!-- Session & Semester row -->
+            <div class="flex gap-3 mb-4">
+                <div class="flex-1">
+                    <label class="block text-[11px] font-semibold text-gray-500 uppercase tracking-wide mb-1.5">
+                        Session
+                    </label>
+                    <div class="relative">
+                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                            <svg class="w-3.5 h-3.5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                            </svg>
+                        </div>
+                        <select
+                            v-model="sesi"
+                            class="w-full pl-9 pr-3 py-2.5 text-[13px] font-semibold bg-white border border-gray-200 rounded-xl shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 transition appearance-none"
+                        >
+                            <option value="2024/2025">2024/2025</option>
+                            <option value="2023/2024">2023/2024</option>
+                            <option value="2022/2023">2022/2023</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="w-28">
+                    <label class="block text-[11px] font-semibold text-gray-500 uppercase tracking-wide mb-1.5">
+                        Semester
+                    </label>
+                    <div class="relative">
+                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                            <svg class="w-3.5 h-3.5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A2 2 0 013 12V7a4 4 0 014-4z" />
+                            </svg>
+                        </div>
+                        <select
+                            v-model="semester"
+                            class="w-full pl-9 pr-3 py-2.5 text-[13px] font-semibold bg-white border border-gray-200 rounded-xl shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 transition appearance-none"
+                        >
+                            <option :value="1">Sem 1</option>
+                            <option :value="2">Sem 2</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Search Filters -->
+            <div class="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+                <!-- Name -->
+                <div class="flex items-center gap-3 px-4 py-3 border-b border-gray-50">
+                    <svg class="w-4 h-4 text-gray-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                    </svg>
                     <input
                         v-model="nama"
                         type="text"
-                        placeholder="Type to search student name"
-                        class="rounded-xl px-3 py-2 border-2 border-blue-100 focus:border-blue-400 outline-none bg-white shadow transition w-full"
+                        placeholder="Search by name"
+                        class="flex-1 text-[14px] bg-transparent outline-none placeholder:text-gray-400 text-gray-900"
                     />
                 </div>
-            </div>
-            <div class="flex flex-row gap-2 w-full">
-                <div class="flex-1 flex flex-col">
-                    <label class="mb-1 ml-1 text-xs font-bold text-blue-800"
-                        >🎓 Year</label
-                    >
-                    <input
-                        v-model="tahun"
-                        type="text"
-                        placeholder="Year"
-                        class="rounded-xl px-3 py-2 border-2 border-blue-100 focus:border-blue-400 outline-none bg-white shadow transition w-full"
-                    />
-                </div>
-                <div class="flex-1 flex flex-col">
-                    <label class="mb-1 ml-1 text-xs font-bold text-blue-800"
-                        >📚 Course</label
-                    >
-                    <input
-                        v-model="kursus"
-                        type="text"
-                        placeholder="Course"
-                        class="rounded-xl px-3 py-2 border-2 border-blue-100 focus:border-blue-400 outline-none bg-white shadow transition w-full"
-                    />
+                <!-- Year + Course row -->
+                <div class="flex">
+                    <div class="flex items-center gap-3 px-4 py-3 flex-1 border-r border-gray-50">
+                        <svg class="w-4 h-4 text-gray-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75"
+                                d="M12 14l9-5-9-5-9 5 9 5z" />
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75"
+                                d="M12 14l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14z" />
+                        </svg>
+                        <input
+                            v-model="tahun"
+                            type="text"
+                            placeholder="Year"
+                            class="flex-1 min-w-0 text-[14px] bg-transparent outline-none placeholder:text-gray-400 text-gray-900"
+                        />
+                    </div>
+                    <div class="flex items-center gap-3 px-4 py-3 flex-1">
+                        <svg class="w-4 h-4 text-gray-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75"
+                                d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+                        </svg>
+                        <input
+                            v-model="kursus"
+                            type="text"
+                            placeholder="Course"
+                            class="flex-1 min-w-0 text-[14px] bg-transparent outline-none placeholder:text-gray-400 text-gray-900"
+                        />
+                    </div>
                 </div>
             </div>
         </div>
 
-        <!-- Loading Spinner -->
-        <div
-            v-if="isLoading"
-            class="flex flex-col items-center justify-center py-16"
-        >
-            <svg
-                class="animate-spin h-12 w-12 text-blue-400 mb-2"
-                xmlns="http://www.w3.org/2000/svg"
-                fill="none"
-                viewBox="0 0 24 24"
-            >
-                <circle
-                    class="opacity-25"
-                    cx="12"
-                    cy="12"
-                    r="10"
-                    stroke="currentColor"
-                    stroke-width="4"
-                />
-                <path
-                    class="opacity-75"
-                    fill="currentColor"
-                    d="M4 12a8 8 0 018-8v8H4z"
-                />
+        <!-- Loading State -->
+        <div v-if="isLoading" class="flex flex-col items-center justify-center py-20">
+            <svg class="animate-spin w-8 h-8 text-blue-500 mb-3" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" />
+                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z" />
             </svg>
-            <span class="text-blue-500 font-semibold text-lg"
-                >Loading students...</span
-            >
+            <span class="text-[14px] text-gray-400 font-medium">Loading students&hellip;</span>
         </div>
 
-        <!-- Student Card Carousel with Centered First Card -->
-        <div
-            v-if="!isLoading"
-            class="w-full flex flex-col items-center px-0 mt-6"
-        >
-            <div class="relative w-full max-w-full mx-auto">
-                <!-- Carousel navigation -->
+        <!-- Carousel -->
+        <div v-if="!isLoading" class="mt-4">
+            <div class="relative w-full">
+                <!-- Left chevron -->
                 <button
-                    class="absolute left-1 top-1/2 -translate-y-1/2 z-10 bg-white border-2 border-blue-200 shadow p-2 rounded-full hover:bg-blue-50 transition text-xs"
+                    class="carousel-nav left-2"
                     :disabled="currentIndex <= 0"
+                    :class="currentIndex <= 0 ? 'opacity-30 cursor-not-allowed' : 'hover:bg-gray-100'"
                     @click="prevCard"
-                    style="width: 38px; height: 38px"
+                    aria-label="Previous"
                 >
-                    <span>⬅️</span>
+                    <svg class="w-4 h-4 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 19l-7-7 7-7" />
+                    </svg>
                 </button>
-                <!-- Gradient overlays -->
-                <div
-                    class="pointer-events-none absolute left-0 top-0 w-20 h-full z-20 bg-gradient-to-r from-blue-50/80 via-white/20 to-transparent"
-                ></div>
-                <div
-                    class="pointer-events-none absolute right-0 top-0 w-20 h-full z-20 bg-gradient-to-l from-blue-50/80 via-white/20 to-transparent"
-                ></div>
+
+                <!-- Fade overlays -->
+                <div class="pointer-events-none absolute left-0 top-0 w-16 h-full z-10 bg-gradient-to-r from-[#f2f2f7] to-transparent"></div>
+                <div class="pointer-events-none absolute right-0 top-0 w-16 h-full z-10 bg-gradient-to-l from-[#f2f2f7] to-transparent"></div>
+
+                <!-- Slider -->
                 <div
                     ref="sliderRef"
-                    class="flex gap-2 overflow-x-auto snap-x snap-mandatory pb-8 pt-2 no-scrollbar gap-8"
-                    style="scroll-behavior: smooth; overflow-y: visible"
+                    class="flex gap-4 overflow-x-auto snap-x snap-mandatory pb-6 pt-1 no-scrollbar"
+                    style="scroll-behavior: smooth;"
                     @scroll="onScrollSlider"
                     @touchstart="handleTouchStart"
                     @touchend="handleTouchEnd"
-                    tabindex="0"
                 >
-                    <!-- Left phantom padder for centering first card -->
-                    <div
-                        :style="{ minWidth: 'calc(50vw - 130px)' }"
-                        aria-hidden="true"
-                    ></div>
-                    <!-- CARDS -->
+                    <!-- Left phantom -->
+                    <div :style="{ minWidth: 'calc(50vw - 100px)' }" aria-hidden="true"></div>
+
+                    <!-- Student Cards -->
                     <div
                         v-for="(student, idx) in filteredStudents"
                         :key="student.no_matrik"
-                        class="group bg-white bg-opacity-90 hover:bg-blue-50 border-4 border-blue-200 hover:border-blue-400 rounded-3xl shadow-lg shadow-blue-100/40 backdrop-blur transition-all duration-300 w-[195px] min-w-[195px] max-w-[195px] h-[280px] p-4 flex flex-col justify-between items-start relative scale-100 hover:scale-105 cursor-pointer"
-                        :style="{
-                            boxShadow:
-                                currentIndex === idx
-                                    ? '0 8px 24px 2px #3b82f680'
-                                    : '0 2px 10px 1px #60a5fa33',
-                            borderWidth: currentIndex === idx ? '4px' : '2px',
-                        }"
+                        class="student-card snap-center"
+                        :class="{ 'student-card-active': currentIndex === idx }"
                     >
-                        <div class="flex flex-col gap-1 w-full">
-                            <div
-                                class="font-bold text-xs text-blue-800 flex items-center gap-1"
-                            >
-                                👤
-                                <span :title="student.name">{{
-                                    student.name
-                                }}</span>
+                        <!-- Active indicator dot -->
+                        <div v-if="currentIndex === idx" class="absolute top-3 right-3">
+                            <div class="w-2 h-2 rounded-full bg-blue-500"></div>
+                        </div>
+
+                        <!-- Avatar -->
+                        <div class="flex items-center gap-3 mb-4">
+                            <div class="w-10 h-10 rounded-full bg-blue-50 border border-blue-100 flex items-center justify-center shrink-0">
+                                <svg class="w-5 h-5 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75"
+                                        d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                                </svg>
                             </div>
-                            <div
-                                class="text-[13px] mt-0.5 text-gray-700 flex flex-row gap-1 items-center"
-                            >
-                                <span class="font-bold">🆔</span>
-                                <span class="font-mono">{{
-                                    student.no_matrik
-                                }}</span>
-                            </div>
-                            <div
-                                class="text-[12px] text-gray-500 flex flex-row items-center gap-1"
-                            >
-                                <span>🔖</span>
-                                <span>{{ student.no_kp || "-" }}</span>
+                            <div class="min-w-0">
+                                <div class="text-[13px] font-semibold text-gray-900 leading-tight truncate" :title="student.name">
+                                    {{ student.name }}
+                                </div>
+                                <div class="text-[11px] text-gray-400 font-mono mt-0.5">{{ student.no_matrik }}</div>
                             </div>
                         </div>
-                        <div class="flex-1"></div>
-                        <div class="w-full flex flex-col gap-1 mt-2">
-                            <div
-                                class="flex flex-row gap-1 items-center text-blue-700 text-xs font-medium"
-                            >
-                                <span>🎓 Year:</span>
-                                <span class="font-bold">{{
-                                    student.year
-                                }}</span>
+
+                        <!-- ID field -->
+                        <div class="info-row mb-3">
+                            <svg class="info-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75"
+                                    d="M10 6H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V8a2 2 0 00-2-2h-5m-4 0V5a2 2 0 114 0v1m-4 0a2 2 0 104 0m-5 8a2 2 0 100-4 2 2 0 000 4zm0 0c1.306 0 2.417.835 2.83 2M9 14a3.001 3.001 0 00-2.83 2M15 11h3m-3 4h2" />
+                            </svg>
+                            <span class="info-label">IC</span>
+                            <span class="info-value font-mono text-[11px]">{{ student.no_kp || '—' }}</span>
+                        </div>
+
+                        <!-- Divider -->
+                        <div class="h-px bg-gray-100 mb-3"></div>
+
+                        <!-- Details grid -->
+                        <div class="space-y-2">
+                            <div class="info-row">
+                                <svg class="info-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75"
+                                        d="M12 14l9-5-9-5-9 5 9 5z" />
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75"
+                                        d="M12 14l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14z" />
+                                </svg>
+                                <span class="info-label">Year</span>
+                                <span class="info-value">{{ student.year }}</span>
                             </div>
-                            <div
-                                class="flex flex-row gap-1 items-center text-blue-700 text-xs font-medium"
-                            >
-                                <span>📚 Course:</span>
-                                <span class="font-bold">{{
-                                    student.course
-                                }}</span>
+                            <div class="info-row">
+                                <svg class="info-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75"
+                                        d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+                                </svg>
+                                <span class="info-label">Course</span>
+                                <span class="info-value">{{ student.course }}</span>
                             </div>
-                            <div
-                                class="flex flex-row gap-1 items-center text-green-700 text-xs font-medium"
-                            >
-                                <span>🏢 Faculty:</span>
-                                <span class="font-bold">{{
-                                    student.faculty
-                                }}</span>
+                            <div class="info-row">
+                                <svg class="info-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75"
+                                        d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                                </svg>
+                                <span class="info-label">Faculty</span>
+                                <span class="info-value">{{ student.faculty }}</span>
                             </div>
-                            <div
-                                class="flex flex-row gap-1 items-center text-pink-700 text-xs font-medium"
-                            >
-                                <span>📖 Subjects:</span>
-                                <span class="font-bold">{{
-                                    student.subjectCount
-                                }}</span>
+                            <div class="info-row">
+                                <svg class="info-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75"
+                                        d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                                </svg>
+                                <span class="info-label">Subjects</span>
+                                <span class="info-value">{{ student.subjectCount }}</span>
                             </div>
                         </div>
+
+                        <!-- Timetable button -->
                         <button
-                            class="mt-4 px-4 py-2 bottom-3 rounded-2xl bg-gradient-to-tr from-blue-300 via-blue-400 to-blue-600 text-white font-bold text-xs shadow-md hover:from-pink-400 hover:to-blue-700 transition active:scale-95 flex items-center gap-1"
-                            title="View Timetable"
-                            @click.stop="
-                                openStudentTimetable(student.no_matrik)
-                            "
+                            class="mt-4 w-full flex items-center justify-center gap-2 py-2 px-3 bg-[#0a3270] hover:bg-[#0d3d87] active:bg-[#08265a] text-white text-[12px] font-semibold rounded-xl transition-colors duration-150"
+                            @click.stop="openStudentTimetable(student.no_matrik)"
                         >
-                            <span>📅 Timetable</span>
+                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                            </svg>
+                            View Timetable
                         </button>
-                        <!-- animated emoji badge -->
-                        <span
-                            v-if="currentIndex === idx"
-                            class="absolute top-3 right-3 text-xs animate-bounce"
-                            title="Currently Selected"
-                            >🌟</span
-                        >
                     </div>
-                    <!-- Right phantom padder for centering last card -->
-                    <div
-                        :style="{ minWidth: 'calc(50vw - 130px)' }"
-                        aria-hidden="true"
-                    ></div>
+
+                    <!-- Right phantom -->
+                    <div :style="{ minWidth: 'calc(50vw - 100px)' }" aria-hidden="true"></div>
                 </div>
+
+                <!-- Right chevron -->
                 <button
-                    class="absolute right-1 top-1/2 -translate-y-1/2 z-10 bg-white border-2 border-blue-200 shadow p-2 rounded-full hover:bg-blue-50 transition text-xs"
+                    class="carousel-nav right-2"
                     :disabled="currentIndex >= filteredStudents.length - 1"
+                    :class="currentIndex >= filteredStudents.length - 1 ? 'opacity-30 cursor-not-allowed' : 'hover:bg-gray-100'"
                     @click="nextCard"
-                    style="width: 38px; height: 38px"
+                    aria-label="Next"
                 >
-                    <span>➡️</span>
+                    <svg class="w-4 h-4 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7" />
+                    </svg>
                 </button>
             </div>
+
+            <!-- Count + more loading -->
+            <div class="px-4 mt-1 flex items-center justify-between">
+                <span class="text-[12px] text-gray-400">
+                    {{ filteredStudents.length }} student{{ filteredStudents.length !== 1 ? 's' : '' }} loaded
+                </span>
+                <span v-if="isLoadingMore" class="flex items-center gap-1.5 text-[12px] text-blue-500">
+                    <svg class="animate-spin w-3 h-3" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" />
+                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z" />
+                    </svg>
+                    Loading more&hellip;
+                </span>
+            </div>
+
+            <!-- Empty State -->
             <div
-                v-if="!filteredStudents.length && !isLoading"
-                class="text-center py-8 text-gray-400 text-lg"
+                v-if="!filteredStudents.length && !isLoading && !isLoadingMore"
+                class="flex flex-col items-center justify-center py-16 px-8 text-center"
             >
-                <span>😢 No students found.</span>
+                <div class="w-16 h-16 rounded-2xl bg-gray-100 flex items-center justify-center mb-4">
+                    <svg class="w-8 h-8 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+                            d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z" />
+                    </svg>
+                </div>
+                <p class="text-[15px] font-semibold text-gray-500">No students found</p>
+                <p class="text-[13px] text-gray-400 mt-1">Try adjusting your search filters</p>
             </div>
         </div>
+
         <Footer />
 
-        <!-- Timetable Popup Modal -->
+        <!-- Timetable Popup -->
         <TimetableStudentPopup
             :show="showTimetablePopup"
             :matric="selectedMatric"
@@ -478,36 +546,71 @@ function closeTimetablePopup() {
 </template>
 
 <style scoped>
-.no-scrollbar::-webkit-scrollbar {
-    display: none;
-}
-.no-scrollbar {
-    -ms-overflow-style: none;
-    scrollbar-width: none;
-}
-/* Animations for badge and button */
-@keyframes pop {
-    0% {
-        transform: scale(1);
-    }
-    50% {
-        transform: scale(1.2);
-    }
-    100% {
-        transform: scale(1);
-    }
-}
-button:active {
-    animation: pop 0.12s;
-}
-</style>
+.no-scrollbar::-webkit-scrollbar { display: none; }
+.no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
 
-<style scoped>
-.no-scrollbar::-webkit-scrollbar {
-    display: none;
+.student-card {
+    position: relative;
+    background: white;
+    border: 1.5px solid #e5e7eb;
+    border-radius: 20px;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+    width: 200px;
+    min-width: 200px;
+    max-width: 200px;
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    transition: box-shadow 0.2s ease, border-color 0.2s ease, transform 0.2s ease;
+    cursor: default;
 }
-.no-scrollbar {
-    -ms-overflow-style: none;
-    scrollbar-width: none;
+.student-card-active {
+    border-color: #3b82f6;
+    box-shadow: 0 4px 20px rgba(59,130,246,0.15);
+    transform: translateY(-2px);
+}
+
+.carousel-nav {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    z-index: 20;
+    width: 36px;
+    height: 36px;
+    background: white;
+    border: 1.5px solid #e5e7eb;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 1px 6px rgba(0,0,0,0.08);
+    transition: background-color 0.15s;
+}
+
+.info-row {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+.info-icon {
+    width: 13px;
+    height: 13px;
+    color: #9ca3af;
+    flex-shrink: 0;
+}
+.info-label {
+    font-size: 11px;
+    color: #9ca3af;
+    font-weight: 500;
+    min-width: 44px;
+}
+.info-value {
+    font-size: 12px;
+    color: #1f2937;
+    font-weight: 600;
+    flex: 1;
+    truncate: ellipsis;
+    overflow: hidden;
+    white-space: nowrap;
 }
 </style>

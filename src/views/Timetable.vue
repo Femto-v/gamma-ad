@@ -291,7 +291,7 @@ const mergedDaySchedule = computed(() => {
                             class="flex items-center space-x-4 text-sm text-gray-600"
                         >
                             <span>Section: {{ item.section }}</span>
-                            <span v-if="item.room">📍 {{ item.room }}</span>
+                            <span v-if="item.room">{{ item.room }}</span>
                         </div>
                     </div>
                 </div>

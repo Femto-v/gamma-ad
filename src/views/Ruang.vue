@@ -146,14 +146,14 @@ onBeforeUnmount(() => {
                         <input
                             v-model="searchTerm"
                             type="text"
-                            placeholder="Search venue, kode, jenis, fakultas..."
-                            class="w-full bg-gradient-to-r from-blue-50 via-white to-blue-100 border-2 border-blue-200 focus:ring-2 focus:ring-blue-400 focus:border-blue-400 rounded-xl py-3 pl-12 pr-4 text-base shadow transition placeholder-gray-400"
+                            placeholder="Search venue, code, type, faculty..."
+                            class="w-full bg-white border border-gray-200 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 rounded-xl py-3 pl-11 pr-4 text-[14px] shadow-sm transition placeholder-gray-400 outline-none"
                         />
-                        <span
-                            class="absolute left-4 top-1/2 -translate-y-1/2 text-blue-400 text-2xl pointer-events-none"
-                        >
-                            🔍
-                        </span>
+                        <div class="absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none">
+                            <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                            </svg>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -161,9 +161,7 @@ onBeforeUnmount(() => {
             <!-- Fakulti Dropdown -->
             <div class="flex flex-col items-center gap-2 py-4 text-sm">
                 <div class="flex items-center gap-3">
-                    <span class="font-semibold text-blue-800 text-lg"
-                        >🏫 Faculty:</span
-                    >
+                    <span class="font-semibold text-gray-700 text-sm">Faculty:</span>
                     <select
                         v-model="selectedFaculty"
                         class="bg-gradient-to-r from-blue-50 via-white to-blue-100 border-2 border-blue-200 focus:ring-2 focus:ring-blue-400 focus:border-blue-400 rounded-xl px-4 py-2 shadow text-base transition"
@@ -192,7 +190,7 @@ onBeforeUnmount(() => {
                                 <span
                                     class="text-blue-700 font-bold text-xl tracking-widest flex items-center gap-1"
                                 >
-                                    🏢 {{ room.code }}
+                                    {{ room.code }}
                                 </span>
                             </div>
                             <button
@@ -230,7 +228,6 @@ onBeforeUnmount(() => {
                         <div
                             class="mt-2 mb-1 text-lg font-semibold text-gray-800 flex items-center gap-2"
                         >
-                            <span>🏷️</span>
                             <span>{{ room.name }}</span>
                             <span
                                 v-if="
@@ -253,17 +250,17 @@ onBeforeUnmount(() => {
                             <span
                                 class="flex items-center gap-1 bg-blue-50 border border-blue-200 text-blue-700 rounded-full px-3 py-1"
                             >
-                                🏫 {{ room.faculty }}
+                                {{ room.faculty }}
                             </span>
                             <span
                                 class="flex items-center gap-1 bg-green-50 border border-green-200 text-green-700 rounded-full px-3 py-1"
                             >
-                                🏷️ {{ room.type }}
+                                {{ room.type }}
                             </span>
                             <span
                                 class="flex items-center gap-1 bg-yellow-50 border border-yellow-200 text-yellow-700 rounded-full px-3 py-1"
                             >
-                                👥 {{ room.capacity }}
+                                {{ room.capacity }} seats
                             </span>
                         </div>
                     </div>
